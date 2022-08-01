@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Users\rosscj1\source\repos\GardenMVC\bin\publish\</_PublishTargetUrl>
+    <History>True|2022-05-20T12:46:40.3215469Z;True|2022-04-19T07:20:22.9801793-03:00;True|2022-04-18T17:48:17.2734258-03:00;True|2022-04-18T17:20:42.8009843-03:00;True|2022-04-18T15:03:50.0168150-03:00;True|2022-04-15T17:03:08.6115910-03:00;True|2022-04-15T15:36:18.6233895-03:00;True|2022-04-15T15:23:24.5586650-03:00;True|2022-04-15T14:54:18.7921532-03:00;True|2022-04-15T13:50:55.8915909-03:00;True|2022-04-15T09:09:02.3575484-03:00;True|2022-04-14T22:44:13.9127684-03:00;True|2022-04-12T14:09:05.4274266-03:00;True|2022-04-12T13:18:55.0721880-03:00;True|2022-04-12T13:16:38.5417035-03:00;False|2022-04-12T13:14:19.5406743-03:00;False|2022-04-12T13:12:35.7945960-03:00;False|2022-04-12T13:10:38.3306880-03:00;False|2022-04-12T13:08:03.3146787-03:00;False|2022-04-12T13:07:44.1543543-03:00;True|2022-04-12T12:40:19.5480862-03:00;True|2022-04-04T23:15:04.3749790-03:00;True|2022-04-04T23:12:46.0028137-03:00;True|2022-04-04T23:07:58.2704216-03:00;</History>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+  </PropertyGroup>
+  <ItemGroup>
+    <DestinationConnectionStrings Include="GardenConnection">
+      <Value>Server=192.168.2.200%3bport=3307%3bDatabase=mygarden%3bUid=mygardenuser%3bPwd=mygardenpassword%3b</Value>
+    </DestinationConnectionStrings>
+  </ItemGroup>
+</Project>

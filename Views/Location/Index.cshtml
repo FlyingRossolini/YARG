@@ -1,0 +1,79 @@
+﻿@model IEnumerable<Location>
+
+@{
+    ViewData["Title"] = "Locations";
+}
+<div class="jumbotron">
+    <h2>@ViewData["Title"]</h2>
+</div>
+
+
+<a asp-action="Create">
+    <i class="fa fa-plus text-success" aria-hidden="true"></i> Create New
+</a>
+<br />
+
+<br />
+
+<table class="table table-bordered">
+    <thead class="thead-light">
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                Sorting
+            </th>
+            <th>
+                <small>Show On Landing Page?</small>
+            </th>
+            <th class="text-center">
+                Active?
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Location location in Model)
+        {
+            <tr>
+                <td>
+                    @location.Name
+                </td>
+                <td>
+                    @location.Sorting
+                </td>
+                @if (location.IsShowOnLandingPage)
+                {
+                    <td class="text-center"><span class="fa fa-check text-success"></span></td>
+
+                }
+                else
+                {
+                    <td class="text-center"></td>
+                }
+                @if (location.IsActive)
+                {
+                    <td class="text-center"><span class="fa fa-check text-success"></span></td>
+
+                }
+                else
+                {
+                    <td class="text-center"></td>
+                }
+
+                <td class="text-center">
+                    <a asp-action="Edit" asp-route-id="@location.ID">
+                        <i class="center fa fa-lg fa-pencil text-primary" aria-hidden="true"></i>
+                    </a> &nbsp;
+                    <a asp-action="Delete" asp-route-id="@location.ID">
+                        <i class="center fa fa-lg fa-x text-danger" aria-hidden="true"></i>
+                    </a>
+
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

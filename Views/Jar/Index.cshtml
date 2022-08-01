@@ -1,0 +1,97 @@
+﻿@model IEnumerable<Jar>
+
+@{
+    ViewData["Title"] = "Mixing Jars";
+}
+<div class="jumbotron">
+    <h2>@ViewData["Title"]</h2>
+</div>
+
+
+<a asp-action="Create">
+    <i class="fa fa-plus text-success" aria-hidden="true"></i> Create New
+</a>
+<br />
+
+<br />
+
+<table class="table table-bordered">
+    <thead class="thead-light">
+        <tr>
+            <th>
+                Mixing Fan Position
+            </th>
+            <th>
+                Chemical
+            </th>
+            <th>
+                # Mixing Times / Day
+            </th>
+            <th>
+                Mix Duration (mins)
+            </th>
+            <th>
+                Capacity
+            </th>
+            <th>
+                Current Amount (L)
+            </th>
+            <th>
+                Mixing Fan Over Speed (rpm)
+            </th>
+            <th class="text-center">
+                Active?
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Jar jar in Model)
+        {
+            <tr>
+                <td>
+                    @jar.MixFanPosition
+                </td>
+                <td>
+                    @jar.ChemicalName
+                </td>
+                <td>
+                    @jar.MixTimesPerDay
+                </td>
+                <td>
+                    @jar.Duration
+                </td>
+                <td>
+                    @jar.Capacity
+                </td>
+                <td>
+                    @jar.CurrentAmount
+                </td>
+                <td>
+                    @jar.MixFanOverSpeed
+                </td>
+                @if (jar.IsActive)
+                {
+                    <td class="text-center"><span class="fa fa-check text-success"></span></td>
+
+                }
+                else
+                {
+                    <td class="text-center"></td>
+                }
+
+                <td class="text-center">
+                    <a asp-action="Edit" asp-route-id="@jar.ID">
+                        <i class="center fa fa-lg fa-pencil text-primary" aria-hidden="true"></i>
+                    </a> &nbsp;
+                    <a asp-action="Delete" asp-route-id="@jar.ID">
+                        <i class="center fa fa-lg fa-x text-danger" aria-hidden="true"></i>
+                    </a>
+
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

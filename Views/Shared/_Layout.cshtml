@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html>
+<script src="~/lib/jquery/jquery.min.js"></script>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GardenMVC</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link href="~/lib/font-awesome/css/all.css" rel="stylesheet" />
+    <script src="~/lib/plotly/plotly.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans&display=swap' rel='stylesheet' type='text/css'>
+
+</head>
+<body>
+    <div class="wrapper">
+        <div class="sidebar">
+            <h1><i class="fa-solid fa-seedling text-success"></i><a href="@Url.Action("Index","Home")" style="color: white;">YARG</a></h1>
+            <h6 class="text-center text-white-50"><i><small>Yet Another Robotic Garden</small></i></h6>
+            <ul>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-book text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","Recipe")"><span class="text-warning">Recipe Book</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-wheat-awn fa-xl text-black-50"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","GrowSeason")"><span class="text-warning">Grow Seasons</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-bucket text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","Pot")"><span class="text-warning">Buckets</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-jar text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","Jar")"><span class="text-warning">Jars</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-cannabis text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","Crop")"><span class="text-warning">Crops</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-flask-vial text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","Chemical")"><span class="text-warning">Chemicals</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-satellite-dish text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","RemoteProbe")"><span class="text-warning">Sensors</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-location-crosshairs text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","Location")"><span class="text-warning">Locations</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-vials text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","ChemicalType")"><span class="text-warning">Chemical Types</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-ruler text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","MeasurementType")"><span class="text-warning">Measurement Types</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-regular fa-sun text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","LightCycle")"><span class="text-warning">Light Cycles</span></a>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div class="row">
+                        <div class="col-3 center">
+                            <i class="fa-solid fa-angles-up text-black-50 fa-xl"></i>
+                        </div>
+                        <div>
+                            <a href="@Url.Action("Index","LimitType")"><span class="text-warning">Limit Types</span></a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="main-content">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div>
+            &copy; 2022 - <small>A FlyingRossolini UberTrainer Experience</small>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/jquery.min.js"></script>
+    <script src="~/lib/popper/umd/popper.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    @*<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>*@
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

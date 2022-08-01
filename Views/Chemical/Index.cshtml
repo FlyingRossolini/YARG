@@ -1,0 +1,99 @@
+﻿@model IEnumerable<Chemical>
+
+@{
+    ViewData["Title"] = "Chemicals";
+}
+<div class="jumbotron">
+    <h2>@ViewData["Title"]</h2>
+</div>
+
+
+<a asp-action="Create">
+    <i class="fa fa-plus text-success" aria-hidden="true"></i> Create New
+</a>
+<br />
+
+<br />
+
+<table class="table table-bordered">
+    <thead class="thead-light">
+        <tr>
+            <th>
+                <strong>Name</strong>
+            </th>
+            <th>
+                <small><strong>Manufacturer</strong></small>
+            </th>
+            <th>
+                <small><strong>Type</strong></small>
+            </th>
+            <th class="text-center">
+                <small><strong>$ / L</strong></small>
+            </th>
+            <th class="table_center">
+                <small><strong>In Stock (L)</strong></small>
+            </th>
+            <th class="table_center">
+                <small><strong>Reorder Pt</strong></small>
+            </th>
+            <th class="table_center">
+                <small><strong>Mix Priority</strong></small>
+            </th>
+            <th class="text-center">
+                <small><strong>Active?</strong></small>
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Chemical chemical in Model)
+        {
+            <tr>
+                <td>
+                    @chemical.Name
+                </td>
+                <td>
+                    @chemical.Manufacturer
+                </td>
+                <td>
+                    @chemical.ChemicalTypeName
+                </td>
+
+                <td class="text-center">
+                    @chemical.PricePerL.ToString("$ 0.00")
+                </td>
+                <td class="text-center">
+                    @chemical.InStockAmount.ToString("0.0")
+                </td>
+                <td class="text-center">
+                    @chemical.MinReorderPoint
+                </td>
+                <td class="text-center">
+                    @chemical.MixPriority
+                </td>
+
+                @if (chemical.IsActive)
+                {
+                    <td class="text-center"><span class="fa fa-check text-success"></span></td>
+
+                }
+                else
+                {
+                    <td class="text-center"></td>
+                }
+
+                <td class="text-center">
+                    <a asp-action="Edit" asp-route-id="@chemical.ID">
+                        <i class="center fa fa-lg fa-pencil text-primary" aria-hidden="true"></i>
+                    </a> &nbsp;
+                    <a asp-action="Delete" asp-route-id="@chemical.ID">
+                        <i class="center fa fa-lg fa-x text-danger" aria-hidden="true"></i>
+                    </a>
+
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
