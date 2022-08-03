@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "RtDNYv4ETE2BCpbdwL3k5QiGQq0kG+wrSy5EyNWdPOzGYShEg5of6BhRiwXhHEXI3LONC6+cKopYpFd2o5bwPw==",
+  "dgSpecHash": "eSMoKmKtHZXnVZxvhcvQUjX4CrP+FLT86jTujwojQIY3vDkGzdWGYIs4GuCZxz51V+h+bwIGRNgic4STv7kUKQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\rosscj1\\source\\repos\\GardenMVC\\GardenMVC.csproj",
   "expectedPackageFiles": [
@@ -159,9 +159,9 @@
     "C:\\Users\\rosscj1\\.nuget\\packages\\system.xml.readerwriter\\4.3.0\\system.xml.readerwriter.4.3.0.nupkg.sha512",
     "C:\\Users\\rosscj1\\.nuget\\packages\\system.xml.xdocument\\4.3.0\\system.xml.xdocument.4.3.0.nupkg.sha512",
     "C:\\Users\\rosscj1\\.nuget\\packages\\system.xml.xmldocument\\4.3.0\\system.xml.xmldocument.4.3.0.nupkg.sha512",
-    "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.netcore.app.runtime.linux-arm64\\5.0.14\\microsoft.netcore.app.runtime.linux-arm64.5.0.14.nupkg.sha512",
-    "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.linux-arm64\\5.0.14\\microsoft.aspnetcore.app.runtime.linux-arm64.5.0.14.nupkg.sha512",
-    "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.netcore.app.host.linux-arm64\\5.0.14\\microsoft.netcore.app.host.linux-arm64.5.0.14.nupkg.sha512"
+    "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.netcore.app.runtime.linux-arm64\\5.0.17\\microsoft.netcore.app.runtime.linux-arm64.5.0.17.nupkg.sha512",
+    "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.linux-arm64\\5.0.17\\microsoft.aspnetcore.app.runtime.linux-arm64.5.0.17.nupkg.sha512",
+    "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.netcore.app.host.linux-arm64\\5.0.17\\microsoft.netcore.app.host.linux-arm64.5.0.17.nupkg.sha512"
   ],
   "logs": []
 }
