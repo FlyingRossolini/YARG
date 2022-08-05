@@ -1,6 +1,7 @@
 ﻿using GardenMVC.DAL;
 using GardenMVC.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -16,11 +17,11 @@ namespace GardenMVC.Controllers
         private readonly PotDAL _potDAL;
         private readonly GrowSeasonDAL _growSeasonDAL;
 
-        public HomeController()
+        public HomeController(IConfiguration configuration)
         {
-            _wateringScheduleDAL = new();
-            _potDAL = new();
-            _growSeasonDAL = new();
+            _wateringScheduleDAL = new(configuration);
+            _potDAL = new(configuration);
+            _growSeasonDAL = new(configuration);
         }
 
 

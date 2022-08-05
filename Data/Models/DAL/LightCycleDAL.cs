@@ -1,26 +1,25 @@
 ﻿using GardenMVC.Models;
+using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace GardenMVC.DAL
 {
     public class LightCycleDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
-    
-        public LightCycleDAL()
+        private readonly IConfiguration _config;
+
+        public LightCycleDAL(IConfiguration configuration)
         {
-            this._connectionStringManager = new();
+            _config = configuration;
         }
 
         public IEnumerable<LightCycle> GetLightCycles()
         {
             List<LightCycle> lstream = new();
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetLightCycles", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -57,7 +56,7 @@ namespace GardenMVC.DAL
     
         public void AddLightCycle(LightCycle lightCycle)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddLightCycle", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -81,7 +80,7 @@ namespace GardenMVC.DAL
         public LightCycle GetLightCycleByID(Guid id)
         {
             LightCycle lightCycle = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetLightCycleByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -115,7 +114,7 @@ namespace GardenMVC.DAL
     
         public void SaveLightCycle(LightCycle lightCycle)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spUpdateLightCycle", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -136,7 +135,7 @@ namespace GardenMVC.DAL
     
         public void DeleteLightCycle(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeleteLightCycle", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;

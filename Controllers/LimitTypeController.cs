@@ -1,6 +1,7 @@
 ﻿using GardenMVC.Common_Types;
 using GardenMVC.DAL;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 
 namespace GardenMVC.Models
@@ -9,9 +10,9 @@ namespace GardenMVC.Models
     {
         private readonly LimitTypeDAL _limitTypeDAL;
 
-        public LimitTypeController()
+        public LimitTypeController(IConfiguration configuration)
         {
-            _limitTypeDAL = new();
+            _limitTypeDAL = new(configuration);
         }
 
         // GET: LimitTypeController

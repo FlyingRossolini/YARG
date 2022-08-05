@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.Models
 {
@@ -14,11 +15,11 @@ namespace GardenMVC.Models
         private readonly ChemicalDAL _chemicalDAL;
         private readonly MixingFanScheduleDAL _mixingFanScheduleDAL;
 
-        public JarController()
+        public JarController(IConfiguration configuration)
         {
-            _jarDAL = new();
-            _chemicalDAL = new();
-            _mixingFanScheduleDAL = new();
+            _jarDAL = new(configuration);
+            _chemicalDAL = new(configuration);
+            _mixingFanScheduleDAL = new(configuration);
         }
 
         // GET: JarController

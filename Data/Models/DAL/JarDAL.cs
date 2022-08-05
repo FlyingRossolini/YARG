@@ -2,16 +2,17 @@
 using System;
 using System.Collections.Generic;
 using GardenMVC.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.DAL
 {
     public class JarDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
+        private readonly IConfiguration _config;
 
-        public JarDAL()
+        public JarDAL(IConfiguration configuration)
         {
-            _connectionStringManager = new();
+            _config = configuration;
         }
 
         public IEnumerable<Jar> GetJars()
@@ -19,7 +20,7 @@ namespace GardenMVC.DAL
             List<Jar> lstream = new();
             try
             {
-                using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+                using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
                 {
                     sqlConnection.Open();
 
@@ -67,7 +68,7 @@ namespace GardenMVC.DAL
         
         public void AddJar(Jar jar)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddJar", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -97,7 +98,7 @@ namespace GardenMVC.DAL
         public Jar GetJarByID(Guid id)
         {
             Jar jar = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetJarByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -148,7 +149,7 @@ namespace GardenMVC.DAL
             }
 
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spUpdateJar", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -176,7 +177,7 @@ namespace GardenMVC.DAL
 
         public void DeleteJar(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeleteJar", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;

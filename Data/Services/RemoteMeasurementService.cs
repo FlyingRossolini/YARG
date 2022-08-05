@@ -3,20 +3,19 @@ using System;
 using GardenMVC.Data.Models.ViewModels;
 using GardenMVC.Models;
 using GardenMVC.Common_Types;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.Data.Services
 {
     public class RemoteMeasurementService
     {
-        private readonly ConnectionStringManager _connectionStringManager;
         private readonly RemoteProbeDAL _remoteProbeDAL;
         private readonly MeasurementDAL _measurementDAL;
 
-        public RemoteMeasurementService()
+        public RemoteMeasurementService(IConfiguration configuration)
         {
-            _connectionStringManager = new();
-            _remoteProbeDAL = new();
-            _measurementDAL = new();
+            _remoteProbeDAL = new(configuration);
+            _measurementDAL = new(configuration);
         }
 
         public void AddRemoteMeasurement(RemoteMeasurementViewModel remoteMeasurement)

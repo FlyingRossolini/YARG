@@ -2,22 +2,23 @@
 using System;
 using System.Collections.Generic;
 using GardenMVC.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.DAL
 {
     public class CropDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
+        private readonly IConfiguration _config;
 
-        public CropDAL()
+        public CropDAL(IConfiguration config)
         {
-            _connectionStringManager = new();
+            _config = config;
         }
 
         public IEnumerable<Crop> GetCrops()
         {
             List<Crop> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetCrops", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -54,7 +55,7 @@ namespace GardenMVC.DAL
         
         public void AddCrop(Crop crop)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddCrop", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -78,7 +79,7 @@ namespace GardenMVC.DAL
         public Crop GetCropByID(Guid id)
         {
             Crop crop = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetCropByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -111,7 +112,7 @@ namespace GardenMVC.DAL
 
         public void SaveCrop(Crop crop)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spUpdateCrop", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -131,7 +132,7 @@ namespace GardenMVC.DAL
 
         public void DeleteCrop(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeleteCrop", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;

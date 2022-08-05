@@ -1,6 +1,7 @@
 ﻿using GardenMVC.Common_Types;
 using GardenMVC.DAL;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 
 namespace GardenMVC.Models
@@ -9,9 +10,9 @@ namespace GardenMVC.Models
     {
         private readonly LocationDAL _locationDAL;
 
-        public LocationController()
+        public LocationController(IConfiguration configuration)
         {
-            _locationDAL = new();
+            _locationDAL = new(configuration);
         }
 
         // GET: LocationController

@@ -1,4 +1,5 @@
 ﻿using GardenMVC.Models;
+using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
@@ -7,16 +8,16 @@ namespace GardenMVC.DAL
 {
     public class PotDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
-        public PotDAL()
+        private readonly IConfiguration _config;
+        public PotDAL(IConfiguration configuration)
         {
-            _connectionStringManager = new();
+            _config = configuration;
         }
 
         public IEnumerable<Pot> GetPots()
         {
             List<Pot> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetPots", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -58,7 +59,7 @@ namespace GardenMVC.DAL
         public IEnumerable<Pot> GetActivePots()
         {
             List<Pot> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetPots", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -103,7 +104,7 @@ namespace GardenMVC.DAL
 
         public void AddPot(Pot pot)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddPot", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -131,7 +132,7 @@ namespace GardenMVC.DAL
         public Pot GetPotByID(Guid id)
         {
             Pot pot = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetPotByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -170,7 +171,7 @@ namespace GardenMVC.DAL
         public short PotCount()
         {
             short count = 0;
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spPotCount", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -205,7 +206,7 @@ namespace GardenMVC.DAL
                 flgUpdateWateringSchedule = true;
             }
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spUpdatePot", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -233,7 +234,7 @@ namespace GardenMVC.DAL
         {
 
             // delete this pot from watering schedule
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeletePotsFromWateringSchedule", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -246,7 +247,7 @@ namespace GardenMVC.DAL
                 sqlConnection.Dispose();
             }
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeletePot", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -260,7 +261,7 @@ namespace GardenMVC.DAL
             }
 
             // fix up queue positions of all pots here
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spFixPotQueuePositions", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -279,7 +280,7 @@ namespace GardenMVC.DAL
         public short GetNextQueuePosition()
         {
             short r = 0;
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetNextPotQueuePosition", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -307,7 +308,7 @@ namespace GardenMVC.DAL
         {
             short speed = 0;
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spGetEbbSpeedFromQueuePosition", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -335,7 +336,7 @@ namespace GardenMVC.DAL
         {
             short speed = 0;
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spGetFlowSpeedFromQueuePosition", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;

@@ -1,6 +1,7 @@
 ﻿using GardenMVC.Common_Types;
 using GardenMVC.DAL;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 
 namespace GardenMVC.Models
@@ -9,9 +10,9 @@ namespace GardenMVC.Models
     {
         private readonly FeedingChartTypeDAL _feedingChartTypeDAL;
 
-        public FeedingChartTypeController()
+        public FeedingChartTypeController(IConfiguration configuration)
         {
-            _feedingChartTypeDAL = new();
+            _feedingChartTypeDAL = new(configuration);
         }
 
         // GET: FeedingChartTypeController

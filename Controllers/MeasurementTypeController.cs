@@ -1,6 +1,7 @@
 ﻿using GardenMVC.Common_Types;
 using GardenMVC.DAL;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 
 namespace GardenMVC.Models
@@ -9,9 +10,9 @@ namespace GardenMVC.Models
     {
         private readonly MeasurementTypeDAL _measurementTypeDAL;
 
-        public MeasurementTypeController()
+        public MeasurementTypeController(IConfiguration configuration)
         {
-            _measurementTypeDAL = new();
+            _measurementTypeDAL = new(configuration);
         }
 
         // GET: MeasurementTypeController

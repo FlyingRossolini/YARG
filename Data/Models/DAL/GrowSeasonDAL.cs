@@ -4,23 +4,24 @@ using System.Linq;
 using System.Threading.Tasks;
 using GardenMVC.Common_Types;
 using GardenMVC.Models;
+using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 
 namespace GardenMVC.DAL
 {
     public class GrowSeasonDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
+        private readonly IConfiguration _config;
 
-        public GrowSeasonDAL()
+        public GrowSeasonDAL(IConfiguration configuration)
         {
-            this._connectionStringManager = new();
+            _config = configuration;
         }
 
         public bool FlgActiveGrowSeason()
         {
             bool flg = false;
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spActiveGrowSeason", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -48,7 +49,7 @@ namespace GardenMVC.DAL
         {
             Guid id = Guid.Empty;
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spIDofActiveGrowSeason", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -75,7 +76,7 @@ namespace GardenMVC.DAL
         public IEnumerable<GrowSeason> GetGrowSeasons()
         {
             List<GrowSeason> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetGrowSeasons", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -125,7 +126,7 @@ namespace GardenMVC.DAL
    
         public void AddGrowSeason(GrowSeason growSeason)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddGrowSeason", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -157,7 +158,7 @@ namespace GardenMVC.DAL
         public GrowSeason GetGrowSeasonByID(Guid id)
         {
             GrowSeason growSeason = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetGrowSeasonByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -207,7 +208,7 @@ namespace GardenMVC.DAL
         
         public void SaveGrowSeason(GrowSeason growSeason)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spUpdateGrowSeason", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -236,7 +237,7 @@ namespace GardenMVC.DAL
         public DateTime GetSunriseToday()
         {
             DateTime dtTemp = DateTime.Today;
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spGetSunriseToday", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -261,7 +262,7 @@ namespace GardenMVC.DAL
         public DateTime GetSunsetToday()
         {
             DateTime dtTemp = DateTime.Today;
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spGetSunsetToday", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;

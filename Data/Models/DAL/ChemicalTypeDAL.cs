@@ -2,22 +2,23 @@
 using System;
 using System.Collections.Generic;
 using GardenMVC.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.DAL
 {
     public class ChemicalTypeDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
+        private readonly IConfiguration _config;
 
-        public ChemicalTypeDAL()
+        public ChemicalTypeDAL(IConfiguration config)
         {
-            _connectionStringManager = new();
+            _config = config;
         }
 
         public IEnumerable<ChemicalType> GetChemicalTypes()
         {
             List<ChemicalType> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetChemicalTypes", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -58,7 +59,7 @@ namespace GardenMVC.DAL
         
         public void AddChemicalType(ChemicalType chemicalType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddChemicalType", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -86,7 +87,7 @@ namespace GardenMVC.DAL
         public ChemicalType GetChemicalTypeByID(Guid id)
         {
             ChemicalType chemicalType = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetChemicalTypeByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -123,7 +124,7 @@ namespace GardenMVC.DAL
 
         public void SaveChemicalType(ChemicalType chemicalType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spUpdateChemicalType", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -147,7 +148,7 @@ namespace GardenMVC.DAL
 
         public void DeleteChemicalType(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeleteChemicalType", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;

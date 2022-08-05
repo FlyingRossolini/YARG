@@ -2,6 +2,7 @@
 using GardenMVC.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,11 @@ namespace GardenMVC.Models
         private readonly RecipeDAL _recipeDAL;
         private readonly LightCycleDAL _lightCycleDAL;
         private readonly LocationDAL _locationDAL;
-        public RecipeController()
+        public RecipeController(IConfiguration configuration)
         {
-            _recipeDAL = new();
-            _lightCycleDAL = new();
-            _locationDAL = new();
+            _recipeDAL = new(configuration);
+            _lightCycleDAL = new(configuration);
+            _locationDAL = new(configuration);
         }
 
         // GET: RecipeController

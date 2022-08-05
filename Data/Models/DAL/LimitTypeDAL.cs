@@ -2,22 +2,23 @@
 using System;
 using System.Collections.Generic;
 using GardenMVC.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.DAL
 {
     public class LimitTypeDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
+        private readonly IConfiguration _config;
 
-        public LimitTypeDAL()
+        public LimitTypeDAL(IConfiguration configuration)
         {
-            _connectionStringManager = new();
+            _config = configuration;
         }
 
         public IEnumerable<LimitType> GetLimitTypes()
         {
             List<LimitType> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetLimitTypes", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -55,7 +56,7 @@ namespace GardenMVC.DAL
         
         public void AddLimitType(LimitType limitType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddLimitType", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -80,7 +81,7 @@ namespace GardenMVC.DAL
         public LimitType GetLimitTypeByID(Guid id)
         {
             LimitType limitType = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetLimitTypeByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -114,7 +115,7 @@ namespace GardenMVC.DAL
 
         public void SaveLimitType(LimitType limitType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spUpdateLimitType", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -135,7 +136,7 @@ namespace GardenMVC.DAL
 
         public void DeleteLimitType(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeleteLimitType", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;

@@ -2,22 +2,23 @@
 using System;
 using System.Collections.Generic;
 using GardenMVC.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.DAL
 {
     public class FeedingChartTypeDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
+        private readonly IConfiguration _config;
 
-        public FeedingChartTypeDAL()
+        public FeedingChartTypeDAL(IConfiguration configuration)
         {
-            _connectionStringManager = new();
+            _config = configuration;
         }
 
         public IEnumerable<FeedingChartType> GetFeedingChartTypes()
         {
             List<FeedingChartType> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetFeedingChartTypes", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -55,7 +56,7 @@ namespace GardenMVC.DAL
         
         public void AddFeedingChartType(FeedingChartType feedingChartType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddFeedingChartType", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -80,7 +81,7 @@ namespace GardenMVC.DAL
         public FeedingChartType GetFeedingChartTypeByID(Guid id)
         {
             FeedingChartType feedingChartType = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetFeedingChartTypeByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -114,7 +115,7 @@ namespace GardenMVC.DAL
 
         public void SaveFeedingChartType(FeedingChartType feedingChartType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spUpdateFeedingChartType", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -135,7 +136,7 @@ namespace GardenMVC.DAL
 
         public void DeleteFeedingChartType(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeleteFeedingChartType", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;

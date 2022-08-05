@@ -2,6 +2,7 @@
 using GardenMVC.DAL;
 using GardenMVC.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 
@@ -11,9 +12,9 @@ namespace GardenMVC.Controllers
     {
         private readonly LightCycleDAL _lightCycleDAL;
 
-        public LightCycleController()
+        public LightCycleController(IConfiguration configuration)
         {
-            _lightCycleDAL = new();
+            _lightCycleDAL = new(configuration);
         }
 
         // GET: LightCycleController

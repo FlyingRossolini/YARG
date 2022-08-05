@@ -23,7 +23,7 @@ namespace GardenMVC
                 {
                     //webBuilder.UseStartup().UseContentRoot(Directory.GetCurrentDirectory())
                     //.UseUrls("http://*:5000");
-                   // webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>();
                     webBuilder.UseKestrel().UseContentRoot(Directory.GetCurrentDirectory())
                     .UseUrls("http://*:5000").UseStartup<Startup>();
                 }).ConfigureLogging(logging =>

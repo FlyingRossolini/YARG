@@ -2,6 +2,7 @@
 using GardenMVC.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,11 @@ namespace GardenMVC.Models
         private readonly LocationDAL _locationDAL;
         private readonly MeasurementTypeDAL _measurementTypeDAL;
 
-        public RemoteProbeController()
+        public RemoteProbeController(IConfiguration configuration)
         {
-            _remoteProbeDAL = new();
-            _locationDAL = new();
-            _measurementTypeDAL = new();
+            _remoteProbeDAL = new(configuration);
+            _locationDAL = new(configuration);
+            _measurementTypeDAL = new(configuration);
         }
 
         // GET: RemoteProbeController

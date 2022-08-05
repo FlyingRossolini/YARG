@@ -2,6 +2,7 @@
 using GardenMVC.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,10 @@ namespace GardenMVC.Models
         private readonly ChemicalDAL _chemicalDAL;
         private readonly ChemicalTypeDAL _chemicalTypeDAL;
 
-        public ChemicalController()
+        public ChemicalController(IConfiguration configuration)
         {
-            _chemicalDAL = new();
-            _chemicalTypeDAL = new();
+            _chemicalDAL = new(configuration);
+            _chemicalTypeDAL = new(configuration);
         }
 
         // GET: ChemicalController

@@ -6,18 +6,17 @@ using System.Threading.Tasks;
 using GardenMVC.Models;
 using GardenMVC.Common_Types;
 using GardenMVC.Data.Models.ViewModels;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.DAL
 {
     public class RecipeDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
-        private readonly LightCycleDAL _lightCycleDAL;
+        private readonly IConfiguration _config;
 
-        public RecipeDAL()
+        public RecipeDAL(IConfiguration configuration)
         {
-            _connectionStringManager = new();
-            _lightCycleDAL = new();
+            _config = configuration;
         }
 
         public void AddRecipe(Recipe recipe)
@@ -48,7 +47,7 @@ namespace GardenMVC.DAL
         {
             Recipe recipe = new();
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetRecipeByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -108,7 +107,7 @@ namespace GardenMVC.DAL
 
         public void DeleteRecipe(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeleteRecipe", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -124,7 +123,7 @@ namespace GardenMVC.DAL
 
         public void UpdateRecipeName(Recipe recipe)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spUpdateRecipeName", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -143,7 +142,7 @@ namespace GardenMVC.DAL
 
         public void UpdateRecipeStepLimit(RecipeStepLimit recipeStepLimit)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -166,7 +165,7 @@ namespace GardenMVC.DAL
 
         public void UpdateRecipeStepIrrigation(RecipeStep recipeStep)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -188,7 +187,7 @@ namespace GardenMVC.DAL
         }
         public void UpdateRecipeStepAmount(RecipeStepAmount recipeStepAmount)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -210,7 +209,7 @@ namespace GardenMVC.DAL
         }
         public void UpdateRecipeStepSoaktime(RecipeStep recipeStep)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -232,7 +231,7 @@ namespace GardenMVC.DAL
         }
         public void UpdateRecipeStepMorningSip(RecipeStep recipeStep)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -255,7 +254,7 @@ namespace GardenMVC.DAL
 
         public void UpdateRecipeStepEveningSip(RecipeStep recipeStep)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -277,7 +276,7 @@ namespace GardenMVC.DAL
         }
         public void UpdateRecipeStepLightCycle(RecipeStep recipeStep)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -300,7 +299,7 @@ namespace GardenMVC.DAL
 
         public void DeleteRecipeStep(Guid guid)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -319,7 +318,7 @@ namespace GardenMVC.DAL
         }
         public void DeleteRecipeStepLimit(Guid guid)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -338,7 +337,7 @@ namespace GardenMVC.DAL
         }
         public void DeleteRecipeStepAmount(Guid guid)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -358,7 +357,7 @@ namespace GardenMVC.DAL
 
         public void AddRecipeStepLimit(RecipeStepLimit recipeStepLimit)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -386,7 +385,7 @@ namespace GardenMVC.DAL
         }
         public void AddRecipeStepAmount(RecipeStepAmount recipeStepAmount)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -412,7 +411,7 @@ namespace GardenMVC.DAL
         }
         public void AddRecipeStep(RecipeStep recipeStep)
         {
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -445,7 +444,7 @@ namespace GardenMVC.DAL
         {
             RecipeStep recipeStep = new();
 
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -482,7 +481,7 @@ namespace GardenMVC.DAL
         {
             decimal tmpDec = 0;
 
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -514,7 +513,7 @@ namespace GardenMVC.DAL
         {
             decimal tmpDec = 0;
 
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -544,7 +543,7 @@ namespace GardenMVC.DAL
         {
             RecipeStepLimit recipeStepLimit = new();
 
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -576,7 +575,7 @@ namespace GardenMVC.DAL
         {
             List<RecipeChemListViewModel> lstream = new();
 
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 
@@ -612,7 +611,7 @@ namespace GardenMVC.DAL
         public IEnumerable<Recipe> GetRecipes()
         {
             List<Recipe> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetRecipes", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -634,7 +633,7 @@ namespace GardenMVC.DAL
                     };
 
                     List<RecipeChemList> recipeChemLists = new();
-                    MySqlConnection sqlRecipeChemListConnection = new MySqlConnection(_connectionStringManager.GetConnectionString());
+                    MySqlConnection sqlRecipeChemListConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                     MySqlCommand sqlRecipeChemListCommand = new MySqlCommand("spGetRecipeChemListByRecipeID", sqlRecipeChemListConnection);
                     sqlRecipeChemListCommand.CommandType = System.Data.CommandType.StoredProcedure;
                     sqlRecipeChemListCommand.Parameters.AddWithValue("thisid", recipe.ID.ToString());
@@ -672,7 +671,7 @@ namespace GardenMVC.DAL
                     recipe.RecipeChems = recipeChemLists;
 
                     List<RecipeStep> recipeSteps = new();
-                    MySqlConnection sqlRecipeStepConnection = new MySqlConnection(_connectionStringManager.GetConnectionString());
+                    MySqlConnection sqlRecipeStepConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                     MySqlCommand sqlRecipeStepCommand = new MySqlCommand("spGetRecipeStepsByRecipeID", sqlRecipeStepConnection);
                     sqlRecipeStepCommand.CommandType = System.Data.CommandType.StoredProcedure;
                     sqlRecipeStepCommand.Parameters.AddWithValue("thisid", recipe.ID.ToString());
@@ -701,7 +700,7 @@ namespace GardenMVC.DAL
                         };
 
                         List<RecipeStepLimit> recipeStepLimits = new();
-                        MySqlConnection sqlRecipeStepLimitConnection = new MySqlConnection(_connectionStringManager.GetConnectionString());
+                        MySqlConnection sqlRecipeStepLimitConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                         MySqlCommand sqlRecipeStepLimitCommand = new MySqlCommand("spGetRecipeStepLimitsByRecipeStepID", sqlRecipeStepLimitConnection);
                         sqlRecipeStepLimitCommand.CommandType = System.Data.CommandType.StoredProcedure;
                         sqlRecipeStepLimitCommand.Parameters.AddWithValue("thisid", recipeStep.ID.ToString());
@@ -745,7 +744,7 @@ namespace GardenMVC.DAL
                         recipeStep.RecipeStepLimits = recipeStepLimits;
 
                         List<RecipeStepAmount> recipeStepAmounts = new();
-                        MySqlConnection sqlRecipeStepAmountConnection = new MySqlConnection(_connectionStringManager.GetConnectionString());
+                        MySqlConnection sqlRecipeStepAmountConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                         MySqlCommand sqlRecipeStepAmountCommand = new MySqlCommand("spGetRecipeStepAmountsByRecipeStepID", sqlRecipeStepAmountConnection);
                         sqlRecipeStepAmountCommand.CommandType = System.Data.CommandType.StoredProcedure;
                         sqlRecipeStepAmountCommand.Parameters.AddWithValue("thisid", recipeStep.ID.ToString());
@@ -810,7 +809,7 @@ namespace GardenMVC.DAL
         {
             List<RecipeChemList> lstream = new();
 
-            using (MySqlConnection sqlConnection = new(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
             {
                 sqlConnection.Open();
 

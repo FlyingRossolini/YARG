@@ -3,6 +3,7 @@ using System;
 using GardenMVC.Data.Models.ViewModels;
 using GardenMVC.Models;
 using GardenMVC.Common_Types;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.Data.Services
 {
@@ -11,10 +12,10 @@ namespace GardenMVC.Data.Services
         private readonly WateringScheduleDAL _wateringScheduleDAL;
         private readonly MixingFanScheduleDAL _mixingFanScheduleDAL;
 
-        public RemoteHostService()
+        public RemoteHostService(IConfiguration configuration)
         {
-            _wateringScheduleDAL = new();
-            _mixingFanScheduleDAL = new();
+            _wateringScheduleDAL = new(configuration);
+            _mixingFanScheduleDAL = new(configuration);
         }
 
         public void AcknowledgeWateringSchedule(RemoteHostCommandViewModel remoteHostViewModel)

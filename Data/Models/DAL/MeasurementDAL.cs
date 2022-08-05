@@ -3,21 +3,22 @@ using System;
 using System.Collections.Generic;
 using GardenMVC.Models;
 using GardenMVC.Data.Models.ViewModels;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.DAL
 {
     public class MeasurementDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
+        private readonly IConfiguration _config;
 
-        public MeasurementDAL()
+        public MeasurementDAL(IConfiguration configuration)
         {
-            _connectionStringManager = new();
+            _config = configuration;
         }
         
         public void AddMeasurement(Measurement measurement)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddMeasurement", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -40,7 +41,7 @@ namespace GardenMVC.DAL
         public Measurement GetMeasurementByID(Guid id)
         {
             Measurement measurement = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetMeasurementByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -74,7 +75,7 @@ namespace GardenMVC.DAL
         public IEnumerable<Measurement> GetMeasurements()
         {
             List<Measurement> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetMeasurements", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;

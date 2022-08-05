@@ -9,21 +9,22 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.Models
 {
     public class ExecuteTaskServiceCallJob : IJob
     {
-        private readonly ConnectionStringManager _connectionStringManager;
+        private readonly IConfiguration _config;
         private readonly WateringScheduleDAL _wateringScheduleDAL;
         private readonly MixingFanScheduleDAL _mixingFanScheduleDAL;
 
 
-        public ExecuteTaskServiceCallJob()
+        public ExecuteTaskServiceCallJob(IConfiguration configuration)
         {
-            _connectionStringManager = new();
-            _wateringScheduleDAL = new();
-            _mixingFanScheduleDAL = new();
+            _config = configuration;
+            _wateringScheduleDAL = new(configuration);
+            _mixingFanScheduleDAL = new(configuration);
         }
 
         public Task Execute(IJobExecutionContext context)
@@ -32,7 +33,7 @@ namespace GardenMVC.Models
 
             Task task = Task.Run(async () =>
             {
-                if (_connectionStringManager.GetExecuteTaskServiceCallSchedulingStatusString().Equals("ON"))
+                if (_config.GetValue<string>("QuartzStrings:ExecuteTaskServiceCallSchedulingStatus").Equals("ON"))
                 {
                     try
                     {
@@ -65,8 +66,8 @@ namespace GardenMVC.Models
 
                                     var options = new MqttClientOptionsBuilder()
                                     .WithClientId(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name)
-                                    .WithTcpServer(_connectionStringManager.GetMQTTServerIP(), Int32.Parse(_connectionStringManager.GetMQTTPort()))
-                                    .WithCredentials(_connectionStringManager.GetMQTTUsername(), _connectionStringManager.GetMQTTPassword())
+                                    .WithTcpServer(_config.GetValue<string>("MQTTStrings:MQTTConnectionIP"), _config.GetValue<int>("MQTTStrings:MQTTPort"))
+                                    .WithCredentials(_config.GetValue<string>("MQTTStrings:MQTTUsername"), _config.GetValue<string>("MQTTStrings:MQTTPassword"))
                                     .WithCleanSession()
                                     .Build();
 
@@ -117,43 +118,43 @@ namespace GardenMVC.Models
             
         }
 
-        private async void SendMQTT(ConnectionStringManager connectionStringManager,string strTopic, string strMessage)
-        {
-            try
-            {
-                var factory = new MqttFactory();
-                var mqttClient = factory.CreateMqttClient();
+        //private async void SendMQTT(ConnectionStringManager connectionStringManager,string strTopic, string strMessage)
+        //{
+        //    try
+        //    {
+        //        var factory = new MqttFactory();
+        //        var mqttClient = factory.CreateMqttClient();
 
-                var options = new MqttClientOptionsBuilder()
-                .WithClientId(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name)
-                .WithTcpServer(connectionStringManager.GetMQTTServerIP(), Int32.Parse(connectionStringManager.GetMQTTPort()))
-                .WithCredentials(connectionStringManager.GetMQTTUsername(), connectionStringManager.GetMQTTPassword())
-                .WithCleanSession()
-                .Build();
+        //        var options = new MqttClientOptionsBuilder()
+        //        .WithClientId(System.Reflection.Assembly.GetExecutingAssembly().GetName().Name)
+        //        .WithTcpServer(connectionStringManager.GetMQTTServerIP(), Int32.Parse(connectionStringManager.GetMQTTPort()))
+        //        .WithCredentials(connectionStringManager.GetMQTTUsername(), connectionStringManager.GetMQTTPassword())
+        //        .WithCleanSession()
+        //        .Build();
 
-                using (var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(1)))
-                {
-                    await mqttClient.ConnectAsync(options, cancellationToken.Token).ConfigureAwait(false);
-                }
+        //        using (var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(1)))
+        //        {
+        //            await mqttClient.ConnectAsync(options, cancellationToken.Token).ConfigureAwait(false);
+        //        }
 
 
-                var message = new MqttApplicationMessageBuilder()
-                .WithTopic(strTopic)
-                .WithPayload(strMessage)
-                .WithExactlyOnceQoS()
-                .WithRetainFlag()
-                .Build();
+        //        var message = new MqttApplicationMessageBuilder()
+        //        .WithTopic(strTopic)
+        //        .WithPayload(strMessage)
+        //        .WithExactlyOnceQoS()
+        //        .WithRetainFlag()
+        //        .Build();
 
-                await mqttClient.PublishAsync(message);
+        //        await mqttClient.PublishAsync(message);
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error!");
-                Console.WriteLine(ex.ToString() + " " + ex.Message);
-            }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine("Error!");
+        //        Console.WriteLine(ex.ToString() + " " + ex.Message);
+        //    }
 
-        }
+        //}
 
     }
 }

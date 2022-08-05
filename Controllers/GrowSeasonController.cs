@@ -3,6 +3,7 @@ using GardenMVC.DAL;
 using GardenMVC.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +14,13 @@ namespace GardenMVC.Controllers
     {
         private readonly GrowSeasonDAL _growSeasonDAL;
         private readonly CropDAL _cropDAL;
-        private readonly LightCycleDAL _lightCycleDAL;
         private readonly WateringScheduleDAL _wateringScheduleDAL;
-        public GrowSeasonController()
+
+        public GrowSeasonController(IConfiguration configuration)
         {
-            _growSeasonDAL = new();
-            _cropDAL = new();
-            _wateringScheduleDAL = new();
+            _growSeasonDAL = new(configuration);
+            _cropDAL = new(configuration);
+            _wateringScheduleDAL = new(configuration);
         }
         // GET: GrowSeasonController
         public ActionResult Index()

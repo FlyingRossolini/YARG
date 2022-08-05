@@ -116,3 +116,5 @@ C:\Users\rosscj1\source\repos\GardenMVC\obj\Debug\net5.0\GardenMVC.dll
 C:\Users\rosscj1\source\repos\GardenMVC\obj\Debug\net5.0\ref\GardenMVC.dll
 C:\Users\rosscj1\source\repos\GardenMVC\obj\Debug\net5.0\GardenMVC.pdb
 C:\Users\rosscj1\source\repos\GardenMVC\obj\Debug\net5.0\GardenMVC.genruntimeconfig.cache
+C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\appsettings.Production.Development.json
+C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\appsettings.Production.json

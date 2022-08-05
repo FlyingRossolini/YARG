@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using GardenMVC.Models;
 using GardenMVC.Common_Types;
 using GardenMVC.DAL;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.Controllers
 {
@@ -11,10 +12,10 @@ namespace GardenMVC.Controllers
         private readonly PotDAL _potDAL;
         private readonly WateringScheduleDAL _wateringScheduleDAL;
 
-        public PotController()
+        public PotController(IConfiguration configuration)
         {
-            _potDAL = new();
-            _wateringScheduleDAL = new();
+            _potDAL = new(configuration);
+            _wateringScheduleDAL = new(configuration);
         }
 
         // GET: Pot

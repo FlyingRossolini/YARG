@@ -6,27 +6,22 @@ using System.Threading.Tasks;
 using GardenMVC.Models;
 using GardenMVC.Common_Types;
 using GardenMVC.Data.Models.ViewModels;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.DAL
 {
     public class MixingFanScheduleDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
-        private readonly JarDAL _jarDAL;
-        private readonly LightCycleDAL _lightCycleDAL;
-        private readonly GrowSeasonDAL _growSeasonDAL;
+        private readonly IConfiguration _config;
 
-        public MixingFanScheduleDAL()
+        public MixingFanScheduleDAL(IConfiguration configuration)
         {
-            _connectionStringManager = new();
-            _jarDAL = new();
-            _lightCycleDAL = new();
-            _growSeasonDAL = new();
+            _config = configuration;
         }
 
         public void DeleteAllMixingFanSchedulesByJarID(Guid jarID)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeleteMixingFanScheduleByJarID", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -42,7 +37,7 @@ namespace GardenMVC.DAL
 
         public void PrepMixingFanScheduleByID(Guid jarID)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spPrepMixingFanScheduleByID", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -58,7 +53,7 @@ namespace GardenMVC.DAL
 
         public void AddMixingFanSchedule(MixingFanSchedule mixingFanSchedule)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddMixingFanSchedule", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -117,7 +112,7 @@ namespace GardenMVC.DAL
         public IEnumerable<MixingFanSchedule> GetMixingFanSchedules()
         {
             List<MixingFanSchedule> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetMixingFanSchedules", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -172,7 +167,7 @@ namespace GardenMVC.DAL
 
         public void AcknowledgeMixingFanSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAcknowledgeMixingFanSchedule", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -191,7 +186,7 @@ namespace GardenMVC.DAL
 
         public void CompleteMixingFanSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spCompleteMixingFanSchedule", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -212,7 +207,7 @@ namespace GardenMVC.DAL
         public IEnumerable<MixingFanScheduleCommand> AreWeThereYet()
         {
             List<MixingFanScheduleCommand> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetCurrentMixingFanSchedules", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -248,7 +243,7 @@ namespace GardenMVC.DAL
         {
             MixingFanSchedule mixingFanSchedule = new();
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetMixingFanScheduleByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;

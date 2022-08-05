@@ -1,6 +1,7 @@
 ﻿using GardenMVC.Common_Types;
 using GardenMVC.DAL;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System;
 
 namespace GardenMVC.Models
@@ -9,9 +10,9 @@ namespace GardenMVC.Models
     {
         private readonly CropDAL _cropDAL;
 
-        public CropController()
+        public CropController(IConfiguration configuration)
         {
-            this._cropDAL = new();
+            _cropDAL = new(configuration);
         }
 
         // GET: CropController

@@ -6,27 +6,22 @@ using System.Threading.Tasks;
 using GardenMVC.Models;
 using GardenMVC.Common_Types;
 using GardenMVC.Data.Models.ViewModels;
+using Microsoft.Extensions.Configuration;
 
 namespace GardenMVC.DAL
 {
     public class WateringScheduleDAL
     {
-        private readonly ConnectionStringManager _connectionStringManager;
-        private readonly PotDAL _potDAL;
-        private readonly LightCycleDAL _lightCycleDAL;
-        private readonly GrowSeasonDAL _growSeasonDAL;
+        private readonly IConfiguration _config;
 
-        public WateringScheduleDAL()
+        public WateringScheduleDAL(IConfiguration configuration)
         {
-            _connectionStringManager = new();
-            _potDAL = new();
-            _lightCycleDAL = new();
-            _growSeasonDAL = new();
+            _config = configuration;
         }
 
         public void DeleteAllWateringSchedules()
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spDeleteAllWateringSchedules", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -41,7 +36,7 @@ namespace GardenMVC.DAL
 
         public void AddWateringSchedule(WateringSchedule wateringSchedule)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAddWateringSchedule", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -72,15 +67,21 @@ namespace GardenMVC.DAL
         {
             DeleteAllWateringSchedules();
 
-            GrowSeason growSeason = _growSeasonDAL.GetGrowSeasonByID(_growSeasonDAL.IDActiveGrowSeason());
+            GrowSeasonDAL growSeasonDAL = new(_config);
 
-            int cntActiveBuckets = (from pot in _potDAL.GetPots()
+            GrowSeason growSeason = growSeasonDAL.GetGrowSeasonByID(growSeasonDAL.IDActiveGrowSeason());
+
+            PotDAL potDAL = new(_config);
+
+            int cntActiveBuckets = (from pot in potDAL.GetPots()
                                     where pot.IsActive == true
                                     select pot.ID).Count();
 
-            double amtMinsOfDaylight = _lightCycleDAL.GetLightCycleByID(growSeason.LightCycleID).DaylightHours * 60;
+            LightCycleDAL lightCycleDAL = new(_config);
 
-            foreach (Pot p in _potDAL.GetPots().Where(x => x.IsActive == true))
+            double amtMinsOfDaylight = lightCycleDAL.GetLightCycleByID(growSeason.LightCycleID).DaylightHours * 60;
+
+            foreach (Pot p in potDAL.GetPots().Where(x => x.IsActive == true))
             {
 
                 for (int j = 0; j < growSeason.EFEventsPerDay; j++)
@@ -184,7 +185,7 @@ namespace GardenMVC.DAL
         public IEnumerable<WateringSchedule> GetWateringSchedules()
         {
             List<WateringSchedule> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetWateringSchedules", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
@@ -230,7 +231,7 @@ namespace GardenMVC.DAL
 
         public void AcknowledgeWateringSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spAcknowledgeWateringSchedule", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -249,7 +250,7 @@ namespace GardenMVC.DAL
 
         public void CompleteWateringSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spCompleteWateringSchedule", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -271,7 +272,7 @@ namespace GardenMVC.DAL
             WateringScheduleCommand wateringScheduleCommand = null;
             Guid wsID = Guid.Empty;
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCmd = new MySqlCommand("spGetCurrentWateringScheduleID", sqlConnection);
                 sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -293,6 +294,8 @@ namespace GardenMVC.DAL
                 sqlConnection.Dispose();
             }
 
+            PotDAL potDAL = new(_config);
+
             if (wsID != Guid.Empty)
             {
                 WateringSchedule ws = GetWateringScheduleByID(wsID);
@@ -300,8 +303,8 @@ namespace GardenMVC.DAL
                 wateringScheduleCommand.WateringScheduleID = ws.ID;
                 wateringScheduleCommand.PotNumber = ws.PotQueuePosition;
                 wateringScheduleCommand.Amount = Convert.ToInt16(ws.EFAmount * 1000);
-                wateringScheduleCommand.EbbSpeed = _potDAL.GetEbbSpeedFromQueuePosition(ws.PotQueuePosition);
-                wateringScheduleCommand.FlowSpeed = _potDAL.GetFlowSpeedFromQueuePosition(ws.PotQueuePosition);
+                wateringScheduleCommand.EbbSpeed = potDAL.GetEbbSpeedFromQueuePosition(ws.PotQueuePosition);
+                wateringScheduleCommand.FlowSpeed = potDAL.GetFlowSpeedFromQueuePosition(ws.PotQueuePosition);
                 wateringScheduleCommand.Duration = ws.EFDuration;
 
             } 
@@ -313,7 +316,7 @@ namespace GardenMVC.DAL
         {
             WateringSchedule wateringSchedule = new();
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
+            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
                 MySqlCommand sqlCommand = new MySqlCommand("spGetWateringScheduleByID", sqlConnection);
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
