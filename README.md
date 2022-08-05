@@ -9,4 +9,4 @@ Yet Another Robotic Garden. Adventures in architecting a minimalistic approach t
 
 ## Grow Room
 * Current setup is a 4' x 5' physical room - each pot (up to 4) will house a plant that will occupy a 2' x 2' area. Each plant will have a Spider Farmer SF1000 led grow light mounted directly above it. 
-* Grow room environmental elements (temperature & humidity) are monitored and adjusted if they fall outside of comtrol limits.
+* Grow room environmental elements (temperature & humidity) are monitored and adjusted if they fall outside of control limits.
