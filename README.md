@@ -1,4 +1,4 @@
 # YARG
-Yet Another Robotic Garden. Adventures in architecting a minimalist approach to automated an ebb and flow hydroponic garden.
+Yet Another Robotic Garden. Adventures in architecting a minimalistic approach to an automated ebb and flow hydroponic garden.
 
 ## Preface
