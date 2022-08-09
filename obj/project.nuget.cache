@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "eSMoKmKtHZXnVZxvhcvQUjX4CrP+FLT86jTujwojQIY3vDkGzdWGYIs4GuCZxz51V+h+bwIGRNgic4STv7kUKQ==",
+  "dgSpecHash": "EvZKNl4CHf17o9hrEsVqI90SL1sSEAR2cyHcp/hmZ9g/li5UfQ+lLJKTymgI4+2HWPd3YoVw/3hD4DOLen8Y4Q==",
   "success": true,
-  "projectFilePath": "C:\\Users\\rosscj1\\source\\repos\\GardenMVC\\GardenMVC.csproj",
+  "projectFilePath": "C:\\Users\\rosscj1\\source\\repos\\GardenMVC\\YARG.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\rosscj1\\.nuget\\packages\\bouncycastle.netcore\\1.8.5\\bouncycastle.netcore.1.8.5.nupkg.sha512",
     "C:\\Users\\rosscj1\\.nuget\\packages\\google.protobuf\\3.14.0\\google.protobuf.3.14.0.nupkg.sha512",

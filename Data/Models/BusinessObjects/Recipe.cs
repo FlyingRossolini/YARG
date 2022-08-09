@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace GardenMVC.Models
+namespace YARG.Models
 {
     public class Recipe
     {

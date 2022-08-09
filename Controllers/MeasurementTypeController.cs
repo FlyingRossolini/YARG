@@ -1,10 +1,10 @@
-﻿using GardenMVC.Common_Types;
-using GardenMVC.DAL;
+﻿using YARG.Common_Types;
+using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 
-namespace GardenMVC.Models
+namespace YARG.Models
 {
     public class MeasurementTypeController : Controller
     {

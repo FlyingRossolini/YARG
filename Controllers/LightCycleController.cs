@@ -1,12 +1,12 @@
-﻿using GardenMVC.Common_Types;
-using GardenMVC.DAL;
-using GardenMVC.Models;
+﻿using YARG.Common_Types;
+using YARG.DAL;
+using YARG.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 
-namespace GardenMVC.Controllers
+namespace YARG.Controllers
 {
     public class LightCycleController : Controller
     {

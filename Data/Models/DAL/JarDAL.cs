@@ -1,10 +1,10 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using GardenMVC.Models;
+using YARG.Models;
 using Microsoft.Extensions.Configuration;
 
-namespace GardenMVC.DAL
+namespace YARG.DAL
 {
     public class JarDAL
     {

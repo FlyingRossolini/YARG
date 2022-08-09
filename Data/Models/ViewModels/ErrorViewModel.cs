@@ -1,6 +1,6 @@
 using System;
 
-namespace GardenMVC.Models
+namespace YARG.Models
 {
     public class ErrorViewModel
     {

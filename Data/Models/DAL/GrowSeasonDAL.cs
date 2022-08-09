@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GardenMVC.Common_Types;
-using GardenMVC.Models;
+using YARG.Common_Types;
+using YARG.Models;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 
-namespace GardenMVC.DAL
+namespace YARG.DAL
 {
     public class GrowSeasonDAL
     {

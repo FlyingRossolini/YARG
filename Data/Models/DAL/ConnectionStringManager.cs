@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration.Json;
 using System.IO;
 
-namespace GardenMVC.DAL
+namespace YARG.DAL
 {
     //public class ConnectionStringManager
     //{

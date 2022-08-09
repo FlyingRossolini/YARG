@@ -1,11 +1,11 @@
-﻿using GardenMVC.DAL;
+﻿using YARG.DAL;
 using System;
-using GardenMVC.Data.Models.ViewModels;
-using GardenMVC.Models;
-using GardenMVC.Common_Types;
+using YARG.Data.Models.ViewModels;
+using YARG.Models;
+using YARG.Common_Types;
 using Microsoft.Extensions.Configuration;
 
-namespace GardenMVC.Data.Services
+namespace YARG.Data.Services
 {
     public class RemoteMeasurementService
     {

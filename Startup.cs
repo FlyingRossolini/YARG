@@ -8,10 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GardenMVC.Models;
-using GardenMVC.Data.Services;
+using YARG.Models;
+using YARG.Data.Services;
 
-namespace GardenMVC
+namespace YARG
 {
     public class Startup
     {

@@ -1,5 +1,5 @@
-﻿using GardenMVC.Common_Types;
-using GardenMVC.DAL;
+﻿using YARG.Common_Types;
+using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GardenMVC.Models
+namespace YARG.Models
 {
     public class ChemicalController : Controller
     {

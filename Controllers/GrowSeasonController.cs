@@ -1,6 +1,6 @@
-﻿using GardenMVC.Common_Types;
-using GardenMVC.DAL;
-using GardenMVC.Models;
+﻿using YARG.Common_Types;
+using YARG.DAL;
+using YARG.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GardenMVC.Controllers
+namespace YARG.Controllers
 {
     public class GrowSeasonController : Controller
     {

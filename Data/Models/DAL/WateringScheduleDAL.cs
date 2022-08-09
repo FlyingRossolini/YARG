@@ -3,12 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GardenMVC.Models;
-using GardenMVC.Common_Types;
-using GardenMVC.Data.Models.ViewModels;
+using YARG.Models;
+using YARG.Common_Types;
+using YARG.Data.Models.ViewModels;
 using Microsoft.Extensions.Configuration;
 
-namespace GardenMVC.DAL
+namespace YARG.DAL
 {
     public class WateringScheduleDAL
     {

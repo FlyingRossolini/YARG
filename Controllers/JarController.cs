@@ -1,5 +1,5 @@
-﻿using GardenMVC.Common_Types;
-using GardenMVC.DAL;
+﻿using YARG.Common_Types;
+using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 
-namespace GardenMVC.Models
+namespace YARG.Models
 {
     public class JarController : Controller
     {

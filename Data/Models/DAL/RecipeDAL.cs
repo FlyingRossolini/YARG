@@ -3,12 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GardenMVC.Models;
-using GardenMVC.Common_Types;
-using GardenMVC.Data.Models.ViewModels;
+using YARG.Models;
+using YARG.Common_Types;
+using YARG.Data.Models.ViewModels;
 using Microsoft.Extensions.Configuration;
 
-namespace GardenMVC.DAL
+namespace YARG.DAL
 {
     public class RecipeDAL
     {
@@ -21,26 +21,33 @@ namespace GardenMVC.DAL
 
         public void AddRecipe(Recipe recipe)
         {
-            //using (MySqlConnection sqlConnection = new MySqlConnection(_connectionStringManager.GetConnectionString()))
-            //{
-            //    MySqlCommand sqlCmd = new MySqlCommand("spAddRecipe", sqlConnection);
-            //    sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-            //    sqlCmd.Parameters.AddWithValue("id", recipe.ID.ToString());
-            //    sqlCmd.Parameters.AddWithValue("feedingChartTypeID", recipe.FeedingChartTypeID.ToString());
-            //    sqlCmd.Parameters.AddWithValue("weekNumber", recipe.WeekNumber);
-            //    sqlCmd.Parameters.AddWithValue("lightCycleID", recipe.LightCycleID);
-            //    sqlCmd.Parameters.AddWithValue("chemicalsID", recipe.ChemicalsID.ToString());
-            //    sqlCmd.Parameters.AddWithValue("createdBy", recipe.CreatedBy);
-            //    sqlCmd.Parameters.AddWithValue("createDate", recipe.CreateDate);
-            //    sqlCmd.Parameters.AddWithValue("changedBy", recipe.ChangedBy);
-            //    sqlCmd.Parameters.AddWithValue("changeDate", recipe.ChangeDate);
+            try
+            {
+                using (MySqlConnection sqlConnection = new(_config.GetConnectionString("GardenConnection")))
+                {
+                    sqlConnection.Open();
 
-            //    sqlConnection.Open();
-            //    sqlCmd.ExecuteNonQuery();
-            //    sqlCmd.Dispose();
-            //    sqlConnection.Close();
-            //    sqlConnection.Dispose();
-            //}
+                    using (MySqlCommand sqlCommand = new())
+                    {
+                        sqlCommand.Connection = sqlConnection;
+                        sqlCommand.CommandText = "spAddRecipe";
+                        sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                        sqlCommand.Parameters.AddWithValue("id", recipe.ID.ToString());
+                        sqlCommand.Parameters.AddWithValue("name", recipe.Name);
+                        sqlCommand.Parameters.AddWithValue("createdBy", recipe.CreatedBy);
+                        sqlCommand.Parameters.AddWithValue("createDate", recipe.CreateDate);
+                        sqlCommand.Parameters.AddWithValue("changedBy", recipe.ChangedBy);
+                        sqlCommand.Parameters.AddWithValue("changeDate", recipe.ChangeDate);
+
+                        sqlCommand.ExecuteNonQuery();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         private Recipe GetRecipeByID(Guid recipeID)

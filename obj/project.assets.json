@@ -9784,9 +9784,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\rosscj1\\source\\repos\\GardenMVC\\GardenMVC.csproj",
-      "projectName": "GardenMVC",
-      "projectPath": "C:\\Users\\rosscj1\\source\\repos\\GardenMVC\\GardenMVC.csproj",
+      "projectUniqueName": "C:\\Users\\rosscj1\\source\\repos\\GardenMVC\\YARG.csproj",
+      "projectName": "YARG",
+      "projectPath": "C:\\Users\\rosscj1\\source\\repos\\GardenMVC\\YARG.csproj",
       "packagesPath": "C:\\Users\\rosscj1\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\rosscj1\\source\\repos\\GardenMVC\\obj\\",
       "projectStyle": "PackageReference",

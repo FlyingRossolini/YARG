@@ -1,4 +1,4 @@
-﻿@model GardenMVC.Models.RecipeViewModel
+﻿@model YARG.Models.RecipeViewModel
 
 @{
     ViewData["Title"] = "Recipe Book";
@@ -34,11 +34,8 @@
 
                 foreach (var recipe in Model.recipes)
                 {
-                    string s = '#' + recipe.Name;
-                    s = s.Replace("-", "").Replace(" ", "");
-                    //string s = '#' + recipe.ID.ToString();
-                    //s = s.Replace("-", "");
-
+                    string s = "#m" + recipe.ID.ToString();
+                    string str_li = "li_" + recipe.ID.ToString();
                     string strClass = "nav-link active";
 
                     if (i > 0)
@@ -46,8 +43,8 @@
                         strClass = "nav-link";
                     }
 
-                    <li class="nav-item">
-                        <a href="@s" class="@strClass" data-bs-toggle="tab">
+                    <li class="nav-item" id="@str_li">
+                        <a href="@s" class="@strClass" data-bs-toggle="tab" data-recipeid="@recipe.ID.ToString()">
                             <span>
                                 @*<span class="recipeID" style="display: none;">@recipe.ID.ToString()</span>*@
                                 <span class="recipeName">@recipe.Name</span>&nbsp;&nbsp;
@@ -74,12 +71,7 @@
 
                                 foreach (var recipe in Model.recipes)
                                 {
-                                    string a = recipe.Name;
-                                    a = a.Replace("-", "").Replace(" ", "");
-
-                                    //string a = recipe.ID.ToString();
-                                    //a = a.Replace("-", "");
-
+                                    string a = "m" + recipe.ID.ToString();
                                     string strClass = "tab-pane fade show active";
 
                                     if (j > 0)
@@ -87,7 +79,7 @@
                                         strClass = "tab-pane fade";
                                     }
 
-                                    <div class="@strClass" id="@a">
+                                    <div class="@strClass" id="@a" data-recipeid="@recipe.ID.ToString()">
                                         <div class="col">
                                             @{
                                                 string strTblName = "tbl" + recipe.ID.ToString();
@@ -98,7 +90,7 @@
                                                     <tr>
                                                         <th class="table-header-blank" style="text-align:center;">
                                                             <button id="btn-add-week" type="button" class="btn btn-outline-success btn-sm btn-add-week" data-toggle="tooltip" data-placement="left" title="Add new week" data-recipe="@recipe.ID.ToString()">
-                                                                <span class="fa-solid fa-plus align-middle"></span>
+                                                                <span class="fa-solid fa-plus"></span>
                                                             </button>
 
                                                         </th>
@@ -135,13 +127,13 @@
                                                         <th rowspan="2" class="table-header-2">
                                                             Daylight
                                                         </th>
-                                                        <th colspan="2" class="table-header-3">
+                                                        <th colspan="2" class="table-header-3" style="border-top-left-radius: 0px;">
                                                             <small><strong>Day Temp</strong></small>
                                                         </th>
-                                                        <th colspan="2" class="table-header-3">
+                                                        <th colspan="2" class="table-header-3" style="border-top-left-radius: 0px;">
                                                             <small><strong>Night Temp</strong></small>
                                                         </th>
-                                                        <th colspan="2" class="table-header-3">
+                                                        <th colspan="2" class="table-header-3" style="border-top-left-radius: 0px;">
                                                             <small><strong>Humidity</strong></small>
                                                         </th>
                                                         <th colspan="2" class="table-header-4">
@@ -174,22 +166,22 @@
                                                         <th colspan="4" class="table-header-8"><strong>Irrigation</strong></th>
                                                     </tr>
                                                     <tr>
-                                                        <th class="table-header-3" style="font-size: x-small">
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
                                                             LCL
                                                         </th>
-                                                        <th class="table-header-3" style="font-size: x-small">
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
                                                             UCL
                                                         </th>
-                                                        <th class="table-header-3" style="font-size: x-small">
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
                                                             LCL
                                                         </th>
-                                                        <th class="table-header-3" style="font-size: x-small">
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
                                                             UCL
                                                         </th>
-                                                        <th class="table-header-3" style="font-size: x-small">
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
                                                             LCL
                                                         </th>
-                                                        <th class="table-header-3" style="font-size: x-small">
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
                                                             UCL
                                                         </th>
                                                         <th class="table-header-4" style="font-size: x-small">
@@ -206,7 +198,7 @@
                                                         </th>
                                                         @{
                                                             foreach (var chemType in Model.recipeChemListViewModels.Where(x => x.RecipeID.ToString() == recipe.ID.ToString())
-                                                                          .Where(p => p.ChemicalTypeID == Guid.Parse("3a031e60-3574-b192-2593-a2caaefa5c06")))
+                                                                          .Where(p => p.ChemicalTypeName == "Nutrients"))
                                                             {
                                                                 <th class="table-header-6" style="font-size: x-small">
                                                                     @chemType.ChemicalName
@@ -214,7 +206,7 @@
                                                             }
 
                                                             foreach (var chemType in Model.recipeChemListViewModels.Where(x => x.RecipeID.ToString() == recipe.ID.ToString())
-                                                                .Where(p => p.ChemicalTypeID == Guid.Parse("3a031e60-610e-0f43-73e3-550c031f9571")))
+                                                                .Where(p => p.ChemicalTypeName == "Supplements"))
                                                             {
                                                                 <th class="table-header-7" style="font-size: x-small">
                                                                     @chemType.ChemicalName
@@ -222,16 +214,16 @@
                                                             }
 
                                                         }
-                                                        <th class="table-header-8" style="font-size: x-small">
+                                                        <th class="table-header-8" style="font-size: x-small; border-top-right-radius: 0px;">
                                                             Events / Day
                                                         </th>
-                                                        <th class="table-header-8" style="font-size: x-small">
+                                                        <th class="table-header-8" style="font-size: x-small; border-top-right-radius: 0px; ">
                                                             Soak Time
                                                         </th>
-                                                        <th class="table-header-8" style="font-size: x-small">
+                                                        <th class="table-header-8" style="font-size: x-small; border-top-right-radius: 0px; ">
                                                             Morning Sip
                                                         </th>
-                                                        <th class="table-header-8" style="font-size: x-small">
+                                                        <th class="table-header-8" style="font-size: x-small; border-top-right-radius: 0px; ">
                                                             Evening Sip
                                                         </th>
                                                         <th class="table-header-blank"></th>
@@ -348,24 +340,24 @@
                                                                 @foreach (var steplimit in (step.RecipeStepLimits)
                                                                    .Where(op => op.LocationID == Guid.Parse("3a030486-4c6e-174a-5cda-f6eb18dbb247"))
                                                                    .Where(o => o.MeasurementTypeID == Guid.Parse("3a0307d4-7913-8e12-b823-4aa5ccc8d100"))
-                                                                   .Where(o => o.LimitTypeID == Guid.Parse("3a03a0f5-27e6-d4a6-a3e7-ef1f0877283f")))
+                                                                   .Where(o => o.LimitTypeName == "LCL"))
                                                                 {
                                                                     string strres_ppm_lclId = step.ID.ToString() + "-res-ppm-lcl-textbox";
 
                                                                     <td class="text-center res-ppm-lcl-limitvalue" data-is-res_ppm_lcl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-res_ppm_lcl-previous-value="@steplimit.Value.ToString("0")">
-                                                                        <small><input id="@strres_ppm_lclId" type="number" value="@steplimit.Value.ToString("0")" max="2400" min="0" step="100" disabled style="text-align: center" /></small>
+                                                                        <small><input id="@strres_ppm_lclId" type="number" value="@steplimit.Value.ToString("0")" max="1500" min="0" step="50" disabled style="text-align: center" /></small>
                                                                     </td>
 
                                                                 }
                                                                 @foreach (var steplimit in (step.RecipeStepLimits)
                                                                .Where(op => op.LocationID == Guid.Parse("3a030486-4c6e-174a-5cda-f6eb18dbb247"))
                                                                .Where(o => o.MeasurementTypeID == Guid.Parse("3a0307d4-7913-8e12-b823-4aa5ccc8d100"))
-                                                               .Where(o => o.LimitTypeID == Guid.Parse("3a03a0f4-fe17-340e-a311-f553d5cef030")))
+                                                               .Where(o => o.LimitTypeName == "UCL"))
                                                                 {
                                                                     string strres_ppm_uclId = step.ID.ToString() + "-res-ppm-ucl-textbox";
 
                                                                     <td class="text-center res-ppm-ucl-limitvalue" data-is-res_ppm_ucl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-res_ppm_ucl-previous-value="@steplimit.Value.ToString("0")">
-                                                                        <small><input id="@strres_ppm_uclId" type="number" value="@steplimit.Value.ToString("0")" max="2400" min="0" step="100" disabled style="text-align: center" /></small>
+                                                                        <small><input id="@strres_ppm_uclId" type="number" value="@steplimit.Value.ToString("0")" max="1500" min="0" step="50" disabled style="text-align: center" /></small>
                                                                     </td>
 
                                                                 }
@@ -420,7 +412,7 @@
                                                                     </td>
 
                                                                 }
-                                                                <td class="text-center">
+                                                                <td class="text-center" style="border-right: none;">
                                                                     <a class="Edit" href="javascript:;">
                                                                         <span class="fa-solid fa-pencil text-primary"></span>
                                                                     </a>
@@ -428,7 +420,7 @@
                                                                         <span class="fa fa-save text-success"></span>
                                                                     </a>
                                                                 </td>
-                                                                <td class="text-center">
+                                                                <td class="text-center" style="border-right: 1px solid #ddd; border-left: none;">
                                                                     <a class="Cancel" href="javascript:;" style="display:none">
                                                                         <span class="fa fa-times text-secondary"></span>
                                                                     </a>
@@ -447,18 +439,24 @@
 
                                     j++;
                                 }
+
+                                
                             }
                         </div>
                     </div>
                 </div>
             </div>
             <div class="card-footer" style="padding-top: 2%">
-                <button id="btn-delete-recipe" type="button" class="btn btn-danger btn-sm">Delete</button>
+                @if (j > 1)
+                {
+                    <button id="btn-delete-recipe" type="button" class="btn btn-danger btn-sm">Delete</button>
+                }
+                else
+                {
+                    <button id="btn-delete-recipe" type="button" class="btn btn-danger btn-sm" disabled>Delete</button>
+                }
             </div>
         </div>
-
-
-
     </div>
 
     <br />
@@ -958,18 +956,88 @@
 
                         $('body').removeClass('waiting');
                     }
+                },
+                failure: function (response) {
+                    $('body').removeClass('waiting');
+                    alert(response);
+
                 }
             });
         });
 
+        function resetTab() {
+            var tabs = $("#tab-list li:not(:first)");
+            var len = 1
+            $(tabs).each(function (k, v) {
+                len++;
+                $(this).find('a').html('Tab ' + len + button);
+            })
+            tabID--;
+        }
         $('#btn-add-recipe').click(function () {
-            var nextTab = $('#myTab li').length + 1;
+            
+            var s = "";
 
-            //$('<li class="nav-item"><a href="#tab' + nextTab + '" class="nav-link" data-toggle="tab">Tab ' + nextTab + '</a></li>').appendTo('#myTab');
-            $('<li class="nav-item"><a href="#tab' + nextTab + '" class="nav-link" data-bs-toggle="tab"><span><span>New!</span>&nbsp;&nbsp;<i class="fa-solid fa-pen editRecipeName"></i></span></a></li>').appendTo('#myTab');
-            $('<div class="tab-pane fade" id="tab' + nextTab + '"><h4 class="mt-2">tab' + nextTab + ' content</h4><p> Donec vel placerat quam, ut euismod risus.Sed a mi suscipit, elementum sem a, hendrerit velit.Donec at erat magna.Sed dignissim orci nec eleifend egestas.Donec eget mi consequat massa vestibulum laoreet.Mauris et ultrices nulla, malesuada volutpat ante.Fusce ut orci lorem.Donec molestie libero in tempus imperdiet.Cum sociis natoque penatibus et magnis.</p></div>').appendTo('.tab-content');
-            $("#myTab a:last").tab("show");
-            $(".editRecipeName").click(editRecipeNameHandler);
+            $.ajax({
+                url: '/Recipe/AddRecipe',
+                type: 'GET',
+                contentType: 'application/json; charset=utf-8',
+                dataType: "json",
+                success: function (data) {
+                    if (data) {
+                        var nextTab = $('#myTab li').length + 1;
+
+                    //    //$('<li class="nav-item"><a href="#tab' + nextTab + '" class="nav-link" data-toggle="tab">Tab ' + nextTab + '</a></li>').appendTo('#myTab');
+                    //    $('<li class="nav-item"><a href="#tab' + nextTab + '" class="nav-link" data-bs-toggle="tab"><span><span>' + data.name + '</span>&nbsp;&nbsp;<i class="fa-solid fa-pen editRecipeName"></i></span></a></li>').appendTo('#myTab');
+                    //    $('<div class="tab-pane fade" id="tab' + nextTab + '"><h4 class="mt-2">tab' + nextTab + ' content</h4><p> Donec vel placerat quam, ut euismod risus.Sed a mi suscipit, elementum sem a, hendrerit velit.Donec at erat magna.Sed dignissim orci nec eleifend egestas.Donec eget mi consequat massa vestibulum laoreet.Mauris et ultrices nulla, malesuada volutpat ante.Fusce ut orci lorem.Donec molestie libero in tempus imperdiet.Cum sociis natoque penatibus et magnis.</p></div>').appendTo('.tab-content');
+                    //    $("#myTab a:last").tab("show");
+                    //    $(".editRecipeName").click(editRecipeNameHandler);
+                        var z = data.id.replace("-", "");
+                        $('<li class="nav-item" id="li_' + data.id + '"><a href="#m' + data.id + '" class="nav-link" data-bs-toggle="tab" data-recipeid="' + data.id + '"><span><span class="recipeName">' + data.name + '</span>&nbsp;&nbsp;<i class="fa-solid fa-pen editRecipeName"></i></span></a></li>').appendTo('#myTab');
+                        $('<div class="tab-pane fade" id="m' + data.id + '" data-recipeid="' + data.id + '"><p> Donec vel placerat quam, ut euismod risus.Sed a mi suscipit, elementum sem a, hendrerit velit.Donec at erat magna.Sed dignissim orci nec eleifend egestas.Donec eget mi consequat massa vestibulum laoreet.Mauris et ultrices nulla, malesuada volutpat ante.Fusce ut orci lorem.Donec molestie libero in tempus imperdiet.Cum sociis natoque penatibus et magnis.</p></div>').appendTo('.tab-content');
+                        $("#myTab a:last").tab("show");
+                        $(".editRecipeName").click(editRecipeNameHandler);
+                    }
+                }
+            });
+
+
+        });
+
+        $('#btn-delete-recipe').click(function () {
+            if (confirm("Are you sure you want to delete this recipe?")) {
+                var recipeID = document.getElementsByClassName('tab-pane fade active show')[0].getAttribute('data-recipeid');
+                $('body').addClass('waiting');
+
+                $.ajax({
+                    url: '/Recipe/DeleteRecipe',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    data: {
+                        __RequestVerificationToken: token,
+                        RecipeID: recipeID
+                    },
+                    success: function (response) {
+                        document.getElementsByClassName('tab-pane fade active show')[0].remove();
+                        document.getElementsByClassName('nav-link active')[0].remove();
+
+                        var tabFirst = $('#myTab a:first');
+                        tabFirst.tab('show');
+
+                        if (document.getElementById("myTabContent").childElementCount == 1) {
+                            $("#btn-delete-recipe").prop('disabled', true);
+                        };
+
+                        $('body').removeClass('waiting');
+
+                    },
+                    failure: function (response) {
+                        $('body').removeClass('waiting');
+                        alert(response);
+                    }
+                });
+
+            };
         });
 
         var editRecipeNameHandler = function () {
@@ -978,9 +1046,9 @@
             $(this).prev().attr("contenteditable", "true").focusout(function () {
                 $(this).removeAttr("contenteditable").off("focusout");
                 t.css("visibility", "visible");
-
+                
                 var recipeName = $(this).closest('a').find('.recipeName').text();
-                var recipeID = $(this).closest('a').find('.recipeID').text();
+                var recipeID = $(this).closest('a').attr("data-recipeid");
 
                 var recipeObject = {
                     'ID': recipeID,
@@ -995,6 +1063,9 @@
                         __RequestVerificationToken: token,
                         Recipe: recipeObject
                     },
+                    failure: function (response) {
+                        alert(response);
+                    },
                 });
 
             });
@@ -1002,40 +1073,6 @@
         };
 
         $(".editRecipeName").click(editRecipeNameHandler);
-
-        var keycodes = {
-            'backspace': 8,
-            'delete': 46,
-            'minus': 45,
-            'leftarrow': 37,
-            'rightarrow': 39,
-            'number1': 48,
-            'number9': 57
-        };
-
-        function noNumbers(e) {
-            var charCode = e.which ? e.which :
-                (e.charCode ? e.charCode :
-                    (e.keyCode ? e.keyCode : 0));
-
-            if ((charCode < keycodes.number1 || charCode > keycodes.number9) &&
-                charCode !== keycodes.delete &&
-                charCode !== keycodes.backspace &&
-                charCode !== keycodes.leftarrow &&
-                charCode !== keycodes.rightarrow &&
-                charCode !== keycodes.minus)
-                e.preventDefault();
-        }
-
-        function startEdit() {
-            $(".inline-view").hide();
-            $(".inline-edit").show();
-        }
-
-        function cancelEdit() {
-            $(".inline-edit").hide();
-            $(".inline-view").show();
-        }
 
         function updateStepLimit(recipesteplimit, limitvalue) {
             var recipeStepLimitObject = {
@@ -1054,7 +1091,6 @@
             });
 
         }
-
         function updateStepAmount(recipestepamount, amountvalue) {
             var recipeStepAmountObject = {
                 'ID': recipestepamount,
@@ -1069,6 +1105,9 @@
                     __RequestVerificationToken: token,
                     RecipeStepAmount: recipeStepAmountObject
                 },
+                failure: function (response) {
+                    alert(response);
+                }
             });
 
         }
@@ -1086,6 +1125,9 @@
                     __RequestVerificationToken: token,
                     RecipeStep: recipeStepObject
                 },
+                failure: function (response) {
+                    alert(response);
+                }
             });
         }
         function updateSoakTime(recipestepid, value) {
@@ -1102,6 +1144,9 @@
                     __RequestVerificationToken: token,
                     RecipeStep: recipeStepObject
                 },
+                failure: function (response) {
+                    alert(response);
+                }
             });
         }
         function updateMorningSip(recipestepid, value) {
@@ -1118,6 +1163,9 @@
                     __RequestVerificationToken: token,
                     RecipeStep: recipeStepObject
                 },
+                failure: function (response) {
+                    alert(response);
+                }
             });
         }
         function updateEveningSip(recipestepid, value) {
@@ -1134,6 +1182,9 @@
                     __RequestVerificationToken: token,
                     RecipeStep: recipeStepObject
                 },
+                failure: function (response) {
+                    alert(response);
+                }
             });
         }
         function updateLightCycle(recipestepid, value) {
@@ -1150,6 +1201,9 @@
                     __RequestVerificationToken: token,
                     RecipeStep: recipeStepObject
                 },
+                failure: function (response) {
+                    alert(response);
+                }
             });
         }
 
@@ -1543,6 +1597,9 @@
                             row.find(".Delete").hide();
                             row.find("span").html('&nbsp;');
                         }
+                    },
+                    failure: function (response) {
+                        alert(response);
                     }
                 });
 

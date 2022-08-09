@@ -1,10 +1,10 @@
-﻿using GardenMVC.Models;
+﻿using YARG.Models;
 using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 
-namespace GardenMVC.DAL
+namespace YARG.DAL
 {
     public class PotDAL
     {

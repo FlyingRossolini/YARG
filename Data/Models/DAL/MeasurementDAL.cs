@@ -1,11 +1,11 @@
 ﻿using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
-using GardenMVC.Models;
-using GardenMVC.Data.Models.ViewModels;
+using YARG.Models;
+using YARG.Data.Models.ViewModels;
 using Microsoft.Extensions.Configuration;
 
-namespace GardenMVC.DAL
+namespace YARG.DAL
 {
     public class MeasurementDAL
     {

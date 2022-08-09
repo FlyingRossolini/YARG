@@ -1,5 +1,5 @@
-﻿using GardenMVC.Common_Types;
-using GardenMVC.DAL;
+﻿using YARG.Common_Types;
+using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Configuration;
@@ -7,18 +7,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GardenMVC.Models
+namespace YARG.Models
 {
     public class RecipeController : Controller
     {
         private readonly RecipeDAL _recipeDAL;
         private readonly LightCycleDAL _lightCycleDAL;
         private readonly LocationDAL _locationDAL;
+        private readonly IConfiguration _config;
+
         public RecipeController(IConfiguration configuration)
         {
             _recipeDAL = new(configuration);
             _lightCycleDAL = new(configuration);
             _locationDAL = new(configuration);
+            _config = configuration;
         }
 
         // GET: RecipeController
@@ -331,6 +334,23 @@ namespace GardenMVC.Models
             return Json(recipeStep);
         }
 
+        [HttpGet]
+        public JsonResult AddRecipe(Recipe recipe)
+        {
+            string user = Environment.UserName;
+
+            recipe.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
+            recipe.Name = _config.GetValue<string>("YARGStrings:NewRecipeNameDefault");
+            recipe.CreatedBy = user;
+            recipe.CreateDate = DateTime.Now;
+            recipe.ChangedBy = user;
+            recipe.ChangeDate = DateTime.Now;
+
+            _recipeDAL.AddRecipe(recipe);
+
+            return Json(recipe);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdateRecipeStepLimit(RecipeStepLimit recipeStepLimit)
@@ -441,6 +461,14 @@ namespace GardenMVC.Models
             _recipeDAL.DeleteRecipeStepAmount(StepID);
             _recipeDAL.DeleteRecipeStep(StepID);
 
+            return Ok();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteRecipe(Guid RecipeID)
+        {
+            _recipeDAL.DeleteRecipe(RecipeID);
             return Ok();
         }
 

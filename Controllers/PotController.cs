@@ -1,11 +1,11 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
-using GardenMVC.Models;
-using GardenMVC.Common_Types;
-using GardenMVC.DAL;
+using YARG.Models;
+using YARG.Common_Types;
+using YARG.DAL;
 using Microsoft.Extensions.Configuration;
 
-namespace GardenMVC.Controllers
+namespace YARG.Controllers
 {
     public class PotController : Controller
     {

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <RuntimeIdentifiers>linux-arm64</RuntimeIdentifiers>
     <TargetFramework>net5.0</TargetFramework>
-    <ApplicationIcon />
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
     <OutputType>Exe</OutputType>
     <StartupObject />
     <UserSecretsId>eb1ccf8e-25f2-4e26-b360-3efc2b761043</UserSecretsId>

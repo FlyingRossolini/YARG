@@ -14,20 +14,20 @@ namespace AspNetCore
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
 #nullable restore
 #line 1 "C:\Users\rosscj1\source\repos\GardenMVC\Views\_ViewImports.cshtml"
-using GardenMVC;
+using YARG;
 
 #line default
 #line hidden
 #nullable disable
 #nullable restore
 #line 2 "C:\Users\rosscj1\source\repos\GardenMVC\Views\_ViewImports.cshtml"
-using GardenMVC.Models;
+using YARG.Models;
 
 #line default
 #line hidden
 #nullable disable
     [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"SHA1", @"d0f619f6d4bd7b9ecad7da3147fcee318cb0c8e4", @"/Views/LightCycle/Index.cshtml")]
-    [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"SHA1", @"203e0c3e65246d7e06fa984ff694573d8851edc4", @"/Views/_ViewImports.cshtml")]
+    [global::Microsoft.AspNetCore.Razor.Hosting.RazorSourceChecksumAttribute(@"SHA1", @"efca0cb3d9880acb0697001aa6467d7cf77e7e34", @"/Views/_ViewImports.cshtml")]
     public class Views_LightCycle_Index : global::Microsoft.AspNetCore.Mvc.Razor.RazorPage<IEnumerable<LightCycle>>
     {
         private static readonly global::Microsoft.AspNetCore.Razor.TagHelpers.TagHelperAttribute __tagHelperAttribute_0 = new global::Microsoft.AspNetCore.Razor.TagHelpers.TagHelperAttribute("asp-action", "Create", global::Microsoft.AspNetCore.Razor.TagHelpers.HtmlAttributeValueStyle.DoubleQuotes);
@@ -75,7 +75,7 @@ using GardenMVC.Models;
 #line hidden
 #nullable disable
             WriteLiteral("</h2>\r\n</div>\r\n\r\n\r\n");
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "d0f619f6d4bd7b9ecad7da3147fcee318cb0c8e44465", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "d0f619f6d4bd7b9ecad7da3147fcee318cb0c8e44455", async() => {
                 WriteLiteral("\r\n    <i class=\"fa fa-plus text-success\" aria-hidden=\"true\"></i> Create New\r\n");
             }
             );
@@ -166,7 +166,7 @@ using GardenMVC.Models;
 #line hidden
 #nullable disable
             WriteLiteral("\r\n                <td class=\"text-center\">\r\n                    ");
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "d0f619f6d4bd7b9ecad7da3147fcee318cb0c8e47887", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "d0f619f6d4bd7b9ecad7da3147fcee318cb0c8e47877", async() => {
                 WriteLiteral("\r\n                        <i class=\"center fa fa-lg fa-pencil text-primary\" aria-hidden=\"true\"></i>\r\n                    ");
             }
             );
@@ -197,7 +197,7 @@ using GardenMVC.Models;
             Write(__tagHelperExecutionContext.Output);
             __tagHelperExecutionContext = __tagHelperScopeManager.End();
             WriteLiteral(" &nbsp;\r\n                    ");
-            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "d0f619f6d4bd7b9ecad7da3147fcee318cb0c8e410186", async() => {
+            __tagHelperExecutionContext = __tagHelperScopeManager.Begin("a", global::Microsoft.AspNetCore.Razor.TagHelpers.TagMode.StartTagAndEndTag, "d0f619f6d4bd7b9ecad7da3147fcee318cb0c8e410176", async() => {
                 WriteLiteral("\r\n                        <i class=\"center fa fa-lg fa-x text-danger\" aria-hidden=\"true\"></i>\r\n                    ");
             }
             );

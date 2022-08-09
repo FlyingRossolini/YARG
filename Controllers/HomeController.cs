@@ -1,5 +1,5 @@
-﻿using GardenMVC.DAL;
-using GardenMVC.Models;
+﻿using YARG.DAL;
+using YARG.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GardenMVC.Controllers
+namespace YARG.Controllers
 {
     public class HomeController : Controller
     {

@@ -118,17 +118,17 @@ img, fieldset {
     /*Custom Text Color*/
 }
 
-    .tabs .tab a:hover {
-        color: #26a69a;
-        /*Custom Color On Hover*/
-    }
+.tabs .tab a:hover {
+    color: #26a69a;
+    /*Custom Color On Hover*/
+}
 
-    .tabs .tab a:focus.active {
-        color: #26a69a;
-        /*Custom Text Color While Active*/
-        background-color: rgba(38, 166, 154, 0.2);
-        /*Custom Background Color While Active*/
-    }
+.tabs .tab a:focus.active {
+    color: #26a69a;
+    /*Custom Text Color While Active*/
+    background-color: rgba(38, 166, 154, 0.2);
+    /*Custom Background Color While Active*/
+}
 
 .tabs .indicator {
     background-color: #26a69a;
@@ -356,28 +356,34 @@ select {
 .table-header-1 {
     text-align: center;
     background-color: rgb(255, 255, 190);
+    border-top-left-radius: 10px;
+    border-top: 1px solid #ddd;
 }
 
 .table-header-2 {
     text-align: center;
     background-color: rgb(255, 231, 190);
+    border-top: 1px solid #ddd;
 }
 .table-header-3 {
     text-align: center;
     border-bottom: none;
     background-color: rgb(246, 219, 198);
-}
+    border-top-left-radius: 10px;
+/*    border-top: 1px solid #ddd;
+*/}
 .table-header-4 {
     text-align: center;
     border-bottom: none;
-    border-top: none;
-    background-color: rgb(255, 190, 190);
+/*    border-top: 1px solid #ddd;
+*/    background-color: rgb(255, 190, 190);
 }
 .table-header-5 {
     text-align: center;
     border-bottom: none;
-    border-top: none;
     background-color: rgb(255, 179, 191);
+    border-top-right-radius: 10px;
+    border-top: 1px solid #ddd;
 }
 .table-header-6 {
     text-align: center;
@@ -394,10 +400,48 @@ select {
 .table-header-8 {
     text-align: center;
     border-bottom: none;
+    border-top-right-radius: 10px;
     border-top: none;
     background-color: rgb(194, 194, 255);
 }
+table {
+    border: 1px solid #ddd;
+    border-collapse: separate;
+    border-left: 0;
+    border-radius: 4px;
+    border-spacing: 0px;
+}
 
+thead {
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: inherit;
+    border-collapse: separate;
+}
+
+tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+
+th, td {
+    text-align: left;
+    vertical-align: top;
+    border-left: 1px solid #ddd;
+}
+
+td {
+    border-top: 1px solid #ddd;
+}
+
+thead:first-child tr:first-child th:first-child, tbody:first-child tr:first-child td:first-child {
+    border-radius: 4px 0 0 0;
+}
+
+thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td:first-child {
+    border-radius: 0 0 0 4px;
+}
 @media (max-width: 768px) {
 
 }

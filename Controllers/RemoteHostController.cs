@@ -1,5 +1,5 @@
-﻿using GardenMVC.Data.Models.ViewModels;
-using GardenMVC.Data.Services;
+﻿using YARG.Data.Models.ViewModels;
+using YARG.Data.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GardenMVC.Controllers
+namespace YARG.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -25,6 +25,7 @@ namespace GardenMVC.Controllers
             _remoteHostService.AcknowledgeMixingFanSchedule(remoteHostCommandViewModel);
             return Ok();
         }
+        
         [HttpPost("complete-mf-command")]
         public IActionResult CompleteMixingFanSchedule([FromBody] RemoteHostCommandViewModel remoteHostCommandViewModel)
         {

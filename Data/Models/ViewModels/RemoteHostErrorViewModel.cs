@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GardenMVC.Data.Models.ViewModels
+namespace YARG.Data.Models.ViewModels
 {
     public class RemoteHostErrorViewModel
     {

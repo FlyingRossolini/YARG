@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 
-namespace GardenMVC.Common_Types
+namespace YARG.Common_Types
 {
     public enum SequentialGuidType
     {

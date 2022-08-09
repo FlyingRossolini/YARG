@@ -1,12 +1,12 @@
-﻿using GardenMVC.DAL;
-using GardenMVC.Models;
+﻿using YARG.DAL;
+using YARG.Models;
 using Quartz;
 using Quartz.Impl;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
 
-namespace GardenMVC.Models
+namespace YARG.Models
 {
     public class ExecuteTaskServiceCallScheduler
     {

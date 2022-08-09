@@ -1,4 +1,4 @@
-﻿using GardenMVC.DAL;
+﻿using YARG.DAL;
 using Quartz;
 using System;
 using System.Configuration;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 
-namespace GardenMVC.Models
+namespace YARG.Models
 {
     public class ExecuteTaskServiceCallJob : IJob
     {
