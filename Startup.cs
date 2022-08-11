@@ -19,9 +19,12 @@ namespace YARG
 {
     public class Startup
     {
+        private readonly IConfiguration _config;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            _config = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -41,8 +44,8 @@ namespace YARG
                 })
                 .AddGoogle(options =>
                 {
-                    options.ClientId = "380467281753-3cn2hjikddk9fo5pvtvikf1rm0n26mpb.apps.googleusercontent.com";
-                    options.ClientSecret = "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";
+                    options.ClientId = _config.GetValue<string>("Authentication:Google:ClientId");
+                    options.ClientSecret = _config.GetValue<string>("Authentication:Google:ClientSecret");
 
                 });
 
