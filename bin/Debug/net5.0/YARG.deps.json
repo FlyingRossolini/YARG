@@ -35,6 +35,7 @@
         "dependencies": {
           "MQTTnet": "3.1.2",
           "Microsoft.AspNet.WebApi.Client": "5.2.7",
+          "Microsoft.AspNetCore.Authentication.Google": "5.0.17",
           "Microsoft.Extensions.Configuration.Json": "6.0.0",
           "Microsoft.VisualStudio.Web.BrowserLink": "2.2.0",
           "MySql.Data": "8.0.28",
@@ -404,6 +405,17 @@
         },
         "compile": {
           "lib/netstandard2.0/System.Net.Http.Formatting.dll": {}
+        }
+      },
+      "Microsoft.AspNetCore.Authentication.Google/5.0.17": {
+        "runtime": {
+          "lib/net5.0/Microsoft.AspNetCore.Authentication.Google.dll": {
+            "assemblyVersion": "5.0.17.0",
+            "fileVersion": "5.0.1722.21507"
+          }
+        },
+        "compile": {
+          "lib/net5.0/Microsoft.AspNetCore.Authentication.Google.dll": {}
         }
       },
       "Microsoft.AspNetCore.Hosting.Abstractions/2.2.0": {
@@ -3267,6 +3279,13 @@
       "sha512": "sha512-/76fAHknzvFqbznS6Uj2sOyE9rJB3PltY+f53TH8dX9RiGhk02EhuFCWljSj5nnqKaTsmma8DFR50OGyQ4yJ1g==",
       "path": "microsoft.aspnet.webapi.client/5.2.7",
       "hashPath": "microsoft.aspnet.webapi.client.5.2.7.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Authentication.Google/5.0.17": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Az1M408Z6KeOLHH4EJMHLgERvrDpo+YWqEjUzCIfYPwM2f3/FrapW9f/hIa9qYRwZB4sae/J/OlH98ebSm24CQ==",
+      "path": "microsoft.aspnetcore.authentication.google/5.0.17",
+      "hashPath": "microsoft.aspnetcore.authentication.google.5.0.17.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Hosting.Abstractions/2.2.0": {
       "type": "package",

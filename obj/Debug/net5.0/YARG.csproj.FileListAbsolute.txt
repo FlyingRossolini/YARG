@@ -117,3 +117,5 @@ C:\Users\rosscj1\source\repos\GardenMVC\obj\Debug\net5.0\YARG.dll
 C:\Users\rosscj1\source\repos\GardenMVC\obj\Debug\net5.0\ref\YARG.dll
 C:\Users\rosscj1\source\repos\GardenMVC\obj\Debug\net5.0\YARG.pdb
 C:\Users\rosscj1\source\repos\GardenMVC\obj\Debug\net5.0\YARG.genruntimeconfig.cache
+C:\Users\rosscj1\source\repos\GardenMVC\obj\Debug\net5.0\YARG.csproj.AssemblyReference.cache
+C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\Microsoft.AspNetCore.Authentication.Google.dll

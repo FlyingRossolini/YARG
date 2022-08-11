@@ -15,6 +15,7 @@ namespace YARG
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
+
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -23,7 +24,7 @@ namespace YARG
                 {
                     //webBuilder.UseStartup().UseContentRoot(Directory.GetCurrentDirectory())
                     //.UseUrls("http://*:5000");
-                    webBuilder.UseStartup<Startup>();
+                    //webBuilder.UseStartup<Startup>();
                     webBuilder.UseKestrel().UseContentRoot(Directory.GetCurrentDirectory())
                     .UseUrls("http://*:5000").UseStartup<Startup>();
                 }).ConfigureLogging(logging =>
@@ -34,6 +35,7 @@ namespace YARG
                 {
                     config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
                     config.AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: false);
+                    config.AddJsonFile("appsettings.Production.json", optional: true, reloadOnChange: false);
                 });
     }
 }

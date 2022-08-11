@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "EvZKNl4CHf17o9hrEsVqI90SL1sSEAR2cyHcp/hmZ9g/li5UfQ+lLJKTymgI4+2HWPd3YoVw/3hD4DOLen8Y4Q==",
+  "dgSpecHash": "pCARtJ8w5l9/MpQwDAw2AiKi4gdFcigpDghXz45jBxEwhVtVS0x6s0mFM9bRBoxkM6KpDMb98vjlurpWTbp4BQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\rosscj1\\source\\repos\\GardenMVC\\YARG.csproj",
   "expectedPackageFiles": [
@@ -11,6 +11,7 @@
     "C:\\Users\\rosscj1\\.nuget\\packages\\k4os.compression.lz4.streams\\1.2.6\\k4os.compression.lz4.streams.1.2.6.nupkg.sha512",
     "C:\\Users\\rosscj1\\.nuget\\packages\\k4os.hash.xxhash\\1.0.6\\k4os.hash.xxhash.1.0.6.nupkg.sha512",
     "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.aspnet.webapi.client\\5.2.7\\microsoft.aspnet.webapi.client.5.2.7.nupkg.sha512",
+    "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.aspnetcore.authentication.google\\5.0.17\\microsoft.aspnetcore.authentication.google.5.0.17.nupkg.sha512",
     "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.aspnetcore.hosting.abstractions\\2.2.0\\microsoft.aspnetcore.hosting.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.aspnetcore.hosting.server.abstractions\\2.2.0\\microsoft.aspnetcore.hosting.server.abstractions.2.2.0.nupkg.sha512",
     "C:\\Users\\rosscj1\\.nuget\\packages\\microsoft.aspnetcore.http.abstractions\\2.2.0\\microsoft.aspnetcore.http.abstractions.2.2.0.nupkg.sha512",

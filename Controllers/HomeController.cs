@@ -8,9 +8,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace YARG.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly WateringScheduleDAL _wateringScheduleDAL;
@@ -24,7 +26,7 @@ namespace YARG.Controllers
             _growSeasonDAL = new(configuration);
         }
 
-
+        [AllowAnonymous]
         public IActionResult Index()
         {
             HomeViewModel homeViewModel = new();
