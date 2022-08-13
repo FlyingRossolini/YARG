@@ -14,6 +14,9 @@ using YARG.Data.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
+using YARG.Services;
+using YARG.Data;
 
 namespace YARG
 {
@@ -61,6 +64,14 @@ namespace YARG
             //    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
             //})
             //    .AddCookie
+            services.AddTransient<IUserStore<ApplicationUser>, UserStore>();
+            services.AddTransient<IRoleStore<ApplicationRole>, RoleStore>();
+
+            services.AddIdentity<ApplicationUser, ApplicationRole>()
+                .AddDefaultTokenProviders();
+
+            // Add application services.
+            services.AddTransient<IEmailSender, EmailSender>();
 
             services.AddControllersWithViews();
 
