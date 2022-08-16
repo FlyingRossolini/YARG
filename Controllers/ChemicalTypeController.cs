@@ -3,6 +3,7 @@ using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Threading.Tasks;
 
 namespace YARG.Models
 {
@@ -16,9 +17,9 @@ namespace YARG.Models
         }
 
         // GET: ChemicalTypeController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_chemicalTypeDAL.GetChemicalTypes());
+            return View(await _chemicalTypeDAL.GetChemicalTypesAsync());
         }
 
         // GET: ChemicalTypeController/Details/5
@@ -31,7 +32,7 @@ namespace YARG.Models
         // POST: ChemicalTypeController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,Name,IsH2O2,IsPhUp,IsPhDown,Sorting")] ChemicalType chemicalType)
+        public async Task<ActionResult> Create([Bind("ID,Name,IsH2O2,IsPhUp,IsPhDown,Sorting")] ChemicalType chemicalType)
         {
             if (ModelState.IsValid)
             {
@@ -44,7 +45,7 @@ namespace YARG.Models
                 chemicalType.ChangeDate = DateTime.Now;
                 chemicalType.IsActive = true;
 
-                _chemicalTypeDAL.AddChemicalType(chemicalType);
+                await _chemicalTypeDAL.AddChemicalTypeAsync(chemicalType);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -52,20 +53,20 @@ namespace YARG.Models
         }
 
         // GET: ChemicalTypeController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
             
-            return View(_chemicalTypeDAL.GetChemicalTypeByID(id.Value));
+            return View(await _chemicalTypeDAL.GetChemicalTypeByIDAsync(id.Value));
         }
 
         // POST: ChemicalTypeController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,Name,IsH2O2,IsPhUp,IsPhDown,Sorting,IsActive")] ChemicalType chemicalType)
+        public async Task<ActionResult> Edit(Guid id, [Bind("ID,Name,IsH2O2,IsPhUp,IsPhDown,Sorting,IsActive")] ChemicalType chemicalType)
         {
             if (id != chemicalType.ID)
             {
@@ -79,7 +80,7 @@ namespace YARG.Models
                 chemicalType.ChangedBy = user;
                 chemicalType.ChangeDate = DateTime.Now;
 
-                _chemicalTypeDAL.SaveChemicalType(chemicalType);
+                await _chemicalTypeDAL.SaveChemicalTypeAsync(chemicalType);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -87,22 +88,22 @@ namespace YARG.Models
         }
 
         // GET: ChemicalTypeController/Delete/5
-        public ActionResult Delete(Guid? id)
+        public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_chemicalTypeDAL.GetChemicalTypeByID(id.Value));
+            return View(await _chemicalTypeDAL.GetChemicalTypeByIDAsync(id.Value));
         }
 
         // POST: ChemicalTypeController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            _chemicalTypeDAL.DeleteChemicalType(id);
+            await _chemicalTypeDAL.DeleteChemicalType(id);
 
             return RedirectToAction(nameof(Index));
         }

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace YARG.Models
 {
@@ -25,10 +26,10 @@ namespace YARG.Models
         }
 
         // GET: RecipeController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
             List<SelectListItem> ddDaylight = new();
-            var daylightList = (from daylight in _lightCycleDAL.GetLightCycles()
+            var daylightList = (from daylight in await _lightCycleDAL.GetLightCyclesAsync()
                                 where daylight.IsActive == true
                                 select new { daylight.ID, daylight.Name }).ToList();
 
@@ -40,9 +41,9 @@ namespace YARG.Models
             ViewBag.ddDaylight = ddDaylight;
 
             RecipeViewModel recipeViewModel = new();
-            recipeViewModel.recipes = _recipeDAL.GetRecipes();
-            recipeViewModel.locations = _locationDAL.GetLocationsForRecipe();
-            recipeViewModel.recipeChemListViewModels = _recipeDAL.GetRecipeChemListViewModels();
+            recipeViewModel.recipes = await _recipeDAL.GetRecipesAsync();
+            recipeViewModel.locations = await _locationDAL.GetLocationsForRecipeAsync();
+            recipeViewModel.recipeChemListViewModels = await _recipeDAL.GetRecipeChemListViewModelsAsync();
 
             return View(recipeViewModel);
 
@@ -50,14 +51,14 @@ namespace YARG.Models
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateRecipeName(Recipe recipe)
+        public async Task<IActionResult> UpdateRecipeName(Recipe recipe)
         {
             string user = Environment.UserName;
 
             recipe.ChangedBy = user;
             recipe.ChangeDate = DateTime.Now;
 
-            _recipeDAL.UpdateRecipeName(recipe);
+            await _recipeDAL.UpdateRecipeNameAsync(recipe);
 
             return new EmptyResult();
         }
@@ -78,7 +79,7 @@ namespace YARG.Models
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult AddWeek(RecipeStep recipeStep)
+        public async Task<JsonResult> AddWeek(RecipeStep recipeStep)
         {
             string user = Environment.UserName;
 
@@ -88,7 +89,7 @@ namespace YARG.Models
             recipeStep.ChangedBy = user;
             recipeStep.ChangeDate = DateTime.Now;
 
-            RecipeStep lstRecipeStep = _recipeDAL.GetLastRecipeStepByRecipeID(recipeStep.RecipeID);
+            RecipeStep lstRecipeStep = await _recipeDAL.GetLastRecipeStepByRecipeIDAsync(recipeStep.RecipeID);
 
             if(lstRecipeStep.WeekNumber != 0)
             {
@@ -110,7 +111,7 @@ namespace YARG.Models
 
             }
 
-            _recipeDAL.AddRecipeStep(recipeStep);
+            await _recipeDAL.AddRecipeStepAsync(recipeStep);
 
             #region Build Recipe Step Limits
             List<RecipeStepLimit> recipeStepLimits = new();
@@ -122,7 +123,7 @@ namespace YARG.Models
                 LocationID = Constants.LocationType_Habitat,
                 MeasurementTypeID = Constants.MeasurementType_TempDay,
                 LimitTypeID = Constants.LimitType_LCL,
-                Value = _recipeDAL.GetLastRecipeStepLimitValue(recipeStep.RecipeID, 
+                Value = await _recipeDAL.GetLastRecipeStepLimitValueAsync(recipeStep.RecipeID, 
                     Constants.LocationType_Habitat, Constants.MeasurementType_TempDay, Constants.LimitType_LCL),
                 CreatedBy = user,
                 CreateDate = DateTime.Now,
@@ -130,7 +131,7 @@ namespace YARG.Models
                 ChangeDate = DateTime.Now
             };
 
-            _recipeDAL.AddRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.AddRecipeStepLimitAsync(recipeStepLimit);
 
             recipeStepLimits.Add(recipeStepLimit);
 
@@ -141,7 +142,7 @@ namespace YARG.Models
                 LocationID = Constants.LocationType_Habitat,
                 MeasurementTypeID = Constants.MeasurementType_TempDay,
                 LimitTypeID = Constants.LimitType_UCL,
-                Value = _recipeDAL.GetLastRecipeStepLimitValue(recipeStep.RecipeID,
+                Value = await _recipeDAL.GetLastRecipeStepLimitValueAsync(recipeStep.RecipeID,
                     Constants.LocationType_Habitat, Constants.MeasurementType_TempDay, Constants.LimitType_UCL),
                 CreatedBy = user,
                 CreateDate = DateTime.Now,
@@ -149,7 +150,7 @@ namespace YARG.Models
                 ChangeDate = DateTime.Now
             };
 
-            _recipeDAL.AddRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.AddRecipeStepLimitAsync(recipeStepLimit);
 
             recipeStepLimits.Add(recipeStepLimit);
 
@@ -160,7 +161,7 @@ namespace YARG.Models
                 LocationID = Constants.LocationType_Habitat,
                 MeasurementTypeID = Constants.MeasurementType_TempNight,
                 LimitTypeID = Constants.LimitType_LCL,
-                Value = _recipeDAL.GetLastRecipeStepLimitValue(recipeStep.RecipeID,
+                Value = await _recipeDAL.GetLastRecipeStepLimitValueAsync(recipeStep.RecipeID,
                     Constants.LocationType_Habitat, Constants.MeasurementType_TempNight, Constants.LimitType_LCL),
                 CreatedBy = user,
                 CreateDate = DateTime.Now,
@@ -168,7 +169,7 @@ namespace YARG.Models
                 ChangeDate = DateTime.Now
             };
 
-            _recipeDAL.AddRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.AddRecipeStepLimitAsync(recipeStepLimit);
 
             recipeStepLimits.Add(recipeStepLimit);
 
@@ -179,7 +180,7 @@ namespace YARG.Models
                 LocationID = Constants.LocationType_Habitat,
                 MeasurementTypeID = Constants.MeasurementType_TempNight,
                 LimitTypeID = Constants.LimitType_UCL,
-                Value = _recipeDAL.GetLastRecipeStepLimitValue(recipeStep.RecipeID,
+                Value = await _recipeDAL.GetLastRecipeStepLimitValueAsync(recipeStep.RecipeID,
                     Constants.LocationType_Habitat, Constants.MeasurementType_TempNight, Constants.LimitType_UCL),
                 CreatedBy = user,
                 CreateDate = DateTime.Now,
@@ -187,7 +188,7 @@ namespace YARG.Models
                 ChangeDate = DateTime.Now
             };
 
-            _recipeDAL.AddRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.AddRecipeStepLimitAsync(recipeStepLimit);
 
             recipeStepLimits.Add(recipeStepLimit);
 
@@ -198,7 +199,7 @@ namespace YARG.Models
                 LocationID = Constants.LocationType_Habitat,
                 MeasurementTypeID = Constants.MeasurementType_Humidity,
                 LimitTypeID = Constants.LimitType_LCL,
-                Value = _recipeDAL.GetLastRecipeStepLimitValue(recipeStep.RecipeID,
+                Value = await _recipeDAL.GetLastRecipeStepLimitValueAsync(recipeStep.RecipeID,
                     Constants.LocationType_Habitat, Constants.MeasurementType_Humidity, Constants.LimitType_LCL),
                 CreatedBy = user,
                 CreateDate = DateTime.Now,
@@ -206,7 +207,7 @@ namespace YARG.Models
                 ChangeDate = DateTime.Now
             };
 
-            _recipeDAL.AddRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.AddRecipeStepLimitAsync(recipeStepLimit);
 
             recipeStepLimits.Add(recipeStepLimit);
 
@@ -217,7 +218,7 @@ namespace YARG.Models
                 LocationID = Constants.LocationType_Habitat,
                 MeasurementTypeID = Constants.MeasurementType_Humidity,
                 LimitTypeID = Constants.LimitType_UCL,
-                Value = _recipeDAL.GetLastRecipeStepLimitValue(recipeStep.RecipeID,
+                Value = await _recipeDAL.GetLastRecipeStepLimitValueAsync(recipeStep.RecipeID,
                     Constants.LocationType_Habitat, Constants.MeasurementType_Humidity, Constants.LimitType_UCL),
                 CreatedBy = user,
                 CreateDate = DateTime.Now,
@@ -225,7 +226,7 @@ namespace YARG.Models
                 ChangeDate = DateTime.Now
             };
 
-            _recipeDAL.AddRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.AddRecipeStepLimitAsync(recipeStepLimit);
 
             recipeStepLimits.Add(recipeStepLimit);
 
@@ -236,7 +237,7 @@ namespace YARG.Models
                 LocationID = Constants.LocationType_Reservoir,
                 MeasurementTypeID = Constants.MeasurementType_pH,
                 LimitTypeID = Constants.LimitType_LCL,
-                Value = _recipeDAL.GetLastRecipeStepLimitValue(recipeStep.RecipeID,
+                Value = await _recipeDAL.GetLastRecipeStepLimitValueAsync(recipeStep.RecipeID,
                     Constants.LocationType_Reservoir, Constants.MeasurementType_pH, Constants.LimitType_LCL),
                 CreatedBy = user,
                 CreateDate = DateTime.Now,
@@ -244,7 +245,7 @@ namespace YARG.Models
                 ChangeDate = DateTime.Now
             };
 
-            _recipeDAL.AddRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.AddRecipeStepLimitAsync(recipeStepLimit);
 
             recipeStepLimits.Add(recipeStepLimit);
 
@@ -255,7 +256,7 @@ namespace YARG.Models
                 LocationID = Constants.LocationType_Reservoir,
                 MeasurementTypeID = Constants.MeasurementType_pH,
                 LimitTypeID = Constants.LimitType_UCL,
-                Value = _recipeDAL.GetLastRecipeStepLimitValue(recipeStep.RecipeID,
+                Value = await _recipeDAL.GetLastRecipeStepLimitValueAsync(recipeStep.RecipeID,
                     Constants.LocationType_Reservoir, Constants.MeasurementType_pH, Constants.LimitType_UCL),
                 CreatedBy = user,
                 CreateDate = DateTime.Now,
@@ -263,7 +264,7 @@ namespace YARG.Models
                 ChangeDate = DateTime.Now
             };
 
-            _recipeDAL.AddRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.AddRecipeStepLimitAsync(recipeStepLimit);
 
             recipeStepLimits.Add(recipeStepLimit);
 
@@ -274,7 +275,7 @@ namespace YARG.Models
                 LocationID = Constants.LocationType_Reservoir,
                 MeasurementTypeID = Constants.MeasurementType_PPM,
                 LimitTypeID = Constants.LimitType_LCL,
-                Value = _recipeDAL.GetLastRecipeStepLimitValue(recipeStep.RecipeID,
+                Value = await _recipeDAL.GetLastRecipeStepLimitValueAsync(recipeStep.RecipeID,
                     Constants.LocationType_Reservoir, Constants.MeasurementType_PPM, Constants.LimitType_LCL),
                 CreatedBy = user,
                 CreateDate = DateTime.Now,
@@ -282,7 +283,7 @@ namespace YARG.Models
                 ChangeDate = DateTime.Now
             };
 
-            _recipeDAL.AddRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.AddRecipeStepLimitAsync(recipeStepLimit);
 
             recipeStepLimits.Add(recipeStepLimit);
 
@@ -293,7 +294,7 @@ namespace YARG.Models
                 LocationID = Constants.LocationType_Reservoir,
                 MeasurementTypeID = Constants.MeasurementType_PPM,
                 LimitTypeID = Constants.LimitType_UCL,
-                Value = _recipeDAL.GetLastRecipeStepLimitValue(recipeStep.RecipeID,
+                Value = await _recipeDAL.GetLastRecipeStepLimitValueAsync(recipeStep.RecipeID,
                     Constants.LocationType_Reservoir, Constants.MeasurementType_PPM, Constants.LimitType_UCL),
                 CreatedBy = user,
                 CreateDate = DateTime.Now,
@@ -301,7 +302,7 @@ namespace YARG.Models
                 ChangeDate = DateTime.Now
             };
 
-            _recipeDAL.AddRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.AddRecipeStepLimitAsync(recipeStepLimit);
 
             recipeStepLimits.Add(recipeStepLimit);
 
@@ -311,21 +312,21 @@ namespace YARG.Models
 
             List<RecipeStepAmount> recipeStepAmounts = new();
 
-            foreach(RecipeChemList recipeChemList in _recipeDAL.GetRecipeChemListByRecipeID(recipeStep.RecipeID))
+            foreach(RecipeChemList recipeChemList in await _recipeDAL.GetRecipeChemListByRecipeIDAsync(recipeStep.RecipeID))
             {
                 RecipeStepAmount recipeStepAmount = new()
                 {
                     ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString),
                     RecipeStepID = recipeStep.ID,
                     ChemicalID = recipeChemList.ChemicalID,
-                    Amount = _recipeDAL.GetLastRecipeStepAmountValue(recipeStep.RecipeID,recipeChemList.ChemicalID),
+                    Amount = await _recipeDAL.GetLastRecipeStepAmountValueAsync(recipeStep.RecipeID,recipeChemList.ChemicalID),
                     CreatedBy = user,
                     CreateDate = DateTime.Now,
                     ChangedBy = user,
                     ChangeDate = DateTime.Now
                 };
 
-                _recipeDAL.AddRecipeStepAmount(recipeStepAmount);
+                await _recipeDAL.AddRecipeStepAmountAsync(recipeStepAmount);
                 recipeStepAmounts.Add(recipeStepAmount);
             }
 
@@ -335,7 +336,7 @@ namespace YARG.Models
         }
 
         [HttpGet]
-        public JsonResult AddRecipe(Recipe recipe)
+        public async Task<JsonResult> AddRecipe(Recipe recipe)
         {
             string user = Environment.UserName;
 
@@ -346,49 +347,49 @@ namespace YARG.Models
             recipe.ChangedBy = user;
             recipe.ChangeDate = DateTime.Now;
 
-            _recipeDAL.AddRecipe(recipe);
+            await _recipeDAL.AddRecipeAsync(recipe);
 
             return Json(recipe);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateRecipeStepLimit(RecipeStepLimit recipeStepLimit)
+        public async Task<IActionResult> UpdateRecipeStepLimit(RecipeStepLimit recipeStepLimit)
         {
             string user = Environment.UserName;
 
             recipeStepLimit.ChangedBy = user;
             recipeStepLimit.ChangeDate = DateTime.Now;
 
-            _recipeDAL.UpdateRecipeStepLimit(recipeStepLimit);
+            await _recipeDAL.UpdateRecipeStepLimitAsync(recipeStepLimit);
 
             return Ok();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateRecipeStepAmount(RecipeStepAmount recipeStepAmount)
+        public async Task<IActionResult> UpdateRecipeStepAmount(RecipeStepAmount recipeStepAmount)
         {
             string user = Environment.UserName;
 
             recipeStepAmount.ChangedBy = user;
             recipeStepAmount.ChangeDate = DateTime.Now;
 
-            _recipeDAL.UpdateRecipeStepAmount(recipeStepAmount);
+            await _recipeDAL.UpdateRecipeStepAmountAsync(recipeStepAmount);
 
             return Ok();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateRecipeStepIrrigation(RecipeStep recipeStep)
+        public async Task<IActionResult> UpdateRecipeStepIrrigation(RecipeStep recipeStep)
         {
             string user = Environment.UserName;
 
             recipeStep.ChangedBy = user;
             recipeStep.ChangeDate = DateTime.Now;
 
-            _recipeDAL.UpdateRecipeStepIrrigation(recipeStep);
+            await _recipeDAL.UpdateRecipeStepIrrigationAsync(recipeStep);
 
             return Ok();
 
@@ -396,14 +397,14 @@ namespace YARG.Models
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateRecipeStepSoaktime(RecipeStep recipeStep)
+        public async Task<IActionResult> UpdateRecipeStepSoaktime(RecipeStep recipeStep)
         {
             string user = Environment.UserName;
 
             recipeStep.ChangedBy = user;
             recipeStep.ChangeDate = DateTime.Now;
 
-            _recipeDAL.UpdateRecipeStepSoaktime(recipeStep);
+            await _recipeDAL.UpdateRecipeStepSoaktimeAsync(recipeStep);
 
             return Ok();
 
@@ -411,14 +412,14 @@ namespace YARG.Models
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateRecipeStepMorningSip(RecipeStep recipeStep)
+        public async Task<IActionResult> UpdateRecipeStepMorningSip(RecipeStep recipeStep)
         {
             string user = Environment.UserName;
 
             recipeStep.ChangedBy = user;
             recipeStep.ChangeDate = DateTime.Now;
 
-            _recipeDAL.UpdateRecipeStepMorningSip(recipeStep);
+            await _recipeDAL.UpdateRecipeStepMorningSipAsync(recipeStep);
 
             return Ok();
 
@@ -426,28 +427,28 @@ namespace YARG.Models
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateRecipeStepEveningSip(RecipeStep recipeStep)
+        public async Task<IActionResult> UpdateRecipeStepEveningSip(RecipeStep recipeStep)
         {
             string user = Environment.UserName;
 
             recipeStep.ChangedBy = user;
             recipeStep.ChangeDate = DateTime.Now;
 
-            _recipeDAL.UpdateRecipeStepEveningSip(recipeStep);
+            await _recipeDAL.UpdateRecipeStepEveningSipAsync(recipeStep);
 
             return Ok();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateRecipeStepLightCycle(RecipeStep recipeStep)
+        public async Task<IActionResult> UpdateRecipeStepLightCycle(RecipeStep recipeStep)
         {
             string user = Environment.UserName;
 
             recipeStep.ChangedBy = user;
             recipeStep.ChangeDate = DateTime.Now;
 
-            _recipeDAL.UpdateRecipeStepLightCycle(recipeStep);
+            await _recipeDAL.UpdateRecipeStepLightCycleAsync(recipeStep);
 
             return Ok();
 
@@ -455,20 +456,20 @@ namespace YARG.Models
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteRecipeStep(Guid StepID)
+        public async Task<IActionResult> DeleteRecipeStep(Guid StepID)
         {
-            _recipeDAL.DeleteRecipeStepLimit(StepID);
-            _recipeDAL.DeleteRecipeStepAmount(StepID);
-            _recipeDAL.DeleteRecipeStep(StepID);
+            await _recipeDAL.DeleteRecipeStepLimitAsync(StepID);
+            await _recipeDAL.DeleteRecipeStepAmountAsync(StepID);
+            await _recipeDAL.DeleteRecipeStepAsync(StepID);
 
             return Ok();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteRecipe(Guid RecipeID)
+        public async Task<IActionResult> DeleteRecipe(Guid RecipeID)
         {
-            _recipeDAL.DeleteRecipe(RecipeID);
+            await _recipeDAL.DeleteRecipeAsync(RecipeID);
             return Ok();
         }
 

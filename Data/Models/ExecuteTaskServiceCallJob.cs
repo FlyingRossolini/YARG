@@ -38,7 +38,7 @@ namespace YARG.Models
                     try
                     {
                         Console.WriteLine("Searching for mixing fan event(s) for " + DateTime.Now);
-                        IEnumerable<MixingFanScheduleCommand> mixingFanScheduleCommands = _mixingFanScheduleDAL.AreWeThereYet();
+                        IEnumerable<MixingFanScheduleCommand> mixingFanScheduleCommands = await _mixingFanScheduleDAL.AreWeThereYetAsync();
 
                         //Do whatever stuff you want
                         if(mixingFanScheduleCommands != null)

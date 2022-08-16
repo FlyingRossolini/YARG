@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using YARG.Models;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.DAL
 {
@@ -15,135 +16,154 @@ namespace YARG.DAL
             _config = config;
         }
 
-        public IEnumerable<Crop> GetCrops()
+        public async Task<IEnumerable<Crop>> GetCropsAsync()
         {
             List<Crop> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetCrops", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetCrops";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    Crop crop = new Crop
+                    while (await sqlDataReader.ReadAsync())
                     {
-                        ID = Guid.Parse(sqlDataReader["id"].ToString()),
-                        Name = sqlDataReader["name"].ToString(),
-                        CreatedBy = sqlDataReader["createdBy"].ToString(),
-                        CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString()),
-                        ChangedBy = sqlDataReader["changedBy"].ToString(),
-                        ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString()),
-                        IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"))
-                    };
+                        Crop crop = new Crop
+                        {
+                            ID = Guid.Parse(sqlDataReader["id"].ToString()),
+                            Name = sqlDataReader["name"].ToString(),
+                            CreatedBy = sqlDataReader["createdBy"].ToString(),
+                            CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString()),
+                            ChangedBy = sqlDataReader["changedBy"].ToString(),
+                            ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString()),
+                            IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"))
+                        };
 
-                    lstream.Add(crop);
+                        lstream.Add(crop);
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return lstream;
         }
         
-        public void AddCrop(Crop crop)
+        public async Task AddCropAsync(Crop crop)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spAddCrop", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("id", crop.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("name", crop.Name);
-                sqlCmd.Parameters.AddWithValue("createdBy", crop.CreatedBy);
-                sqlCmd.Parameters.AddWithValue("createDate", crop.CreateDate);
-                sqlCmd.Parameters.AddWithValue("changedBy", crop.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("changeDate", crop.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("isActive", crop.IsActive);
-                
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
-            }
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAddCrop";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("id", crop.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("name", crop.Name);
+                sqlCommand.Parameters.AddWithValue("createdBy", crop.CreatedBy);
+                sqlCommand.Parameters.AddWithValue("createDate", crop.CreateDate);
+                sqlCommand.Parameters.AddWithValue("changedBy", crop.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("changeDate", crop.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("isActive", crop.IsActive);
 
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
-        public Crop GetCropByID(Guid id)
+        public async Task<Crop> GetCropByIDAsync(Guid id)
         {
             Crop crop = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetCropByID", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetCropByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    crop.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                    crop.Name = sqlDataReader["name"].ToString();
-                    crop.CreatedBy = sqlDataReader["createdBy"].ToString();
-                    crop.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                    crop.ChangedBy = sqlDataReader["changedBy"].ToString();
-                    crop.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                    crop.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    while (await sqlDataReader.ReadAsync())
+                    {
+                        crop.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                        crop.Name = sqlDataReader["name"].ToString();
+                        crop.CreatedBy = sqlDataReader["createdBy"].ToString();
+                        crop.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                        crop.ChangedBy = sqlDataReader["changedBy"].ToString();
+                        crop.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                        crop.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
             return crop;
         }
 
-        public void SaveCrop(Crop crop)
+        public async Task SaveCrop(Crop crop)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spUpdateCrop", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", crop.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("thisname", crop.Name);
-                sqlCmd.Parameters.AddWithValue("thischangedBy", crop.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("thischangeDate", crop.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("thisisActive", crop.IsActive);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateCrop";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", crop.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("thisname", crop.Name);
+                sqlCommand.Parameters.AddWithValue("thischangedBy", crop.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("thischangeDate", crop.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("thisisActive", crop.IsActive);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
-        public void DeleteCrop(Guid id)
+        public async Task DeleteCrop(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spDeleteCrop", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", id.ToString());
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteCrop";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
         }
     }
 }

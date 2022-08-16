@@ -3,6 +3,7 @@ using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Threading.Tasks;
 
 namespace YARG.Models
 {
@@ -16,9 +17,9 @@ namespace YARG.Models
         }
 
         // GET: MeasurementTypeController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_measurementTypeDAL.GetMeasurementTypes());
+            return View(await _measurementTypeDAL.GetMeasurementTypesAsync());
         }
 
         // GET: MeasurementTypeController/Details/5
@@ -31,7 +32,7 @@ namespace YARG.Models
         // POST: MeasurementTypeController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,Name,Sorting")] MeasurementType measurementType)
+        public async Task<ActionResult> Create([Bind("ID,Name,Sorting")] MeasurementType measurementType)
         {
             if (ModelState.IsValid)
             {
@@ -44,7 +45,7 @@ namespace YARG.Models
                 measurementType.ChangeDate = DateTime.Now;
                 measurementType.IsActive = true;
 
-                _measurementTypeDAL.AddMeasurementType(measurementType);
+                await _measurementTypeDAL.AddMeasurementTypeAsync(measurementType);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -52,20 +53,20 @@ namespace YARG.Models
         }
 
         // GET: MeasurementTypeController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
             
-            return View(_measurementTypeDAL.GetMeasurementTypeByID(id.Value));
+            return View(await _measurementTypeDAL.GetMeasurementTypeByIDAsync(id.Value));
         }
 
         // POST: MeasurementTypeController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,Name,Sorting,IsActive")] MeasurementType measurementType)
+        public async Task <ActionResult> Edit(Guid id, [Bind("ID,Name,Sorting,IsActive")] MeasurementType measurementType)
         {
             if (id != measurementType.ID)
             {
@@ -79,7 +80,7 @@ namespace YARG.Models
                 measurementType.ChangedBy = user;
                 measurementType.ChangeDate = DateTime.Now;
 
-                _measurementTypeDAL.SaveMeasurementType(measurementType);
+                await _measurementTypeDAL.SaveMeasurementTypeAsync(measurementType);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -87,14 +88,14 @@ namespace YARG.Models
         }
 
         // GET: MeasurementTypeController/Delete/5
-        public ActionResult Delete(Guid? id)
+        public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_measurementTypeDAL.GetMeasurementTypeByID(id.Value));
+            return View(await _measurementTypeDAL.GetMeasurementTypeByIDAsync(id.Value));
         }
 
         // POST: MeasurementTypeController/Delete/5
@@ -102,7 +103,7 @@ namespace YARG.Models
         [ValidateAntiForgeryToken]
         public ActionResult Delete(Guid id)
         {
-            _measurementTypeDAL.DeleteMeasurementType(id);
+            _measurementTypeDAL.DeleteMeasurementTypeAsync(id);
 
             return RedirectToAction(nameof(Index));
         }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using YARG.Models;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.DAL
 {
@@ -15,21 +16,23 @@ namespace YARG.DAL
             _config = configuration;
         }
 
-        public IEnumerable<FeedingChartType> GetFeedingChartTypes()
+        public async Task<IEnumerable<FeedingChartType>> GetFeedingChartTypesAsync()
         {
             List<FeedingChartType> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetFeedingChartTypes", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetFeedingChartTypes";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
-                    FeedingChartType feedingChartType = new ()
+                    FeedingChartType feedingChartType = new()
                     {
                         ID = Guid.Parse(sqlDataReader["id"].ToString()),
                         Name = sqlDataReader["name"].ToString(),
@@ -43,110 +46,124 @@ namespace YARG.DAL
 
                     lstream.Add(feedingChartType);
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return lstream;
         }
         
-        public void AddFeedingChartType(FeedingChartType feedingChartType)
+        public async Task AddFeedingChartTypeAsync(FeedingChartType feedingChartType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spAddFeedingChartType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("id", feedingChartType.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("name", feedingChartType.Name);
-                sqlCmd.Parameters.AddWithValue("sorting", feedingChartType.Sorting);
-                sqlCmd.Parameters.AddWithValue("createdBy", feedingChartType.CreatedBy);
-                sqlCmd.Parameters.AddWithValue("createDate", feedingChartType.CreateDate);
-                sqlCmd.Parameters.AddWithValue("changedBy", feedingChartType.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("changeDate", feedingChartType.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("isActive", feedingChartType.IsActive);
-                
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
-            }
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAddFeedingChartType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("id", feedingChartType.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("name", feedingChartType.Name);
+                sqlCommand.Parameters.AddWithValue("sorting", feedingChartType.Sorting);
+                sqlCommand.Parameters.AddWithValue("createdBy", feedingChartType.CreatedBy);
+                sqlCommand.Parameters.AddWithValue("createDate", feedingChartType.CreateDate);
+                sqlCommand.Parameters.AddWithValue("changedBy", feedingChartType.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("changeDate", feedingChartType.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("isActive", feedingChartType.IsActive);
 
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
-        public FeedingChartType GetFeedingChartTypeByID(Guid id)
+        public async Task<FeedingChartType> GetFeedingChartTypeByIDAsync(Guid id)
         {
             FeedingChartType feedingChartType = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetFeedingChartTypeByID", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetFeedingChartTypeByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    feedingChartType.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                    feedingChartType.Name = sqlDataReader["name"].ToString();
-                    feedingChartType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
-                    feedingChartType.CreatedBy = sqlDataReader["createdBy"].ToString();
-                    feedingChartType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                    feedingChartType.ChangedBy = sqlDataReader["changedBy"].ToString();
-                    feedingChartType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                    feedingChartType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    while (await sqlDataReader.ReadAsync())
+                    {
+                        feedingChartType.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                        feedingChartType.Name = sqlDataReader["name"].ToString();
+                        feedingChartType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
+                        feedingChartType.CreatedBy = sqlDataReader["createdBy"].ToString();
+                        feedingChartType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                        feedingChartType.ChangedBy = sqlDataReader["changedBy"].ToString();
+                        feedingChartType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                        feedingChartType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return feedingChartType;
         }
 
-        public void SaveFeedingChartType(FeedingChartType feedingChartType)
+        public async Task SaveFeedingChartTypeAsync(FeedingChartType feedingChartType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spUpdateFeedingChartType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", feedingChartType.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("thisname", feedingChartType.Name);
-                sqlCmd.Parameters.AddWithValue("thissorting", feedingChartType.Sorting);
-                sqlCmd.Parameters.AddWithValue("thischangedBy", feedingChartType.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("thischangeDate", feedingChartType.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("thisisActive", feedingChartType.IsActive);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateFeedingChartType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", feedingChartType.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("thisname", feedingChartType.Name);
+                sqlCommand.Parameters.AddWithValue("thissorting", feedingChartType.Sorting);
+                sqlCommand.Parameters.AddWithValue("thischangedBy", feedingChartType.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("thischangeDate", feedingChartType.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("thisisActive", feedingChartType.IsActive);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
-        public void DeleteFeedingChartType(Guid id)
+        public async Task DeleteFeedingChartTypeAsync(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spDeleteFeedingChartType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", id.ToString());
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteFeedingChartType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
     }

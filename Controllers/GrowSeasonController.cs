@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace YARG.Controllers
 {
@@ -23,24 +24,24 @@ namespace YARG.Controllers
             _wateringScheduleDAL = new(configuration);
         }
         // GET: GrowSeasonController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_growSeasonDAL.GetGrowSeasons());
+            return View(await _growSeasonDAL.GetGrowSeasonsAsync());
         }
 
         // GET: GrowSeasonController/Details/5
         // GET: GrowSeasonController/Create
-        public ActionResult Create()
+        public async Task <ActionResult> Create()
         {
             List<SelectListItem> ddCrop = new();
-            var cropList = (from crop in _cropDAL.GetCrops()
-                            where crop.IsActive == true
-                            orderby crop.Name
-                            select new { crop.ID, crop.Name }).ToList();
-            
-            foreach (var item in cropList)
+            var cropList = await _cropDAL.GetCropsAsync();
+
+            foreach (var crop in cropList)
             {
-                ddCrop.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if (crop.IsActive)
+                {
+                    ddCrop.Add(new SelectListItem { Value = crop.ID.ToString(), Text = crop.Name });
+                }
             }
 
             ViewBag.ddCrop = ddCrop;
@@ -51,7 +52,7 @@ namespace YARG.Controllers
         // POST: GrowSeasonController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,Name,StartDate,EndDate,SunriseTime,CropID,FlgAddMorningSplash,FlgAddEveningSplash,EFEventsPerDay")] GrowSeason growSeason)
+        public async Task<ActionResult> Create([Bind("ID,Name,StartDate,EndDate,SunriseTime,CropID,FlgAddMorningSplash,FlgAddEveningSplash,EFEventsPerDay")] GrowSeason growSeason)
         {
             if (ModelState.IsValid)
             {
@@ -63,9 +64,10 @@ namespace YARG.Controllers
                 growSeason.ChangedBy = user;
                 growSeason.ChangeDate = DateTime.Now;
                 growSeason.IsComplete = false;
-                growSeason.IsActive = !_growSeasonDAL.FlgActiveGrowSeason();
+                //growSeason.IsActive = !await _growSeasonDAL.FlgActiveGrowSeasonAsync();
+                growSeason.IsActive = false;
 
-                _growSeasonDAL.AddGrowSeason(growSeason);
+                await _growSeasonDAL.AddGrowSeasonAsync(growSeason);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -73,7 +75,7 @@ namespace YARG.Controllers
         }
 
         // GET: GrowSeasonController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
@@ -81,28 +83,28 @@ namespace YARG.Controllers
             }
 
             List<SelectListItem> ddCrop = new();
-            var cropList = (from crop in _cropDAL.GetCrops()
-                            where crop.IsActive == true
-                            orderby crop.Name
-                            select new { crop.ID, crop.Name }).ToList();
+            var cropList = await _cropDAL.GetCropsAsync();
 
-            foreach (var item in cropList)
+            foreach (var crop in cropList)
             {
-                ddCrop.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if (crop.IsActive)
+                {
+                    ddCrop.Add(new SelectListItem { Value = crop.ID.ToString(), Text = crop.Name });
+                }
             }
 
             ViewBag.ddCrop = ddCrop;
 
-            ViewBag.flgCanEditIsActive = _growSeasonDAL.IDActiveGrowSeason() ==  id.Value  ||
-                (_growSeasonDAL.IDActiveGrowSeason() != id.Value && !_growSeasonDAL.FlgActiveGrowSeason()); // & id of active grow season != whoever is active
+            ViewBag.flgCanEditIsActive = await _growSeasonDAL.IDActiveGrowSeasonAsync() ==  id.Value  ||
+                (await _growSeasonDAL.IDActiveGrowSeasonAsync() != id.Value && !await _growSeasonDAL.FlgActiveGrowSeasonAsync()); // & id of active grow season != whoever is active
 
-            return View(_growSeasonDAL.GetGrowSeasonByID(id.Value));
+            return View(await _growSeasonDAL.GetGrowSeasonByIDAsync(id.Value));
         }
 
         // POST: GrowSeasonController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,Name,StartDate,EndDate,SunriseTime,CropID,FlgAddMorningSplash,FlgAddEveningSplash,EFEventsPerDay,IsComplete,IsActive")] GrowSeason growSeason)
+        public async Task<ActionResult> Edit(Guid id, [Bind("ID,Name,StartDate,EndDate,SunriseTime,CropID,FlgAddMorningSplash,FlgAddEveningSplash,EFEventsPerDay,IsComplete,IsActive")] GrowSeason growSeason)
         {
             if (id != growSeason.ID)
             {
@@ -113,7 +115,7 @@ namespace YARG.Controllers
             {
                 bool flgRebuildWaterSchedule = false;
 
-                GrowSeason gs = _growSeasonDAL.GetGrowSeasonByID(id);
+                GrowSeason gs = await _growSeasonDAL.GetGrowSeasonByIDAsync(id);
 
                 if(gs.StartDate != growSeason.StartDate ||
                     gs.SunriseTime != growSeason.SunriseTime ||
@@ -131,11 +133,11 @@ namespace YARG.Controllers
                 growSeason.ChangedBy = user;
                 growSeason.ChangeDate = DateTime.Now;
 
-                _growSeasonDAL.SaveGrowSeason(growSeason);
+                await _growSeasonDAL.SaveGrowSeasonAsync(growSeason);
 
                 if(flgRebuildWaterSchedule)
                 {
-                    _wateringScheduleDAL.RebuildWateringSchedule();
+                    await _wateringScheduleDAL.RebuildWateringSchedule();
                 }
 
                 return RedirectToAction(nameof(Index), "Home");

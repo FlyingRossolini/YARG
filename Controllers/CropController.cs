@@ -3,6 +3,7 @@ using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Threading.Tasks;
 
 namespace YARG.Models
 {
@@ -16,9 +17,9 @@ namespace YARG.Models
         }
 
         // GET: CropController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_cropDAL.GetCrops());
+            return View(await _cropDAL.GetCropsAsync());
         }
 
         // GET: CropController/Details/5
@@ -31,7 +32,7 @@ namespace YARG.Models
         // POST: CropController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,Name")] Crop crop)
+        public async Task <ActionResult> Create([Bind("ID,Name")] Crop crop)
         {
             if (ModelState.IsValid)
             {
@@ -44,7 +45,7 @@ namespace YARG.Models
                 crop.ChangeDate = DateTime.Now;
                 crop.IsActive = true;
 
-                _cropDAL.AddCrop(crop);
+                await _cropDAL.AddCropAsync(crop);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -52,20 +53,20 @@ namespace YARG.Models
         }
 
         // GET: CropController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
             
-            return View(_cropDAL.GetCropByID(id.Value));
+            return View(await _cropDAL.GetCropByIDAsync(id.Value));
         }
 
         // POST: CropController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,Name,IsActive")] Crop crop)
+        public async Task<ActionResult> Edit(Guid id, [Bind("ID,Name,IsActive")] Crop crop)
         {
             if (id != crop.ID)
             {
@@ -79,7 +80,7 @@ namespace YARG.Models
                 crop.ChangedBy = user;
                 crop.ChangeDate = DateTime.Now;
 
-                _cropDAL.SaveCrop(crop);
+                await _cropDAL.SaveCrop(crop);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -87,22 +88,22 @@ namespace YARG.Models
         }
 
         // GET: CropController/Delete/5
-        public ActionResult Delete(Guid? id)
+        public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_cropDAL.GetCropByID(id.Value));
+            return View(await _cropDAL.GetCropByIDAsync(id.Value));
         }
 
         // POST: CropController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            _cropDAL.DeleteCrop(id);
+            await _cropDAL.DeleteCrop(id);
 
             return RedirectToAction(nameof(Index));
         }

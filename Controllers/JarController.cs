@@ -3,9 +3,9 @@ using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.Models
 {
@@ -23,23 +23,25 @@ namespace YARG.Models
         }
 
         // GET: JarController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_jarDAL.GetJars());
+            return View(await _jarDAL.GetJarsAsync());
         }
 
         // GET: JarController/Details/5
         // GET: JarController/Create
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
             List<SelectListItem> ddChemical = new();
-            var chemicalList = (from chemical in _chemicalDAL.GetChemicals()
-                            where chemical.IsActive == true                
-                            select new { chemical.ID, chemical.Name }).ToList();
 
-            foreach (var item in chemicalList)
+            var chemList = await _chemicalDAL.GetChemicalsAsync();
+
+            foreach (var chemical in chemList)
             {
-                ddChemical.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if (chemical.IsActive)
+                {
+                    ddChemical.Add(new SelectListItem { Value = chemical.ID.ToString(), Text = chemical.Name });
+                }
             }
 
             ViewBag.ddChemical = ddChemical;
@@ -50,7 +52,7 @@ namespace YARG.Models
         // POST: JarController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,MixFanPosition,ChemicalID,MixTimesPerDay," +
+        public async Task<ActionResult> Create([Bind("ID,MixFanPosition,ChemicalID,MixTimesPerDay," +
             "Duration,Capacity,CurrentAmount,MixFanOverSpeed")] Jar jar)
         {
             if (ModelState.IsValid)
@@ -64,21 +66,22 @@ namespace YARG.Models
                 jar.ChangeDate = DateTime.Now;
                 jar.IsActive = true;
 
-                _jarDAL.AddJar(jar);
+                await _jarDAL.AddJarAsync(jar);
 
-                _mixingFanScheduleDAL.RebuildMixingFanSchedule(jar);
+                await _mixingFanScheduleDAL.RebuildMixingFanScheduleAsync(jar);
 
                 return RedirectToAction(nameof(Index));
             }
-            List<SelectListItem> ddChemical = new();
-            var chemicalList = (from chemical in _chemicalDAL.GetChemicals()
-                                where chemical.IsActive == true
-                                orderby chemical.Name
-                                select new { chemical.ID, chemical.Name }).ToList();
 
-            foreach (var item in chemicalList)
+            List<SelectListItem> ddChemical = new();
+            var chemList = await _chemicalDAL.GetChemicalsAsync();
+
+            foreach (var chemical in chemList)
             {
-                ddChemical.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if (chemical.IsActive)
+                {
+                    ddChemical.Add(new SelectListItem { Value = chemical.ID.ToString(), Text = chemical.Name });
+                }
             }
 
             ViewBag.ddChemical = ddChemical;
@@ -87,7 +90,7 @@ namespace YARG.Models
         }
 
         // GET: JarController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
@@ -95,25 +98,25 @@ namespace YARG.Models
             }
 
             List<SelectListItem> ddChemical = new();
-            var chemicalList = (from chemical in _chemicalDAL.GetChemicals()
-                                where chemical.IsActive == true
-                                orderby chemical.Name
-                                select new { chemical.ID, chemical.Name }).ToList();
+            var chemList = await _chemicalDAL.GetChemicalsAsync();
 
-            foreach (var item in chemicalList)
+            foreach (var chemical in chemList)
             {
-                ddChemical.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if (chemical.IsActive)
+                {
+                    ddChemical.Add(new SelectListItem { Value = chemical.ID.ToString(), Text = chemical.Name });
+                }
             }
 
             ViewBag.ddChemical = ddChemical;
 
-            return View(_jarDAL.GetJarByID(id.Value));
+            return View(await _jarDAL.GetJarByIDAsync(id.Value));
         }
 
         // POST: JarController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,MixFanPosition,ChemicalID,MixTimesPerDay," +
+        public async Task<ActionResult> Edit(Guid id, [Bind("ID,MixFanPosition,ChemicalID,MixTimesPerDay," +
             "Duration,Capacity,CurrentAmount,MixFanOverSpeed,IsActive")] Jar jar)
         {
             if (id != jar.ID)
@@ -128,23 +131,23 @@ namespace YARG.Models
                 jar.ChangedBy = user;
                 jar.ChangeDate = DateTime.Now;
 
-                if (_jarDAL.SaveJar(jar) == true)
+                if (await _jarDAL.SaveJarAsync(jar) == true)
                 {
-                    _mixingFanScheduleDAL.RebuildMixingFanSchedule(jar);
+                    await _mixingFanScheduleDAL.RebuildMixingFanScheduleAsync(jar);
                 };
 
                 return RedirectToAction(nameof(Index));
             }
 
             List<SelectListItem> ddChemical = new();
-            var chemicalList = (from chemical in _chemicalDAL.GetChemicals()
-                                where chemical.IsActive == true
-                                orderby chemical.Name
-                                select new { chemical.ID, chemical.Name }).ToList();
+            var chemList = await _chemicalDAL.GetChemicalsAsync();
 
-            foreach (var item in chemicalList)
+            foreach (var chemical in chemList)
             {
-                ddChemical.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if (chemical.IsActive)
+                {
+                    ddChemical.Add(new SelectListItem { Value = chemical.ID.ToString(), Text = chemical.Name });
+                }
             }
 
             ViewBag.ddChemical = ddChemical;
@@ -153,22 +156,22 @@ namespace YARG.Models
         }
 
         // GET: JarController/Delete/5
-        public ActionResult Delete(Guid? id)
+        public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_jarDAL.GetJarByID(id.Value));
+            return View(await _jarDAL.GetJarByIDAsync(id.Value));
         }
 
         // POST: JarController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            _jarDAL.DeleteJar(id);
+            await _jarDAL.DeleteJarAsync(id);
 
             return RedirectToAction(nameof(Index));
         }

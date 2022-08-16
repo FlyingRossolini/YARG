@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using YARG.Models;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.DAL
 {
@@ -15,19 +16,21 @@ namespace YARG.DAL
             _config = configuration;
         }
 
-        public IEnumerable<Location> GetLocations()
+        public async Task<IEnumerable<Location>> GetLocationsAsync()
         {
             List<Location> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetLocations", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetLocations";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     Location location = new Location
                     {
@@ -44,129 +47,145 @@ namespace YARG.DAL
 
                     lstream.Add(location);
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return lstream;
         }
         
-        public void AddLocation(Location location)
+        public async Task AddLocationAsync(Location location)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spAddLocation", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("id", location.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("name", location.Name);
-                sqlCmd.Parameters.AddWithValue("sorting", location.Sorting);
-                sqlCmd.Parameters.AddWithValue("isShowOnLandingPage", location.IsShowOnLandingPage);
-                sqlCmd.Parameters.AddWithValue("createdBy", location.CreatedBy);
-                sqlCmd.Parameters.AddWithValue("createDate", location.CreateDate);
-                sqlCmd.Parameters.AddWithValue("changedBy", location.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("changeDate", location.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("isActive", location.IsActive);
-                
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
-            }
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAddLocation";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("id", location.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("name", location.Name);
+                sqlCommand.Parameters.AddWithValue("sorting", location.Sorting);
+                sqlCommand.Parameters.AddWithValue("isShowOnLandingPage", location.IsShowOnLandingPage);
+                sqlCommand.Parameters.AddWithValue("createdBy", location.CreatedBy);
+                sqlCommand.Parameters.AddWithValue("createDate", location.CreateDate);
+                sqlCommand.Parameters.AddWithValue("changedBy", location.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("changeDate", location.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("isActive", location.IsActive);
 
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
-        public Location GetLocationByID(Guid id)
+        public async Task<Location> GetLocationByIDAsync(Guid id)
         {
             Location location = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetLocationByID", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetLocationByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    location.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                    location.Name = sqlDataReader["name"].ToString();
-                    location.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
-                    location.IsShowOnLandingPage = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isShowOnLandingPage"));
-                    location.CreatedBy = sqlDataReader["createdBy"].ToString();
-                    location.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                    location.ChangedBy = sqlDataReader["changedBy"].ToString();
-                    location.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                    location.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    while (await sqlDataReader.ReadAsync())
+                    {
+                        location.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                        location.Name = sqlDataReader["name"].ToString();
+                        location.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
+                        location.IsShowOnLandingPage = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isShowOnLandingPage"));
+                        location.CreatedBy = sqlDataReader["createdBy"].ToString();
+                        location.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                        location.ChangedBy = sqlDataReader["changedBy"].ToString();
+                        location.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                        location.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return location;
         }
 
-        public void SaveLocation(Location location)
+        public async Task SaveLocationAsync(Location location)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spUpdateLocation", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", location.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("thissorting", location.Sorting);
-                sqlCmd.Parameters.AddWithValue("thisisShowOnLandingPage", location.IsShowOnLandingPage);
-                sqlCmd.Parameters.AddWithValue("thisname", location.Name);
-                sqlCmd.Parameters.AddWithValue("thischangedBy", location.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("thischangeDate", location.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("thisisActive", location.IsActive);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateLocation";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", location.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("thissorting", location.Sorting);
+                sqlCommand.Parameters.AddWithValue("thisisShowOnLandingPage", location.IsShowOnLandingPage);
+                sqlCommand.Parameters.AddWithValue("thisname", location.Name);
+                sqlCommand.Parameters.AddWithValue("thischangedBy", location.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("thischangeDate", location.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("thisisActive", location.IsActive);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
             }
-        } 
-
-        public void DeleteLocation(Guid id)
-        {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            catch (Exception ex)
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spDeleteLocation", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", id.ToString());
-
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                Console.WriteLine(ex.Message);
             }
         }
 
-        public IEnumerable<Location> GetLocationsForRecipe()
+        public async Task DeleteLocationAsync(Guid id)
+        {
+            try
+            {
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteLocation";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
+
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public async Task<IEnumerable<Location>> GetLocationsForRecipeAsync()
         {
             List<Location> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetLocationsForRecipe", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetLocationsForRecipe";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     Location location = new Location
                     {
@@ -177,12 +196,10 @@ namespace YARG.DAL
 
                     lstream.Add(location);
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return lstream;

@@ -63,138 +63,144 @@ namespace YARG.DAL
             }
         }
 
-        public void RebuildWateringSchedule()
+        public async Task RebuildWateringSchedule()
         {
             DeleteAllWateringSchedules();
 
             GrowSeasonDAL growSeasonDAL = new(_config);
 
-            GrowSeason growSeason = growSeasonDAL.GetGrowSeasonByID(growSeasonDAL.IDActiveGrowSeason());
+            GrowSeason growSeason = await growSeasonDAL.GetGrowSeasonByIDAsync(await growSeasonDAL.IDActiveGrowSeasonAsync());
 
             PotDAL potDAL = new(_config);
 
-            int cntActiveBuckets = (from pot in potDAL.GetPots()
+            int cntActiveBuckets = (from pot in await potDAL.GetPotsAsync()
                                     where pot.IsActive == true
                                     select pot.ID).Count();
 
             LightCycleDAL lightCycleDAL = new(_config);
 
-            double amtMinsOfDaylight = lightCycleDAL.GetLightCycleByID(growSeason.LightCycleID).DaylightHours * 60;
+            //CHANGE FORMULA FOR WEEK LIGHTCYCLE, NOT growSeason anymore.
+            //double amtMinsOfDaylight = await lightCycleDAL.GetLightCycleByIDAsync(await growSeason.LightCycleID).DaylightHours * 60;
 
-            foreach (Pot p in potDAL.GetPots().Where(x => x.IsActive == true))
+            foreach (Pot p in await potDAL.GetPotsAsync())
             {
 
-                for (int j = 0; j < growSeason.EFEventsPerDay; j++)
+                if (p.IsActive)
                 {
-                    DateTime dt = DateTime.Today;
-                    DateTime firstdateoftheday = dt.Add(growSeason.SunriseTime.TimeOfDay).AddMinutes(amtMinsOfDaylight / (growSeason.EFEventsPerDay + 1)).AddSeconds(-(cntActiveBuckets - 1) * (9 * 60 + 30));
-
-                    WateringSchedule ws = new();
-                    ws.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
-                    ws.PotID = p.ID;
-                    ws.EFStartTime = DateTime.Parse(firstdateoftheday.AddMinutes(amtMinsOfDaylight / (growSeason.EFEventsPerDay + 1) * j).AddMinutes(16 * (p.QueuePosition - 1)).ToString("g"));
-                    ws.EFDuration = p.EFDuration;
-                    ws.EFAmount = p.EFAmount;
-                    if(ws.EFStartTime.TimeOfDay < growSeason.SunriseTime.TimeOfDay)
+                    for (int j = 0; j < growSeason.EFEventsPerDay; j++)
                     {
-                        ws.Rollover = 1;
-                    }
-                    else
-                    {
-                        ws.Rollover = 0;
-                    }
-                    ws.IsCompleted = false;
-                    ws.IsAcknowledged = false;
-                    ws.IsErrorState = false;
-                    ws.CreatedBy = "HITMAN";
-                    ws.CreateDate = DateTime.Now;
-                    ws.ChangedBy = "HITMAN";
-                    ws.ChangeDate = DateTime.Now;
-                    ws.IsActive = true;
+                        DateTime dt = DateTime.Today;
+                        //DateTime firstdateoftheday = dt.Add(growSeason.SunriseTime.TimeOfDay).AddMinutes(amtMinsOfDaylight / (growSeason.EFEventsPerDay + 1)).AddSeconds(-(cntActiveBuckets - 1) * (9 * 60 + 30));
 
-                    AddWateringSchedule(ws);
+                        WateringSchedule ws = new();
+                        ws.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
+                        ws.PotID = p.ID;
+                        //ws.EFStartTime = DateTime.Parse(firstdateoftheday.AddMinutes(amtMinsOfDaylight / (growSeason.EFEventsPerDay + 1) * j).AddMinutes(16 * (p.QueuePosition - 1)).ToString("g"));
+                        ws.EFDuration = p.EFDuration;
+                        ws.EFAmount = p.EFAmount;
+                        if (ws.EFStartTime.TimeOfDay < growSeason.SunriseTime.TimeOfDay)
+                        {
+                            ws.Rollover = 1;
+                        }
+                        else
+                        {
+                            ws.Rollover = 0;
+                        }
+                        ws.IsCompleted = false;
+                        ws.IsAcknowledged = false;
+                        ws.IsErrorState = false;
+                        ws.CreatedBy = "HITMAN";
+                        ws.CreateDate = DateTime.Now;
+                        ws.ChangedBy = "HITMAN";
+                        ws.ChangeDate = DateTime.Now;
+                        ws.IsActive = true;
+
+                        AddWateringSchedule(ws);
+                    }
+
+                    if (growSeason.FlgAddMorningSplash)
+                    {
+                        DateTime dt = DateTime.Today;
+                        DateTime morningsplashdt = growSeason.SunriseTime;
+
+                        WateringSchedule ws = new();
+                        ws.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
+                        ws.PotID = p.ID;
+                        ws.EFStartTime = morningsplashdt.AddMinutes(4 * (p.QueuePosition - 1));
+                        ws.EFDuration = 4;
+                        ws.EFAmount = p.EFAmount;
+                        if (ws.EFStartTime.TimeOfDay < growSeason.SunriseTime.TimeOfDay)
+                        {
+                            ws.Rollover = 1;
+                        }
+                        else
+                        {
+                            ws.Rollover = 0;
+                        }
+                        ws.IsCompleted = false;
+                        ws.IsAcknowledged = false;
+                        ws.IsErrorState = false;
+                        ws.CreatedBy = "HITMAN";
+                        ws.CreateDate = DateTime.Now;
+                        ws.ChangedBy = "HITMAN";
+                        ws.ChangeDate = DateTime.Now;
+                        ws.IsActive = true;
+
+                        AddWateringSchedule(ws);
+                    }
+                    if (growSeason.FlgAddEveningSplash)
+                    {
+                        DateTime dt = DateTime.Today;
+                        DateTime eveningsplashdt = growSeason.SunsetTime.AddMinutes(-4);
+
+                        WateringSchedule ws = new();
+                        ws.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
+                        ws.PotID = p.ID;
+                        ws.EFStartTime = eveningsplashdt.AddMinutes(-4 * (p.QueuePosition - 1));
+                        ws.EFDuration = 4;
+                        ws.EFAmount = p.EFAmount;
+                        if (ws.EFStartTime.TimeOfDay < growSeason.SunriseTime.TimeOfDay)
+                        {
+                            ws.Rollover = 1;
+                        }
+                        else
+                        {
+                            ws.Rollover = 0;
+                        }
+                        ws.IsCompleted = false;
+                        ws.IsAcknowledged = false;
+                        ws.IsErrorState = false;
+                        ws.CreatedBy = "HITMAN";
+                        ws.CreateDate = DateTime.Now;
+                        ws.ChangedBy = "HITMAN";
+                        ws.ChangeDate = DateTime.Now;
+                        ws.IsActive = true;
+
+                        AddWateringSchedule(ws);
+                    }
+
                 }
-
-                if (growSeason.FlgAddMorningSplash)
-                {
-                    DateTime dt = DateTime.Today;
-                    DateTime morningsplashdt = growSeason.SunriseTime;
-
-                    WateringSchedule ws = new();
-                    ws.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
-                    ws.PotID = p.ID;
-                    ws.EFStartTime = morningsplashdt.AddMinutes(4 * (p.QueuePosition - 1));
-                    ws.EFDuration = 4;
-                    ws.EFAmount = p.EFAmount;
-                    if (ws.EFStartTime.TimeOfDay < growSeason.SunriseTime.TimeOfDay)
-                    {
-                        ws.Rollover = 1;
-                    }
-                    else
-                    {
-                        ws.Rollover = 0;
-                    }
-                    ws.IsCompleted = false;
-                    ws.IsAcknowledged = false;
-                    ws.IsErrorState = false;
-                    ws.CreatedBy = "HITMAN";
-                    ws.CreateDate = DateTime.Now;
-                    ws.ChangedBy = "HITMAN";
-                    ws.ChangeDate = DateTime.Now;
-                    ws.IsActive = true;
-
-                    AddWateringSchedule(ws);
-                }
-                if (growSeason.FlgAddEveningSplash)
-                {
-                    DateTime dt = DateTime.Today;
-                    DateTime eveningsplashdt = growSeason.SunsetTime.AddMinutes(-4);
-
-                    WateringSchedule ws = new();
-                    ws.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
-                    ws.PotID = p.ID;
-                    ws.EFStartTime = eveningsplashdt.AddMinutes(-4 * (p.QueuePosition - 1));
-                    ws.EFDuration = 4;
-                    ws.EFAmount = p.EFAmount;
-                    if (ws.EFStartTime.TimeOfDay < growSeason.SunriseTime.TimeOfDay)
-                    {
-                        ws.Rollover = 1;
-                    }
-                    else
-                    {
-                        ws.Rollover = 0;
-                    }
-                    ws.IsCompleted = false;
-                    ws.IsAcknowledged = false;
-                    ws.IsErrorState = false;
-                    ws.CreatedBy = "HITMAN";
-                    ws.CreateDate = DateTime.Now;
-                    ws.ChangedBy = "HITMAN";
-                    ws.ChangeDate = DateTime.Now;
-                    ws.IsActive = true;
-
-                    AddWateringSchedule(ws);
-                }
-
 
             }
 
 
         }
 
-        public IEnumerable<WateringSchedule> GetWateringSchedules()
+        public async Task<IEnumerable<WateringSchedule>> GetWateringSchedulesAsync()
         {
             List<WateringSchedule> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetWateringSchedules", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetWateringSchedules";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     WateringSchedule wateringSchedule = new WateringSchedule
                     {
@@ -218,12 +224,10 @@ namespace YARG.DAL
 
                     lstream.Add(wateringSchedule);
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return lstream;
@@ -267,7 +271,7 @@ namespace YARG.DAL
 
         }
 
-        public WateringScheduleCommand AreWeThereYet()
+        public async Task<WateringScheduleCommand> AreWeThereYetAsync()
         {
             WateringScheduleCommand wateringScheduleCommand = null;
             Guid wsID = Guid.Empty;
@@ -303,8 +307,8 @@ namespace YARG.DAL
                 wateringScheduleCommand.WateringScheduleID = ws.ID;
                 wateringScheduleCommand.PotNumber = ws.PotQueuePosition;
                 wateringScheduleCommand.Amount = Convert.ToInt16(ws.EFAmount * 1000);
-                wateringScheduleCommand.EbbSpeed = potDAL.GetEbbSpeedFromQueuePosition(ws.PotQueuePosition);
-                wateringScheduleCommand.FlowSpeed = potDAL.GetFlowSpeedFromQueuePosition(ws.PotQueuePosition);
+                wateringScheduleCommand.EbbSpeed = await potDAL.GetEbbSpeedFromQueuePositionAsync(ws.PotQueuePosition);
+                wateringScheduleCommand.FlowSpeed = await potDAL.GetFlowSpeedFromQueuePositionAsync(ws.PotQueuePosition);
                 wateringScheduleCommand.Duration = ws.EFDuration;
 
             } 

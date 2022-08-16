@@ -3,6 +3,7 @@ using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Threading.Tasks;
 
 namespace YARG.Models
 {
@@ -16,9 +17,9 @@ namespace YARG.Models
         }
 
         // GET: FeedingChartTypeController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_feedingChartTypeDAL.GetFeedingChartTypes());
+            return View(await _feedingChartTypeDAL.GetFeedingChartTypesAsync());
         }
 
         // GET: FeedingChartController/Details/5
@@ -31,7 +32,7 @@ namespace YARG.Models
         // POST: FeedingChartController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,Name,Sorting")] FeedingChartType feedingChartType)
+        public async Task<ActionResult> Create([Bind("ID,Name,Sorting")] FeedingChartType feedingChartType)
         {
             if (ModelState.IsValid)
             {
@@ -44,7 +45,7 @@ namespace YARG.Models
                 feedingChartType.ChangeDate = DateTime.Now;
                 feedingChartType.IsActive = true;
 
-                _feedingChartTypeDAL.AddFeedingChartType(feedingChartType);
+                await _feedingChartTypeDAL.AddFeedingChartTypeAsync(feedingChartType);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -52,20 +53,20 @@ namespace YARG.Models
         }
 
         // GET: FeedingChartTypeController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
             
-            return View(_feedingChartTypeDAL.GetFeedingChartTypeByID(id.Value));
+            return View(await _feedingChartTypeDAL.GetFeedingChartTypeByIDAsync(id.Value));
         }
 
         // POST: FeedingChartTypeController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,Name,Sorting,IsActive")] FeedingChartType feedingChartType)
+        public async Task<ActionResult> Edit(Guid id, [Bind("ID,Name,Sorting,IsActive")] FeedingChartType feedingChartType)
         {
             if (id != feedingChartType.ID)
             {
@@ -79,7 +80,7 @@ namespace YARG.Models
                 feedingChartType.ChangedBy = user;
                 feedingChartType.ChangeDate = DateTime.Now;
 
-                _feedingChartTypeDAL.SaveFeedingChartType(feedingChartType);
+                await _feedingChartTypeDAL.SaveFeedingChartTypeAsync(feedingChartType);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -87,22 +88,22 @@ namespace YARG.Models
         }
 
         // GET: FeedingChartTypeController/Delete/5
-        public ActionResult Delete(Guid? id)
+        public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_feedingChartTypeDAL.GetFeedingChartTypeByID(id.Value));
+            return View(await _feedingChartTypeDAL.GetFeedingChartTypeByIDAsync(id.Value));
         }
 
         // POST: FeedingChartTypeController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            _feedingChartTypeDAL.DeleteFeedingChartType(id);
+            await _feedingChartTypeDAL.DeleteFeedingChartTypeAsync(id);
 
             return RedirectToAction(nameof(Index));
         }

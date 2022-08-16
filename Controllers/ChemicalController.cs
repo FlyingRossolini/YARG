@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace YARG.Models
 {
@@ -21,25 +22,24 @@ namespace YARG.Models
         }
 
         // GET: ChemicalController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_chemicalDAL.GetChemicals());
+            return View(await _chemicalDAL.GetChemicalsAsync());
         }
 
         // GET: ChemicalController/Details/5
         // GET: ChemicalController/Create
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
             List<SelectListItem> ddChemicalType = new();
-            var chemicalList = (from c in _chemicalTypeDAL.GetChemicalTypes()
-                            where c.IsActive == true
-                            orderby c.Sorting
-                            
-                            select new { c.ID, c.Name }).ToList();
+            var chemTypeList = await _chemicalTypeDAL.GetChemicalTypesAsync();
 
-            foreach (var item in chemicalList)
+            foreach (var chemical in chemTypeList)
             {
-                ddChemicalType.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if (chemical.IsActive)
+                {
+                    ddChemicalType.Add(new SelectListItem { Value = chemical.ID.ToString(), Text = chemical.Name });
+                }
             }
 
             ViewBag.ddChemicalType = ddChemicalType;
@@ -50,7 +50,7 @@ namespace YARG.Models
         // POST: ChemicalController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,Name,Manufacturer,ChemicalTypeID,PricePerL,InStockAmount," +
+        public async Task<ActionResult> Create([Bind("ID,Name,Manufacturer,ChemicalTypeID,PricePerL,InStockAmount," +
             "MinReorderPoint")] Chemical chemical)
         {
             if (ModelState.IsValid)
@@ -64,21 +64,20 @@ namespace YARG.Models
                 chemical.ChangeDate = DateTime.Now;
                 chemical.IsActive = true;
 
-                _chemicalDAL.AddChemical(chemical);
+                await _chemicalDAL.AddChemicalAsync(chemical);
 
                 return RedirectToAction(nameof(Index));
             }
 
             List<SelectListItem> ddChemicalType = new();
-            var chemicalList = (from c in _chemicalTypeDAL.GetChemicalTypes()
-                                where c.IsActive == true
-                                orderby c.Sorting
-                                
-                                select new { c.ID, c.Name }).ToList();
+            var chemTypeList = await _chemicalTypeDAL.GetChemicalTypesAsync();
 
-            foreach (var item in chemicalList)
+            foreach (var chem in chemTypeList)
             {
-                ddChemicalType.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if (chem.IsActive)
+                {
+                    ddChemicalType.Add(new SelectListItem { Value = chem.ID.ToString(), Text = chem.Name });
+                }
             }
 
             ViewBag.ddChemicalType = ddChemicalType;
@@ -87,7 +86,7 @@ namespace YARG.Models
         }
 
         // GET: ChemicalController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
@@ -95,26 +94,25 @@ namespace YARG.Models
             }
 
             List<SelectListItem> ddChemicalType = new();
-            var chemicalList = (from c in _chemicalTypeDAL.GetChemicalTypes()
-                                where c.IsActive == true
-                                orderby c.Sorting
+            var chemTypeList = await _chemicalTypeDAL.GetChemicalTypesAsync();
 
-                                select new { c.ID, c.Name }).ToList();
-
-            foreach (var item in chemicalList)
+            foreach (var chemical in chemTypeList)
             {
-                ddChemicalType.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if (chemical.IsActive)
+                {
+                    ddChemicalType.Add(new SelectListItem { Value = chemical.ID.ToString(), Text = chemical.Name });
+                }
             }
 
             ViewBag.ddChemicalType = ddChemicalType;
 
-            return View(_chemicalDAL.GetChemicalByID(id.Value));
+            return View(await _chemicalDAL.GetChemicalByIDAsync(id.Value));
         }
 
         // POST: ChemicalController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,Name,Manufacturer,ChemicalTypeID,PricePerL," +
+        public async Task<ActionResult> Edit(Guid id, [Bind("ID,Name,Manufacturer,ChemicalTypeID,PricePerL," +
             "InStockAmount,MinReorderPoint,IsActive")] Chemical chemical)
         {
             if (id != chemical.ID)
@@ -129,21 +127,20 @@ namespace YARG.Models
                 chemical.ChangedBy = user;
                 chemical.ChangeDate = DateTime.Now;
 
-                _chemicalDAL.SaveChemical(chemical);
+                await _chemicalDAL.SaveChemicalAsync(chemical);
 
                 return RedirectToAction(nameof(Index));
             }
 
             List<SelectListItem> ddChemicalType = new();
-            var chemicalList = (from c in _chemicalTypeDAL.GetChemicalTypes()
-                                where c.IsActive == true
-                                orderby c.Sorting
+            var chemTypeList = await _chemicalTypeDAL.GetChemicalTypesAsync();
 
-                                select new { c.ID, c.Name }).ToList();
-
-            foreach (var item in chemicalList)
+            foreach (var chem in chemTypeList)
             {
-                ddChemicalType.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if (chem.IsActive)
+                {
+                    ddChemicalType.Add(new SelectListItem { Value = chem.ID.ToString(), Text = chem.Name });
+                }
             }
 
             ViewBag.ddChemicalType = ddChemicalType;
@@ -152,22 +149,22 @@ namespace YARG.Models
         }
 
         // GET: ChemicalController/Delete/5
-        public ActionResult Delete(Guid? id)
+        public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_chemicalDAL.GetChemicalByID(id.Value));
+            return View(await _chemicalDAL.GetChemicalByIDAsync(id.Value));
         }
 
         // POST: ChemicalController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            _chemicalDAL.DeleteChemical(id);
+            await _chemicalDAL.DeleteChemicalAsync(id);
 
             return RedirectToAction(nameof(Index));
         }

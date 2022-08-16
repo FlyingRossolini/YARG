@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace YARG.Models
 {
@@ -23,37 +24,36 @@ namespace YARG.Models
         }
 
         // GET: RemoteProbeController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_remoteProbeDAL.GetRemoteProbes());
+            return View(await _remoteProbeDAL.GetRemoteProbesAsync());
         }
 
         // GET: RemoteProbeController/Details/5
         // GET: RemoteProbeController/Create
-        public ActionResult Create()
+        public async Task<ActionResult> Create()
         {
             List<SelectListItem> ddLocation = new();
-            var locationList = (from location in _locationDAL.GetLocations()
-                            where location.IsActive == true
-                            orderby location.Name
-                            select new { location.ID, location.Name }).ToList();
 
-            foreach (var item in locationList)
+            var locationList = await _locationDAL.GetLocationsAsync();
+
+            foreach (var location in locationList)
             {
-                ddLocation.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if(location.IsActive)
+                {
+                    ddLocation.Add(new SelectListItem { Value = location.ID.ToString(), Text = location.Name });
+                }
             }
 
             ViewBag.ddLocation = ddLocation;
 
             List<SelectListItem> ddMeasurementType = new();
-            var measurementTypeList = (from measurementType in _measurementTypeDAL.GetMeasurementTypes()
-                                where measurementType.IsActive == true
-                                orderby measurementType.Name
-                                select new { measurementType.ID, measurementType.Name }).ToList();
 
-            foreach (var item in measurementTypeList)
+            var measurementTypeList = await _measurementTypeDAL.GetMeasurementTypesAsync();
+
+            foreach (var measurementType in measurementTypeList)
             {
-                ddMeasurementType.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                ddMeasurementType.Add(new SelectListItem { Value = measurementType.ID.ToString(), Text = measurementType.Name });
             }
 
             ViewBag.ddMeasurementType = ddMeasurementType;
@@ -64,7 +64,7 @@ namespace YARG.Models
         // POST: RemoteProbeController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,RemoteProbeAddress,LocationID,MeasurementTypeID")] RemoteProbe remoteProbe)
+        public async Task<ActionResult> Create([Bind("ID,RemoteProbeAddress,LocationID,MeasurementTypeID")] RemoteProbe remoteProbe)
         {
             if (ModelState.IsValid)
             {
@@ -77,7 +77,7 @@ namespace YARG.Models
                 remoteProbe.ChangeDate = DateTime.Now;
                 remoteProbe.IsActive = true;
 
-                _remoteProbeDAL.AddRemoteProbe(remoteProbe);
+                await _remoteProbeDAL.AddRemoteProbeAsync(remoteProbe);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -86,7 +86,7 @@ namespace YARG.Models
         }
 
         // GET: RemoteProbeController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
@@ -94,38 +94,35 @@ namespace YARG.Models
             }
 
             List<SelectListItem> ddLocation = new();
-            var locationList = (from location in _locationDAL.GetLocations()
-                                where location.IsActive == true
-                                orderby location.Name
-                                select new { location.ID, location.Name }).ToList();
+            var locationList = await _locationDAL.GetLocationsAsync();
 
-            foreach (var item in locationList)
+            foreach (var location in locationList)
             {
-                ddLocation.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                ddLocation.Add(new SelectListItem { Value = location.ID.ToString(), Text = location.Name });
             }
 
             ViewBag.ddLocation = ddLocation;
 
             List<SelectListItem> ddMeasurementType = new();
-            var measurementTypeList = (from measurementType in _measurementTypeDAL.GetMeasurementTypes()
-                                       where measurementType.IsActive == true
-                                       orderby measurementType.Name
-                                       select new { measurementType.ID, measurementType.Name }).ToList();
+            var measurementTypeList = await _measurementTypeDAL.GetMeasurementTypesAsync();
 
-            foreach (var item in measurementTypeList)
+            foreach (var measurementType in measurementTypeList)
             {
-                ddMeasurementType.Add(new SelectListItem { Value = item.ID.ToString(), Text = item.Name });
+                if(measurementType.IsActive)
+                {
+                    ddMeasurementType.Add(new SelectListItem { Value = measurementType.ID.ToString(), Text = measurementType.Name });
+                }
             }
 
             ViewBag.ddMeasurementType = ddMeasurementType;
 
-            return View(_remoteProbeDAL.GetRemoteProbeByID(id.Value));
+            return View(await _remoteProbeDAL.GetRemoteProbeByIDAsync(id.Value));
         }
 
         // POST: RemoteProbeController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,RemoteProbeAddress,LocationID,MeasurementTypeID,IsActive")] RemoteProbe remoteProbe)
+        public async Task<ActionResult> Edit(Guid id, [Bind("ID,RemoteProbeAddress,LocationID,MeasurementTypeID,IsActive")] RemoteProbe remoteProbe)
         {
             if (id != remoteProbe.ID)
             {
@@ -139,7 +136,7 @@ namespace YARG.Models
                 remoteProbe.ChangedBy = user;
                 remoteProbe.ChangeDate = DateTime.Now;
 
-                _remoteProbeDAL.SaveRemoteProbe(remoteProbe);
+                await _remoteProbeDAL.SaveRemoteProbeAsync(remoteProbe);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -147,22 +144,22 @@ namespace YARG.Models
         }
 
         // GET: RemoteProbeController/Delete/5
-        public ActionResult Delete(Guid? id)
+        public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_remoteProbeDAL.GetRemoteProbeByID(id.Value));
+            return View(await _remoteProbeDAL.GetRemoteProbeByIDAsync(id.Value));
         }
 
         // POST: RemoteProbeController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            _remoteProbeDAL.DeleteRemoteProbe(id);
+            await _remoteProbeDAL.DeleteRemoteProbeAsync(id);
 
             return RedirectToAction(nameof(Index));
         }

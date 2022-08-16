@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using YARG.Models;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.DAL
 {
@@ -15,89 +16,97 @@ namespace YARG.DAL
             _config = config;
         }
 
-        public IEnumerable<ChemicalType> GetChemicalTypes()
+        public async Task<IEnumerable<ChemicalType>> GetChemicalTypesAsync()
         {
             List<ChemicalType> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetChemicalTypes", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetChemicalTypes";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    ChemicalType chemicalType = new ChemicalType
+                    while (await sqlDataReader.ReadAsync())
                     {
-                        ID = Guid.Parse(sqlDataReader["id"].ToString()),
-                        Name = sqlDataReader["name"].ToString(),
-                        IsH2O2 = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isH2O2")),
-                        IsPhUp = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isPhUp")),
-                        IsPhDown = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isPhDown")),
-                        Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting")),
-                        CreatedBy = sqlDataReader["createdBy"].ToString(),
-                        CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString()),
-                        ChangedBy = sqlDataReader["changedBy"].ToString(),
-                        ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString()),
-                        IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"))
-                    };
+                        ChemicalType chemicalType = new ChemicalType
+                        {
+                            ID = Guid.Parse(sqlDataReader["id"].ToString()),
+                            Name = sqlDataReader["name"].ToString(),
+                            IsH2O2 = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isH2O2")),
+                            IsPhUp = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isPhUp")),
+                            IsPhDown = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isPhDown")),
+                            Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting")),
+                            CreatedBy = sqlDataReader["createdBy"].ToString(),
+                            CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString()),
+                            ChangedBy = sqlDataReader["changedBy"].ToString(),
+                            ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString()),
+                            IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"))
+                        };
 
-                    lstream.Add(chemicalType);
+                        lstream.Add(chemicalType);
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return lstream;
         }
         
-        public void AddChemicalType(ChemicalType chemicalType)
+        public async Task AddChemicalTypeAsync(ChemicalType chemicalType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spAddChemicalType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("id", chemicalType.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("name", chemicalType.Name);
-                sqlCmd.Parameters.AddWithValue("isH2O2", chemicalType.IsH2O2);
-                sqlCmd.Parameters.AddWithValue("isPhUp", chemicalType.IsPhUp);
-                sqlCmd.Parameters.AddWithValue("isPhDown", chemicalType.IsPhDown);
-                sqlCmd.Parameters.AddWithValue("sorting", chemicalType.Sorting);
-                sqlCmd.Parameters.AddWithValue("createdBy", chemicalType.CreatedBy);
-                sqlCmd.Parameters.AddWithValue("createDate", chemicalType.CreateDate);
-                sqlCmd.Parameters.AddWithValue("changedBy", chemicalType.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("changeDate", chemicalType.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("isActive", chemicalType.IsActive);
-                
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close(); 
-                sqlConnection.Dispose();
-            }
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAddChemicalType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("id", chemicalType.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("name", chemicalType.Name);
+                sqlCommand.Parameters.AddWithValue("isH2O2", chemicalType.IsH2O2);
+                sqlCommand.Parameters.AddWithValue("isPhUp", chemicalType.IsPhUp);
+                sqlCommand.Parameters.AddWithValue("isPhDown", chemicalType.IsPhDown);
+                sqlCommand.Parameters.AddWithValue("sorting", chemicalType.Sorting);
+                sqlCommand.Parameters.AddWithValue("createdBy", chemicalType.CreatedBy);
+                sqlCommand.Parameters.AddWithValue("createDate", chemicalType.CreateDate);
+                sqlCommand.Parameters.AddWithValue("changedBy", chemicalType.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("changeDate", chemicalType.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("isActive", chemicalType.IsActive);
 
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
-        public ChemicalType GetChemicalTypeByID(Guid id)
+        public async Task<ChemicalType> GetChemicalTypeByIDAsync(Guid id)
         {
             ChemicalType chemicalType = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetChemicalTypeByID", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetChemicalTypeByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     chemicalType.ID = Guid.Parse(sqlDataReader["id"].ToString());
                     chemicalType.Name = sqlDataReader["name"].ToString();
@@ -111,55 +120,63 @@ namespace YARG.DAL
                     chemicalType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
                     chemicalType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return chemicalType;
         }
 
-        public void SaveChemicalType(ChemicalType chemicalType)
+        public async Task SaveChemicalTypeAsync(ChemicalType chemicalType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spUpdateChemicalType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", chemicalType.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("thisisH2O2", chemicalType.IsH2O2);
-                sqlCmd.Parameters.AddWithValue("thisisPhUp", chemicalType.IsPhUp);
-                sqlCmd.Parameters.AddWithValue("thisisPhDown", chemicalType.IsPhDown);
-                sqlCmd.Parameters.AddWithValue("thissorting", chemicalType.Sorting);
-                sqlCmd.Parameters.AddWithValue("thisname", chemicalType.Name);
-                sqlCmd.Parameters.AddWithValue("thischangedBy", chemicalType.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("thischangeDate", chemicalType.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("thisisActive", chemicalType.IsActive);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateChemicalType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", chemicalType.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("thisisH2O2", chemicalType.IsH2O2);
+                sqlCommand.Parameters.AddWithValue("thisisPhUp", chemicalType.IsPhUp);
+                sqlCommand.Parameters.AddWithValue("thisisPhDown", chemicalType.IsPhDown);
+                sqlCommand.Parameters.AddWithValue("thissorting", chemicalType.Sorting);
+                sqlCommand.Parameters.AddWithValue("thisname", chemicalType.Name);
+                sqlCommand.Parameters.AddWithValue("thischangedBy", chemicalType.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("thischangeDate", chemicalType.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("thisisActive", chemicalType.IsActive);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
-        public void DeleteChemicalType(Guid id)
+        public async Task DeleteChemicalType(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spDeleteChemicalType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", id.ToString());
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteChemicalType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
         }
     }
 }

@@ -4,6 +4,7 @@ using YARG.Data.Models.ViewModels;
 using YARG.Models;
 using YARG.Common_Types;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.Data.Services
 {
@@ -31,13 +32,13 @@ namespace YARG.Data.Services
         {
 
         }
-        public void AcknowledgeMixingFanSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
+        public async Task AcknowledgeMixingFanSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
-            _mixingFanScheduleDAL.AcknowledgeMixingFanSchedule(remoteHostCommandViewModel);
+            await _mixingFanScheduleDAL.AcknowledgeMixingFanScheduleAsync(remoteHostCommandViewModel);
         }
-        public void CompleteMixingFanSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
+        public async Task CompleteMixingFanSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
-            _mixingFanScheduleDAL.CompleteMixingFanSchedule(remoteHostCommandViewModel);
+            await _mixingFanScheduleDAL.CompleteMixingFanScheduleAsync(remoteHostCommandViewModel);
         }
 
         public void ErrorMixingFanSchedule(RemoteHostErrorViewModel remoteHostErrorViewModel)

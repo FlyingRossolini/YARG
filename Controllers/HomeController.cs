@@ -27,21 +27,21 @@ namespace YARG.Controllers
         }
 
         [AllowAnonymous]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             HomeViewModel homeViewModel = new();
-            homeViewModel.wateringSchedules = _wateringScheduleDAL.GetWateringSchedules();
-            homeViewModel.pots = _potDAL.GetActivePots();
-            homeViewModel.potCount = _potDAL.PotCount();
+            homeViewModel.wateringSchedules = await _wateringScheduleDAL.GetWateringSchedulesAsync();
+            homeViewModel.pots = await _potDAL.GetActivePotsAsync();
+            homeViewModel.potCount = await _potDAL.PotCountAsync();
 
             
-            homeViewModel.sunrise = _growSeasonDAL.GetGrowSeasonByID(_growSeasonDAL.IDActiveGrowSeason()).SunriseTime;
-            homeViewModel.sunset = _growSeasonDAL.GetGrowSeasonByID(_growSeasonDAL.IDActiveGrowSeason()).SunsetTime;
+            homeViewModel.sunrise = (await _growSeasonDAL.GetGrowSeasonByIDAsync(await _growSeasonDAL.IDActiveGrowSeasonAsync())).SunriseTime;
+            homeViewModel.sunset = (await _growSeasonDAL.GetGrowSeasonByIDAsync(await _growSeasonDAL.IDActiveGrowSeasonAsync())).SunsetTime;
 
-            homeViewModel.flgMorningDrink = _growSeasonDAL.GetGrowSeasonByID(_growSeasonDAL.IDActiveGrowSeason()).FlgAddMorningSplash;
-            homeViewModel.flgEveningDrink = _growSeasonDAL.GetGrowSeasonByID(_growSeasonDAL.IDActiveGrowSeason()).FlgAddEveningSplash;
+            homeViewModel.flgMorningDrink = (await _growSeasonDAL.GetGrowSeasonByIDAsync(await _growSeasonDAL.IDActiveGrowSeasonAsync())).FlgAddMorningSplash;
+            homeViewModel.flgEveningDrink = (await _growSeasonDAL.GetGrowSeasonByIDAsync(await _growSeasonDAL.IDActiveGrowSeasonAsync())).FlgAddEveningSplash;
 
-            homeViewModel.growName = _growSeasonDAL.GetGrowSeasonByID(_growSeasonDAL.IDActiveGrowSeason()).Name;
+            homeViewModel.growName = (await _growSeasonDAL.GetGrowSeasonByIDAsync(await _growSeasonDAL.IDActiveGrowSeasonAsync())).Name;
 
             return View(homeViewModel);
         }

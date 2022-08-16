@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using YARG.Models;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.DAL
 {
@@ -15,19 +16,21 @@ namespace YARG.DAL
             _config = configuration;
         }
 
-        public IEnumerable<LimitType> GetLimitTypes()
+        public async Task<IEnumerable<LimitType>> GetLimitTypesAsync()
         {
             List<LimitType> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetLimitTypes", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetLimitTypes";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     LimitType limitType = new LimitType
                     {
@@ -43,110 +46,124 @@ namespace YARG.DAL
 
                     lstream.Add(limitType);
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            
             return lstream;
         }
         
-        public void AddLimitType(LimitType limitType)
+        public async Task AddLimitTypeAsync(LimitType limitType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spAddLimitType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("id", limitType.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("name", limitType.Name);
-                sqlCmd.Parameters.AddWithValue("sorting", limitType.Sorting);
-                sqlCmd.Parameters.AddWithValue("createdBy", limitType.CreatedBy);
-                sqlCmd.Parameters.AddWithValue("createDate", limitType.CreateDate);
-                sqlCmd.Parameters.AddWithValue("changedBy", limitType.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("changeDate", limitType.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("isActive", limitType.IsActive);
-                
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
-            }
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAddLimitType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("id", limitType.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("name", limitType.Name);
+                sqlCommand.Parameters.AddWithValue("sorting", limitType.Sorting);
+                sqlCommand.Parameters.AddWithValue("createdBy", limitType.CreatedBy);
+                sqlCommand.Parameters.AddWithValue("createDate", limitType.CreateDate);
+                sqlCommand.Parameters.AddWithValue("changedBy", limitType.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("changeDate", limitType.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("isActive", limitType.IsActive);
 
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
-        public LimitType GetLimitTypeByID(Guid id)
+        public async Task<LimitType> GetLimitTypeByIDAsync(Guid id)
         {
             LimitType limitType = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetLimitTypeByID", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetLimitTypeByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    limitType.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                    limitType.Name = sqlDataReader["name"].ToString();
-                    limitType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
-                    limitType.CreatedBy = sqlDataReader["createdBy"].ToString();
-                    limitType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                    limitType.ChangedBy = sqlDataReader["changedBy"].ToString();
-                    limitType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                    limitType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    while (await sqlDataReader.ReadAsync())
+                    {
+                        limitType.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                        limitType.Name = sqlDataReader["name"].ToString();
+                        limitType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
+                        limitType.CreatedBy = sqlDataReader["createdBy"].ToString();
+                        limitType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                        limitType.ChangedBy = sqlDataReader["changedBy"].ToString();
+                        limitType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                        limitType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return limitType;
         }
 
-        public void SaveLimitType(LimitType limitType)
+        public async Task SaveLimitTypeAsync(LimitType limitType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spUpdateLimitType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", limitType.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("thisname", limitType.Name);
-                sqlCmd.Parameters.AddWithValue("thissorting", limitType.Sorting);
-                sqlCmd.Parameters.AddWithValue("thischangedBy", limitType.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("thischangeDate", limitType.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("thisisActive", limitType.IsActive);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateLimitType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", limitType.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("thisname", limitType.Name);
+                sqlCommand.Parameters.AddWithValue("thissorting", limitType.Sorting);
+                sqlCommand.Parameters.AddWithValue("thischangedBy", limitType.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("thischangeDate", limitType.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("thisisActive", limitType.IsActive);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
-        public void DeleteLimitType(Guid id)
+        public async Task DeleteLimitTypeAsync(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spDeleteLimitType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", id.ToString());
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteLimitType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
     }

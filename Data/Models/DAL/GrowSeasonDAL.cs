@@ -18,74 +18,75 @@ namespace YARG.DAL
             _config = configuration;
         }
 
-        public bool FlgActiveGrowSeason()
+        public async Task<bool> FlgActiveGrowSeasonAsync()
         {
             bool flg = false;
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spActiveGrowSeason", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spActiveGrowSeason";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     flg = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("flgActiveGrowSeason"));
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return flg;
         }
 
-        public Guid IDActiveGrowSeason()
+        public async Task<Guid> IDActiveGrowSeasonAsync()
         {
             Guid id = Guid.Empty;
-
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spIDofActiveGrowSeason", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spIDofActiveGrowSeason";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     id = Guid.Parse(sqlDataReader["id"].ToString());
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return id;
         }
 
-        public IEnumerable<GrowSeason> GetGrowSeasons()
+        public async Task<IEnumerable<GrowSeason>> GetGrowSeasonsAsync()
         {
             List<GrowSeason> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetGrowSeasons", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetGrowSeasons";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     GrowSeason growSeason = new GrowSeason();
                     growSeason.ID = Guid.Parse(sqlDataReader["id"].ToString());
@@ -114,174 +115,187 @@ namespace YARG.DAL
 
                     lstream.Add(growSeason);
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
             return lstream;
         }
    
-        public void AddGrowSeason(GrowSeason growSeason)
+        public async Task AddGrowSeasonAsync(GrowSeason growSeason)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spAddGrowSeason", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("id", growSeason.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("name", growSeason.Name);
-                sqlCmd.Parameters.AddWithValue("startDate", growSeason.StartDate);
-                sqlCmd.Parameters.AddWithValue("endDate", growSeason.EndDate);
-                sqlCmd.Parameters.AddWithValue("sunriseTime", growSeason.SunriseTime);
-                sqlCmd.Parameters.AddWithValue("cropID", Guid.Parse(growSeason.CropID.ToString()));
-                sqlCmd.Parameters.AddWithValue("flgAddMorningSplash", growSeason.FlgAddMorningSplash);
-                sqlCmd.Parameters.AddWithValue("flgAddEveningSplash", growSeason.FlgAddEveningSplash);
-                sqlCmd.Parameters.AddWithValue("efEventsPerDay", growSeason.EFEventsPerDay);
-                sqlCmd.Parameters.AddWithValue("isComplete", growSeason.IsComplete);
-                sqlCmd.Parameters.AddWithValue("createdBy", growSeason.CreatedBy);
-                sqlCmd.Parameters.AddWithValue("createDate", growSeason.CreateDate);
-                sqlCmd.Parameters.AddWithValue("changedBy", growSeason.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("changeDate", growSeason.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("isActive", growSeason.IsActive);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAddGrowSeason";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("id", growSeason.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("name", growSeason.Name);
+                sqlCommand.Parameters.AddWithValue("startDate", growSeason.StartDate);
+                sqlCommand.Parameters.AddWithValue("endDate", growSeason.EndDate);
+                sqlCommand.Parameters.AddWithValue("sunriseTime", growSeason.SunriseTime);
+                sqlCommand.Parameters.AddWithValue("cropID", Guid.Parse(growSeason.CropID.ToString()));
+                sqlCommand.Parameters.AddWithValue("flgAddMorningSplash", growSeason.FlgAddMorningSplash);
+                sqlCommand.Parameters.AddWithValue("flgAddEveningSplash", growSeason.FlgAddEveningSplash);
+                sqlCommand.Parameters.AddWithValue("efEventsPerDay", growSeason.EFEventsPerDay);
+                sqlCommand.Parameters.AddWithValue("isComplete", growSeason.IsComplete);
+                sqlCommand.Parameters.AddWithValue("createdBy", growSeason.CreatedBy);
+                sqlCommand.Parameters.AddWithValue("createDate", growSeason.CreateDate);
+                sqlCommand.Parameters.AddWithValue("changedBy", growSeason.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("changeDate", growSeason.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("isActive", growSeason.IsActive);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
-        public GrowSeason GetGrowSeasonByID(Guid id)
+        public async Task<GrowSeason> GetGrowSeasonByIDAsync(Guid id)
         {
             GrowSeason growSeason = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetGrowSeasonByID", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetGrowSeasonByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    growSeason.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                    growSeason.Name = sqlDataReader["name"].ToString();
-                    if (sqlDataReader["startDate"] != DBNull.Value)
+                    while (await sqlDataReader.ReadAsync())
                     {
-                        growSeason.StartDate = Convert.ToDateTime(sqlDataReader["startDate"].ToString());
+                        growSeason.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                        growSeason.Name = sqlDataReader["name"].ToString();
+                        if (sqlDataReader["startDate"] != DBNull.Value)
+                        {
+                            growSeason.StartDate = Convert.ToDateTime(sqlDataReader["startDate"].ToString());
+                        }
+                        if (sqlDataReader["endDate"] != DBNull.Value)
+                        {
+                            growSeason.EndDate = Convert.ToDateTime(sqlDataReader["endDate"].ToString());
+                        }
+                        growSeason.SunriseTime = Convert.ToDateTime(sqlDataReader["sunriseTime"].ToString());
+                        growSeason.SunsetTime = Convert.ToDateTime(sqlDataReader["sunsetTime"].ToString());
+                        growSeason.CropID = Guid.Parse(sqlDataReader["cropID"].ToString());
+                        growSeason.CropName = sqlDataReader["cropName"].ToString();
+                        growSeason.FlgAddMorningSplash = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("flgAddMorningSplash"));
+                        growSeason.FlgAddEveningSplash = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("flgAddEveningSplash"));
+                        growSeason.EFEventsPerDay = sqlDataReader.GetByte(sqlDataReader.GetOrdinal("efEventsPerDay"));
+                        growSeason.IsComplete = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isComplete"));
+                        growSeason.CreatedBy = sqlDataReader["createdBy"].ToString();
+                        growSeason.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                        growSeason.ChangedBy = sqlDataReader["changedBy"].ToString();
+                        growSeason.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                        growSeason.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                     }
-                    if (sqlDataReader["endDate"] != DBNull.Value)
-                    {
-                        growSeason.EndDate = Convert.ToDateTime(sqlDataReader["endDate"].ToString());
-                    }
-                    growSeason.SunriseTime = Convert.ToDateTime(sqlDataReader["sunriseTime"].ToString());
-                    growSeason.SunsetTime = Convert.ToDateTime(sqlDataReader["sunsetTime"].ToString());
-                    growSeason.CropID = Guid.Parse(sqlDataReader["cropID"].ToString());
-                    growSeason.CropName = sqlDataReader["cropName"].ToString();
-                    growSeason.FlgAddMorningSplash = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("flgAddMorningSplash"));
-                    growSeason.FlgAddEveningSplash = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("flgAddEveningSplash"));
-                    growSeason.EFEventsPerDay = sqlDataReader.GetByte(sqlDataReader.GetOrdinal("efEventsPerDay"));
-                    growSeason.IsComplete = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isComplete"));
-                    growSeason.CreatedBy = sqlDataReader["createdBy"].ToString();
-                    growSeason.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                    growSeason.ChangedBy = sqlDataReader["changedBy"].ToString();
-                    growSeason.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                    growSeason.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return growSeason;
 
         }
         
-        public void SaveGrowSeason(GrowSeason growSeason)
+        public async Task SaveGrowSeasonAsync(GrowSeason growSeason)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spUpdateGrowSeason", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", growSeason.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("thisname", growSeason.Name);
-                sqlCmd.Parameters.AddWithValue("thisstartDate", growSeason.StartDate);
-                sqlCmd.Parameters.AddWithValue("thisendDate", growSeason.EndDate);
-                sqlCmd.Parameters.AddWithValue("thissunriseTime", growSeason.SunriseTime);
-                sqlCmd.Parameters.AddWithValue("thiscropID", Guid.Parse(growSeason.CropID.ToString()));
-                sqlCmd.Parameters.AddWithValue("thisflgAddMorningSplash", growSeason.FlgAddMorningSplash);
-                sqlCmd.Parameters.AddWithValue("thisflgAddEveningSplash", growSeason.FlgAddEveningSplash);
-                sqlCmd.Parameters.AddWithValue("thisefEventsPerDay", growSeason.EFEventsPerDay);
-                sqlCmd.Parameters.AddWithValue("thisisComplete", growSeason.IsComplete);
-                sqlCmd.Parameters.AddWithValue("thischangedBy", growSeason.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("thischangeDate", growSeason.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("thisisActive", growSeason.IsActive);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateGrowSeason";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", growSeason.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("thisname", growSeason.Name);
+                sqlCommand.Parameters.AddWithValue("thisstartDate", growSeason.StartDate);
+                sqlCommand.Parameters.AddWithValue("thisendDate", growSeason.EndDate);
+                sqlCommand.Parameters.AddWithValue("thissunriseTime", growSeason.SunriseTime);
+                sqlCommand.Parameters.AddWithValue("thiscropID", Guid.Parse(growSeason.CropID.ToString()));
+                sqlCommand.Parameters.AddWithValue("thisflgAddMorningSplash", growSeason.FlgAddMorningSplash);
+                sqlCommand.Parameters.AddWithValue("thisflgAddEveningSplash", growSeason.FlgAddEveningSplash);
+                sqlCommand.Parameters.AddWithValue("thisefEventsPerDay", growSeason.EFEventsPerDay);
+                sqlCommand.Parameters.AddWithValue("thisisComplete", growSeason.IsComplete);
+                sqlCommand.Parameters.AddWithValue("thischangedBy", growSeason.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("thischangeDate", growSeason.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("thisisActive", growSeason.IsActive);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
-    
-        public DateTime GetSunriseToday()
+
+        public async Task<DateTime> GetSunriseTodayAsync()
         {
             DateTime dtTemp = DateTime.Today;
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spGetSunriseToday", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetSunriseToday";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCmd.ExecuteReader();
-                sqlCmd.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     dtTemp = Convert.ToDateTime(sqlDataReader["sunriseToday"].ToString());
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
             return dtTemp;
         }
-        public DateTime GetSunsetToday()
+        
+        public async Task<DateTime> GetSunsetToday()
         {
             DateTime dtTemp = DateTime.Today;
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spGetSunsetToday", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetSunsetToday";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCmd.ExecuteReader();
-                sqlCmd.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     dtTemp = Convert.ToDateTime(sqlDataReader["sunsetToday"].ToString());
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
             return dtTemp;
         }
     }

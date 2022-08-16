@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using YARG.Models;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.DAL
 {
@@ -15,19 +16,21 @@ namespace YARG.DAL
             _config = configuration;
         }
 
-        public IEnumerable<MeasurementType> GetMeasurementTypes()
+        public async Task<IEnumerable<MeasurementType>> GetMeasurementTypesAsync()
         {
             List<MeasurementType> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetMeasurementTypes", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetMeasurementTypes";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     MeasurementType measurementType = new MeasurementType
                     {
@@ -43,110 +46,123 @@ namespace YARG.DAL
 
                     lstream.Add(measurementType);
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return lstream;
         }
         
-        public void AddMeasurementType(MeasurementType measurementType)
+        public async Task AddMeasurementTypeAsync(MeasurementType measurementType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spAddMeasurementType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("id", measurementType.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("name", measurementType.Name);
-                sqlCmd.Parameters.AddWithValue("sorting", measurementType.Sorting);
-                sqlCmd.Parameters.AddWithValue("createdBy", measurementType.CreatedBy);
-                sqlCmd.Parameters.AddWithValue("createDate", measurementType.CreateDate);
-                sqlCmd.Parameters.AddWithValue("changedBy", measurementType.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("changeDate", measurementType.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("isActive", measurementType.IsActive);
-                
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
-            }
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAddMeasurementType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("id", measurementType.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("name", measurementType.Name);
+                sqlCommand.Parameters.AddWithValue("sorting", measurementType.Sorting);
+                sqlCommand.Parameters.AddWithValue("createdBy", measurementType.CreatedBy);
+                sqlCommand.Parameters.AddWithValue("createDate", measurementType.CreateDate);
+                sqlCommand.Parameters.AddWithValue("changedBy", measurementType.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("changeDate", measurementType.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("isActive", measurementType.IsActive);
 
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
-        public MeasurementType GetMeasurementTypeByID(Guid id)
+        public async Task<MeasurementType> GetMeasurementTypeByIDAsync(Guid id)
         {
             MeasurementType measurementType = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetMeasurementTypeByID", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetMeasurementTypeByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    measurementType.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                    measurementType.Name = sqlDataReader["name"].ToString();
-                    measurementType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
-                    measurementType.CreatedBy = sqlDataReader["createdBy"].ToString();
-                    measurementType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                    measurementType.ChangedBy = sqlDataReader["changedBy"].ToString();
-                    measurementType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                    measurementType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    while (await sqlDataReader.ReadAsync())
+                    {
+                        measurementType.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                        measurementType.Name = sqlDataReader["name"].ToString();
+                        measurementType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
+                        measurementType.CreatedBy = sqlDataReader["createdBy"].ToString();
+                        measurementType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                        measurementType.ChangedBy = sqlDataReader["changedBy"].ToString();
+                        measurementType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                        measurementType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return measurementType;
         }
 
-        public void SaveMeasurementType(MeasurementType measurementType)
+        public async Task SaveMeasurementTypeAsync(MeasurementType measurementType)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spUpdateMeasurementType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", measurementType.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("thisname", measurementType.Name);
-                sqlCmd.Parameters.AddWithValue("thissorting", measurementType.Sorting);
-                sqlCmd.Parameters.AddWithValue("thischangedBy", measurementType.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("thischangeDate", measurementType.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("thisisActive", measurementType.IsActive);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateMeasurementType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", measurementType.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("thisname", measurementType.Name);
+                sqlCommand.Parameters.AddWithValue("thissorting", measurementType.Sorting);
+                sqlCommand.Parameters.AddWithValue("thischangedBy", measurementType.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("thischangeDate", measurementType.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("thisisActive", measurementType.IsActive);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
-        public void DeleteMeasurementType(Guid id)
+        public async Task DeleteMeasurementTypeAsync(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spDeleteMeasurementType", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", id.ToString());
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteMeasurementType";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
     }

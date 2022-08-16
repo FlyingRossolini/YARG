@@ -4,6 +4,7 @@ using YARG.Data.Models.ViewModels;
 using YARG.Models;
 using YARG.Common_Types;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.Data.Services
 {
@@ -18,10 +19,10 @@ namespace YARG.Data.Services
             _measurementDAL = new(configuration);
         }
 
-        public void AddRemoteMeasurement(RemoteMeasurementViewModel remoteMeasurement)
+        public async Task AddRemoteMeasurement(RemoteMeasurementViewModel remoteMeasurement)
         {
-            Guid _locationID = _remoteProbeDAL.GetLocationIDByRemoteProbe(remoteMeasurement.RemoteProbeAddress);
-            Guid _measurementTypeID = _remoteProbeDAL.GetMeasurementTypeIDByRemoteProbe(remoteMeasurement.RemoteProbeAddress);
+            Guid _locationID = await _remoteProbeDAL.GetLocationIDByRemoteProbeAsync(remoteMeasurement.RemoteProbeAddress);
+            Guid _measurementTypeID = await _remoteProbeDAL.GetMeasurementTypeIDByRemoteProbeAsync(remoteMeasurement.RemoteProbeAddress);
 
             if (_locationID != Guid.Empty &&
                 _measurementTypeID != Guid.Empty)
@@ -34,7 +35,7 @@ namespace YARG.Data.Services
                 measurement.CreatedBy = remoteMeasurement.RemoteHostname;
                 measurement.CreateDate = DateTime.Now;
                 
-                _measurementDAL.AddMeasurement(measurement);
+                await _measurementDAL.AddMeasurementAsync(measurement);
             }
         }
     }

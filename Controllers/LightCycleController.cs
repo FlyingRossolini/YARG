@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace YARG.Controllers
 {
@@ -18,9 +19,9 @@ namespace YARG.Controllers
         }
 
         // GET: LightCycleController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_lightCycleDAL.GetLightCycles());
+            return View(await _lightCycleDAL.GetLightCyclesAsync());
         }
 
         // GET: LightCycleController/Details/5
@@ -33,7 +34,7 @@ namespace YARG.Controllers
         // POST: LightCycleController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,Name,DaylightHours")] LightCycle lightCycle)
+        public async Task<ActionResult> Create([Bind("ID,Name,DaylightHours")] LightCycle lightCycle)
         {
             if (ModelState.IsValid)
             {
@@ -46,7 +47,7 @@ namespace YARG.Controllers
                 lightCycle.ChangeDate = DateTime.Now;
                 lightCycle.IsActive = true;
 
-                _lightCycleDAL.AddLightCycle(lightCycle);
+                await _lightCycleDAL.AddLightCycleAsync(lightCycle);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -54,20 +55,20 @@ namespace YARG.Controllers
         }
 
         // GET: LightCycleController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_lightCycleDAL.GetLightCycleByID(id.Value));
+            return View(await _lightCycleDAL.GetLightCycleByIDAsync(id.Value));
         }
 
         // POST: LightCycleController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,Name,,DaylightHours,IsActive")]LightCycle lightCycle)
+        public async Task<ActionResult> Edit(Guid id, [Bind("ID,Name,,DaylightHours,IsActive")]LightCycle lightCycle)
         {
             if (id != lightCycle.ID)
             {
@@ -81,7 +82,7 @@ namespace YARG.Controllers
                 lightCycle.ChangedBy = user;
                 lightCycle.ChangeDate = DateTime.Now;
 
-                _lightCycleDAL.SaveLightCycle(lightCycle);
+                await _lightCycleDAL.SaveLightCycleAsync(lightCycle);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -89,32 +90,32 @@ namespace YARG.Controllers
         }
 
         // GET: LightCycleController/Delete/5
-        public ActionResult Delete(Guid? id)
+        public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_lightCycleDAL.GetLightCycleByID(id.Value));
+            return View(await _lightCycleDAL.GetLightCycleByIDAsync(id.Value));
         }
 
         // POST: LightCycleController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            _lightCycleDAL.DeleteLightCycle(id);
+            await _lightCycleDAL.DeleteLightCycleAsync(id);
 
             return RedirectToAction(nameof(Index));
         }
     
         [HttpGet]
-        public JsonResult GetLightCycleList()
+        public async Task<JsonResult> GetLightCycleList()
         {
             List<LightCycle> lightCycles = new();
 
-            foreach(LightCycle lightCycle in _lightCycleDAL.GetLightCycles())
+            foreach(LightCycle lightCycle in await _lightCycleDAL.GetLightCyclesAsync())
             {
                 lightCycles.Add(lightCycle);
             }

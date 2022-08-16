@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using YARG.Models;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.DAL
 {
@@ -15,165 +16,184 @@ namespace YARG.DAL
             _config = config;
         }
 
-        public IEnumerable<Chemical> GetChemicals()
+        public async Task<IEnumerable<Chemical>> GetChemicalsAsync()
         {
             List<Chemical> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetChemicals", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetChemicals";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    Chemical chemical = new Chemical
+                    while (await sqlDataReader.ReadAsync())
                     {
-                        ID = Guid.Parse(sqlDataReader["id"].ToString()),
-                        Name = sqlDataReader["name"].ToString(),
-                        Manufacturer = sqlDataReader["manufacturer"].ToString(),
-                        ChemicalTypeID = Guid.Parse(sqlDataReader["chemicalTypeID"].ToString()),
-                        ChemicalTypeName = sqlDataReader["chemicalTypeName"].ToString(),
-                        MixPriority = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixPriority")),
-                        MixTime = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixTime")),
-                        PricePerL = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("pricePerL")),
-                        InStockAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("inStockAmount")),
-                        MinReorderPoint = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("minReorderPoint")),
-                        CreatedBy = sqlDataReader["createdBy"].ToString(),
-                        CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString()),
-                        ChangedBy = sqlDataReader["changedBy"].ToString(),
-                        ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString()),
-                        IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"))
-                    };
+                        Chemical chemical = new Chemical
+                        {
+                            ID = Guid.Parse(sqlDataReader["id"].ToString()),
+                            Name = sqlDataReader["name"].ToString(),
+                            Manufacturer = sqlDataReader["manufacturer"].ToString(),
+                            ChemicalTypeID = Guid.Parse(sqlDataReader["chemicalTypeID"].ToString()),
+                            ChemicalTypeName = sqlDataReader["chemicalTypeName"].ToString(),
+                            MixPriority = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixPriority")),
+                            MixTime = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixTime")),
+                            PricePerL = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("pricePerL")),
+                            InStockAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("inStockAmount")),
+                            MinReorderPoint = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("minReorderPoint")),
+                            CreatedBy = sqlDataReader["createdBy"].ToString(),
+                            CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString()),
+                            ChangedBy = sqlDataReader["changedBy"].ToString(),
+                            ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString()),
+                            IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"))
+                        };
 
-                    lstream.Add(chemical);
+                        lstream.Add(chemical);
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return lstream;
         }
         
-        public void AddChemical(Chemical chemical)
+        public async Task AddChemicalAsync(Chemical chemical)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spAddChemical", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("id", chemical.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("name", chemical.Name);
-                sqlCmd.Parameters.AddWithValue("manufacturer", chemical.Manufacturer);
-                sqlCmd.Parameters.AddWithValue("chemicalTypeID", chemical.ChemicalTypeID.ToString());
-                sqlCmd.Parameters.AddWithValue("mixPriority", chemical.MixPriority);
-                sqlCmd.Parameters.AddWithValue("mixTime", chemical.MixTime);
-                sqlCmd.Parameters.AddWithValue("pricePerL", chemical.PricePerL);
-                sqlCmd.Parameters.AddWithValue("inStockAmount", chemical.InStockAmount);
-                sqlCmd.Parameters.AddWithValue("minReorderPoint", chemical.MinReorderPoint);                
-                sqlCmd.Parameters.AddWithValue("createdBy", chemical.CreatedBy);
-                sqlCmd.Parameters.AddWithValue("createDate", chemical.CreateDate);
-                sqlCmd.Parameters.AddWithValue("changedBy", chemical.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("changeDate", chemical.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("isActive", chemical.IsActive);
-                
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
-            }
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAddChemical";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("id", chemical.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("name", chemical.Name);
+                sqlCommand.Parameters.AddWithValue("manufacturer", chemical.Manufacturer);
+                sqlCommand.Parameters.AddWithValue("chemicalTypeID", chemical.ChemicalTypeID.ToString());
+                sqlCommand.Parameters.AddWithValue("mixPriority", chemical.MixPriority);
+                sqlCommand.Parameters.AddWithValue("mixTime", chemical.MixTime);
+                sqlCommand.Parameters.AddWithValue("pricePerL", chemical.PricePerL);
+                sqlCommand.Parameters.AddWithValue("inStockAmount", chemical.InStockAmount);
+                sqlCommand.Parameters.AddWithValue("minReorderPoint", chemical.MinReorderPoint);
+                sqlCommand.Parameters.AddWithValue("createdBy", chemical.CreatedBy);
+                sqlCommand.Parameters.AddWithValue("createDate", chemical.CreateDate);
+                sqlCommand.Parameters.AddWithValue("changedBy", chemical.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("changeDate", chemical.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("isActive", chemical.IsActive);
 
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
-        public Chemical GetChemicalByID(Guid id)
+        public async Task<Chemical> GetChemicalByIDAsync(Guid id)
         {
             Chemical chemical = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetChemicalByID", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetChemicalByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    chemical.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                    chemical.Name = sqlDataReader["name"].ToString();
-                    chemical.Manufacturer = sqlDataReader["manufacturer"].ToString();
-                    chemical.ChemicalTypeID = Guid.Parse(sqlDataReader["chemicalTypeID"].ToString());
-                    chemical.ChemicalTypeName = sqlDataReader["chemicalTypeName"].ToString();
-                    chemical.MixPriority = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixPriority"));
-                    chemical.MixTime = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixTime"));
-                    chemical.PricePerL = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("pricePerL"));
-                    chemical.InStockAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("inStockAmount"));
-                    chemical.MinReorderPoint = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("minReorderPoint"));
-                    chemical.CreatedBy = sqlDataReader["createdBy"].ToString();
-                    chemical.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                    chemical.ChangedBy = sqlDataReader["changedBy"].ToString();
-                    chemical.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                    chemical.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    while (await sqlDataReader.ReadAsync())
+                    {
+                        chemical.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                        chemical.Name = sqlDataReader["name"].ToString();
+                        chemical.Manufacturer = sqlDataReader["manufacturer"].ToString();
+                        chemical.ChemicalTypeID = Guid.Parse(sqlDataReader["chemicalTypeID"].ToString());
+                        chemical.ChemicalTypeName = sqlDataReader["chemicalTypeName"].ToString();
+                        chemical.MixPriority = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixPriority"));
+                        chemical.MixTime = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixTime"));
+                        chemical.PricePerL = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("pricePerL"));
+                        chemical.InStockAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("inStockAmount"));
+                        chemical.MinReorderPoint = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("minReorderPoint"));
+                        chemical.CreatedBy = sqlDataReader["createdBy"].ToString();
+                        chemical.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                        chemical.ChangedBy = sqlDataReader["changedBy"].ToString();
+                        chemical.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                        chemical.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+ 
             return chemical;
         }
 
-        public void SaveChemical(Chemical chemical)
+        public async Task SaveChemicalAsync(Chemical chemical)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spUpdateChemical", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", chemical.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("thisname", chemical.Name);
-                sqlCmd.Parameters.AddWithValue("thismanufacturer", chemical.Manufacturer);
-                sqlCmd.Parameters.AddWithValue("thischemicalTypeID", chemical.ChemicalTypeID);
-                sqlCmd.Parameters.AddWithValue("thismixPriority", chemical.MixPriority);
-                sqlCmd.Parameters.AddWithValue("thismixTime", chemical.MixTime);
-                sqlCmd.Parameters.AddWithValue("thispricePerL", chemical.PricePerL);
-                sqlCmd.Parameters.AddWithValue("thisinStockAmount", chemical.InStockAmount);
-                sqlCmd.Parameters.AddWithValue("thisminReorderPoint", chemical.MinReorderPoint);
-                sqlCmd.Parameters.AddWithValue("thischangedBy", chemical.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("thischangeDate", chemical.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("thisisActive", chemical.IsActive);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateChemical";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", chemical.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("thisname", chemical.Name);
+                sqlCommand.Parameters.AddWithValue("thismanufacturer", chemical.Manufacturer);
+                sqlCommand.Parameters.AddWithValue("thischemicalTypeID", chemical.ChemicalTypeID);
+                sqlCommand.Parameters.AddWithValue("thismixPriority", chemical.MixPriority);
+                sqlCommand.Parameters.AddWithValue("thismixTime", chemical.MixTime);
+                sqlCommand.Parameters.AddWithValue("thispricePerL", chemical.PricePerL);
+                sqlCommand.Parameters.AddWithValue("thisinStockAmount", chemical.InStockAmount);
+                sqlCommand.Parameters.AddWithValue("thisminReorderPoint", chemical.MinReorderPoint);
+                sqlCommand.Parameters.AddWithValue("thischangedBy", chemical.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("thischangeDate", chemical.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("thisisActive", chemical.IsActive);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
-        public void DeleteChemical(Guid id)
+        public async Task DeleteChemicalAsync(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spDeleteChemical", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", id.ToString());
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteChemical";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
         }
     }
 }

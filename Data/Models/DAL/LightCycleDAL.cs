@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace YARG.DAL
 {
@@ -15,20 +16,21 @@ namespace YARG.DAL
             _config = configuration;
         }
 
-        public IEnumerable<LightCycle> GetLightCycles()
+        public async Task<IEnumerable<LightCycle>> GetLightCyclesAsync()
         {
             List<LightCycle> lstream = new();
-
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetLightCycles", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetLightCycles";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     LightCycle lightCycle = new LightCycle
                     {
@@ -44,110 +46,126 @@ namespace YARG.DAL
 
                     lstream.Add(lightCycle);
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
             return lstream;
         }
     
-        public void AddLightCycle(LightCycle lightCycle)
+        public async Task AddLightCycleAsync(LightCycle lightCycle)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spAddLightCycle", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("id", lightCycle.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("name", lightCycle.Name);
-                sqlCmd.Parameters.AddWithValue("daylightHours", lightCycle.DaylightHours);
-                sqlCmd.Parameters.AddWithValue("createdBy", lightCycle.CreatedBy);
-                sqlCmd.Parameters.AddWithValue("createDate", lightCycle.CreateDate);
-                sqlCmd.Parameters.AddWithValue("changedBy", lightCycle.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("changeDate", lightCycle.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("isActive", lightCycle.IsActive);
-                
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAddLightCycle";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("id", lightCycle.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("name", lightCycle.Name);
+                sqlCommand.Parameters.AddWithValue("daylightHours", lightCycle.DaylightHours);
+                sqlCommand.Parameters.AddWithValue("createdBy", lightCycle.CreatedBy);
+                sqlCommand.Parameters.AddWithValue("createDate", lightCycle.CreateDate);
+                sqlCommand.Parameters.AddWithValue("changedBy", lightCycle.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("changeDate", lightCycle.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("isActive", lightCycle.IsActive);
+
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
-        public LightCycle GetLightCycleByID(Guid id)
+        public async Task<LightCycle> GetLightCycleByIDAsync(Guid id)
         {
             LightCycle lightCycle = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetLightCycleByID", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetLightCycleByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    lightCycle.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                    lightCycle.Name = sqlDataReader["name"].ToString();
-                    lightCycle.DaylightHours = sqlDataReader.GetByte(sqlDataReader.GetOrdinal("daylightHours"));
-                    lightCycle.CreatedBy = sqlDataReader["createdBy"].ToString();
-                    lightCycle.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                    lightCycle.ChangedBy = sqlDataReader["changedBy"].ToString();
-                    lightCycle.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                    lightCycle.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    while (await sqlDataReader.ReadAsync())
+                    {
+                        lightCycle.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                        lightCycle.Name = sqlDataReader["name"].ToString();
+                        lightCycle.DaylightHours = sqlDataReader.GetByte(sqlDataReader.GetOrdinal("daylightHours"));
+                        lightCycle.CreatedBy = sqlDataReader["createdBy"].ToString();
+                        lightCycle.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                        lightCycle.ChangedBy = sqlDataReader["changedBy"].ToString();
+                        lightCycle.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                        lightCycle.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return lightCycle;
         }
     
-        public void SaveLightCycle(LightCycle lightCycle)
+        public async Task SaveLightCycleAsync(LightCycle lightCycle)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spUpdateLightCycle", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", lightCycle.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("thisname", lightCycle.Name);
-                sqlCmd.Parameters.AddWithValue("thisdaylightHours", lightCycle.DaylightHours);
-                sqlCmd.Parameters.AddWithValue("thischangedBy", lightCycle.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("thischangeDate", lightCycle.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("thisisActive", lightCycle.IsActive);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateLightCycle";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", lightCycle.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("thisname", lightCycle.Name);
+                sqlCommand.Parameters.AddWithValue("thisdaylightHours", lightCycle.DaylightHours);
+                sqlCommand.Parameters.AddWithValue("thischangedBy", lightCycle.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("thischangeDate", lightCycle.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("thisisActive", lightCycle.IsActive);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
-    
-        public void DeleteLightCycle(Guid id)
+
+        public async Task DeleteLightCycleAsync(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spDeleteLightCycle", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", id.ToString());
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteLightCycle";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 }

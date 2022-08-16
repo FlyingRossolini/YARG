@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using YARG.Models;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.DAL
 {
@@ -15,19 +16,21 @@ namespace YARG.DAL
             _config = configuration;
         }
 
-        public IEnumerable<RemoteProbe> GetRemoteProbes()
+        public async Task<IEnumerable<RemoteProbe>> GetRemoteProbesAsync()
         {
             List<RemoteProbe> lstream = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetRemoteProbes", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetRemoteProbes";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
                     RemoteProbe remoteProbe = new RemoteProbe
                     {
@@ -46,18 +49,16 @@ namespace YARG.DAL
 
                     lstream.Add(remoteProbe);
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return lstream;
         }
         
-        public void AddRemoteProbe(RemoteProbe remoteProbe)
+        public async Task AddRemoteProbeAsync(RemoteProbe remoteProbe)
         {
             using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
             {
@@ -82,135 +83,149 @@ namespace YARG.DAL
 
         }
 
-        public RemoteProbe GetRemoteProbeByID(Guid id)
+        public async Task<RemoteProbe> GetRemoteProbeByIDAsync(Guid id)
         {
             RemoteProbe remoteProbe = new();
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetRemoteProbeByID", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetRemoteProbeByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    remoteProbe.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                    remoteProbe.LocationID = Guid.Parse(sqlDataReader["locationID"].ToString());
-                    remoteProbe.LocationName = sqlDataReader["locationName"].ToString();
-                    remoteProbe.MeasurementTypeID = Guid.Parse(sqlDataReader["measurementTypeID"].ToString());
-                    remoteProbe.MeasurementTypeName = sqlDataReader["measurementTypeName"].ToString();
-                    remoteProbe.RemoteProbeAddress = sqlDataReader["remoteProbeAddress"].ToString();
-                    remoteProbe.CreatedBy = sqlDataReader["createdBy"].ToString();
-                    remoteProbe.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                    remoteProbe.ChangedBy = sqlDataReader["changedBy"].ToString();
-                    remoteProbe.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                    remoteProbe.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    while (await sqlDataReader.ReadAsync())
+                    {
+                        remoteProbe.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                        remoteProbe.LocationID = Guid.Parse(sqlDataReader["locationID"].ToString());
+                        remoteProbe.LocationName = sqlDataReader["locationName"].ToString();
+                        remoteProbe.MeasurementTypeID = Guid.Parse(sqlDataReader["measurementTypeID"].ToString());
+                        remoteProbe.MeasurementTypeName = sqlDataReader["measurementTypeName"].ToString();
+                        remoteProbe.RemoteProbeAddress = sqlDataReader["remoteProbeAddress"].ToString();
+                        remoteProbe.CreatedBy = sqlDataReader["createdBy"].ToString();
+                        remoteProbe.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                        remoteProbe.ChangedBy = sqlDataReader["changedBy"].ToString();
+                        remoteProbe.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                        remoteProbe.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return remoteProbe;
         }
 
-        public void SaveRemoteProbe(RemoteProbe remoteProbe)
+        public async Task SaveRemoteProbeAsync(RemoteProbe remoteProbe)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spUpdateRemoteProbe", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", remoteProbe.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("thislocationID", remoteProbe.LocationID.ToString());
-                sqlCmd.Parameters.AddWithValue("thismeasurementTypeID", remoteProbe.MeasurementTypeID.ToString());
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateRemoteProbe";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", remoteProbe.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("thislocationID", remoteProbe.LocationID.ToString());
+                sqlCommand.Parameters.AddWithValue("thismeasurementTypeID", remoteProbe.MeasurementTypeID.ToString());
+                sqlCommand.Parameters.AddWithValue("thisremoteProbeAddress", remoteProbe.RemoteProbeAddress);
+                sqlCommand.Parameters.AddWithValue("thischangedBy", remoteProbe.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("thischangeDate", remoteProbe.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("thisisActive", remoteProbe.IsActive);
 
-                sqlCmd.Parameters.AddWithValue("thisremoteProbeAddress", remoteProbe.RemoteProbeAddress);
-                sqlCmd.Parameters.AddWithValue("thischangedBy", remoteProbe.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("thischangeDate", remoteProbe.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("thisisActive", remoteProbe.IsActive);
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
-        public void DeleteRemoteProbe(Guid id)
+        public async Task DeleteRemoteProbeAsync(Guid id)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spDeleteRemoteProbe", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("thisid", id.ToString());
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteRemoteProbe";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
-        public Guid GetLocationIDByRemoteProbe(string remoteProbeAddress)
+        public async Task<Guid> GetLocationIDByRemoteProbeAsync(string remoteProbeAddress)
         {
             Guid id = Guid.Empty;
-
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetLocationByRemoteProbeAddress", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetLocationByRemoteProbeAddress";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisremoteProbeAddress", remoteProbeAddress);
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    id = Guid.Parse(sqlDataReader["locationID"].ToString());
+                    while (await sqlDataReader.ReadAsync())
+                    {
+                        id = Guid.Parse(sqlDataReader["locationID"].ToString());
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return id;
         }
-        public Guid GetMeasurementTypeIDByRemoteProbe(string remoteProbeAddress)
+        
+        public async Task<Guid> GetMeasurementTypeIDByRemoteProbeAsync(string remoteProbeAddress)
         {
             Guid id = Guid.Empty;
-
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetMeasurementTypeByRemoteProbeAddress", sqlConnection);
+                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetMeasurementTypeByRemoteProbeAddress";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisremoteProbeAddress", remoteProbeAddress);
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
+                await sqlConnection.OpenAsync();
 
-                while (sqlDataReader.Read())
+                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
                 {
-                    id = Guid.Parse(sqlDataReader["measurementTypeID"].ToString());
+                    while (await sqlDataReader.ReadAsync())
+                    {
+                        id = Guid.Parse(sqlDataReader["locationID"].ToString());
+                    }
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return id;

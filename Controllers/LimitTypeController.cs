@@ -3,6 +3,7 @@ using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Threading.Tasks;
 
 namespace YARG.Models
 {
@@ -16,9 +17,9 @@ namespace YARG.Models
         }
 
         // GET: LimitTypeController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_limitTypeDAL.GetLimitTypes());
+            return View(await _limitTypeDAL.GetLimitTypesAsync());
         }
 
         // GET: LimitTypeController/Details/5
@@ -31,7 +32,7 @@ namespace YARG.Models
         // POST: LimitTypeController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,Name,Sorting")] LimitType limitType)
+        public async Task<ActionResult> Create([Bind("ID,Name,Sorting")] LimitType limitType)
         {
             if (ModelState.IsValid)
             {
@@ -44,7 +45,7 @@ namespace YARG.Models
                 limitType.ChangeDate = DateTime.Now;
                 limitType.IsActive = true;
 
-                _limitTypeDAL.AddLimitType(limitType);
+                await _limitTypeDAL.AddLimitTypeAsync(limitType);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -52,20 +53,20 @@ namespace YARG.Models
         }
 
         // GET: LimitTypeController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
             
-            return View(_limitTypeDAL.GetLimitTypeByID(id.Value));
+            return View(await _limitTypeDAL.GetLimitTypeByIDAsync(id.Value));
         }
 
         // POST: LimitTypeController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,Name,Sorting,IsActive")] LimitType limitType)
+        public async Task<ActionResult> Edit(Guid id, [Bind("ID,Name,Sorting,IsActive")] LimitType limitType)
         {
             if (id != limitType.ID)
             {
@@ -79,7 +80,7 @@ namespace YARG.Models
                 limitType.ChangedBy = user;
                 limitType.ChangeDate = DateTime.Now;
 
-                _limitTypeDAL.SaveLimitType(limitType);
+                await _limitTypeDAL.SaveLimitTypeAsync(limitType);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -87,22 +88,22 @@ namespace YARG.Models
         }
 
         // GET: LimitTypeController/Delete/5
-        public ActionResult Delete(Guid? id)
+        public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_limitTypeDAL.GetLimitTypeByID(id.Value));
+            return View(await _limitTypeDAL.GetLimitTypeByIDAsync(id.Value));
         }
 
         // POST: LimitTypeController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            _limitTypeDAL.DeleteLimitType(id);
+            await _limitTypeDAL.DeleteLimitTypeAsync(id);
 
             return RedirectToAction(nameof(Index));
         }

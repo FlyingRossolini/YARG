@@ -4,6 +4,7 @@ using YARG.Models;
 using YARG.Common_Types;
 using YARG.DAL;
 using Microsoft.Extensions.Configuration;
+using System.Threading.Tasks;
 
 namespace YARG.Controllers
 {
@@ -19,18 +20,18 @@ namespace YARG.Controllers
         }
 
         // GET: Pot
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             bool flgCanAddNew = false;
 
-            if(_potDAL.PotCount() < 4)
+            if(await _potDAL.PotCountAsync() < 4)
             {
                 flgCanAddNew = true;
             }
 
             ViewBag.flgCanAddNew = flgCanAddNew;
 
-            return View(_potDAL.GetPots());
+            return View(await _potDAL.GetPotsAsync());
         }
 
         // GET: Pot/Create
@@ -44,23 +45,23 @@ namespace YARG.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create([Bind("ID,Name,EFDuration,EFAmount,EbbSpeed,FlowSpeed")] Pot pot)
+        public async Task<IActionResult> Create([Bind("ID,Name,EFDuration,EFAmount,EbbSpeed,FlowSpeed")] Pot pot)
         {
             if (ModelState.IsValid)
             {
                 string user = Environment.UserName;
 
                 pot.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
-                pot.QueuePosition = _potDAL.GetNextQueuePosition();
+                pot.QueuePosition = await _potDAL.GetNextQueuePositionAsync();
                 pot.CreatedBy = user;
                 pot.CreateDate = DateTime.Now;
                 pot.ChangedBy = user;
                 pot.ChangeDate = DateTime.Now;
                 pot.IsActive = true;
 
-                _potDAL.AddPot(pot);
+                await _potDAL.AddPotAsync(pot);
 
-                _wateringScheduleDAL.RebuildWateringSchedule();
+                await _wateringScheduleDAL.RebuildWateringSchedule();
 
                 return RedirectToAction(nameof(Index));
             }
@@ -68,14 +69,14 @@ namespace YARG.Controllers
         }
 
         // GET: Pot/Edit/5
-        public IActionResult Edit(Guid? id)
+        public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_potDAL.GetPotByID(id.Value));
+            return View(await _potDAL.GetPotByIDAsync(id.Value));
         }
 
         // POST: Pot/Edit/5
@@ -83,7 +84,7 @@ namespace YARG.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Guid id, [Bind("ID,Name,EFDuration,EFAmount,EbbSpeed,FlowSpeed," +
+        public async Task<IActionResult> Edit(Guid id, [Bind("ID,Name,EFDuration,EFAmount,EbbSpeed,FlowSpeed," +
             "IsActive")] Pot pot)
         {
             if (id != pot.ID)
@@ -98,9 +99,9 @@ namespace YARG.Controllers
                 pot.ChangedBy = user;
                 pot.ChangeDate = DateTime.Now;
 
-                if (_potDAL.SavePot(pot) == true)
+                if (await _potDAL.SavePotAsync(pot) == true)
                 {
-                    _wateringScheduleDAL.RebuildWateringSchedule();
+                    await _wateringScheduleDAL.RebuildWateringSchedule();
                 };
 
                 return RedirectToAction(nameof(Index), "Home");
@@ -109,22 +110,22 @@ namespace YARG.Controllers
         }
 
         // GET: Pot/Delete/5
-        public IActionResult Delete(Guid? id)
+        public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_potDAL.GetPotByID(id.Value));
+            return View(await _potDAL.GetPotByIDAsync(id.Value));
         }
 
         // POST: Pot/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(Guid id)
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            _potDAL.DeletePot(id);
+            await _potDAL.DeletePotAsync(id);
 
             return RedirectToAction(nameof(Index), "Home");
         }

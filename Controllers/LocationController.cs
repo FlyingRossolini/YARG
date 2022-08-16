@@ -3,6 +3,7 @@ using YARG.DAL;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
+using System.Threading.Tasks;
 
 namespace YARG.Models
 {
@@ -16,9 +17,9 @@ namespace YARG.Models
         }
 
         // GET: LocationController
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
-            return View(_locationDAL.GetLocations());
+            return View(await _locationDAL.GetLocationsAsync());
         }
 
         // GET: LocationController/Details/5
@@ -31,7 +32,7 @@ namespace YARG.Models
         // POST: LocationController/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind("ID,Name,Sorting,IsShowOnLandingPage")] Location location)
+        public async Task<ActionResult> Create([Bind("ID,Name,Sorting,IsShowOnLandingPage")] Location location)
         {
             if (ModelState.IsValid)
             {
@@ -44,7 +45,7 @@ namespace YARG.Models
                 location.ChangeDate = DateTime.Now;
                 location.IsActive = true;
 
-                _locationDAL.AddLocation(location);
+                await _locationDAL.AddLocationAsync(location);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -52,20 +53,20 @@ namespace YARG.Models
         }
 
         // GET: LocationController/Edit/5
-        public ActionResult Edit(Guid? id)
+        public async Task<ActionResult> Edit(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
             
-            return View(_locationDAL.GetLocationByID(id.Value));
+            return View(await _locationDAL.GetLocationByIDAsync(id.Value));
         }
 
         // POST: LocationController/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(Guid id, [Bind("ID,Name,Sorting,IsShowOnLandingPage,IsActive")] Location location)
+        public async Task<ActionResult> Edit(Guid id, [Bind("ID,Name,Sorting,IsShowOnLandingPage,IsActive")] Location location)
         {
             if (id != location.ID)
             {
@@ -79,7 +80,7 @@ namespace YARG.Models
                 location.ChangedBy = user;
                 location.ChangeDate = DateTime.Now;
 
-                _locationDAL.SaveLocation(location);
+                await _locationDAL.SaveLocationAsync(location);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -87,22 +88,22 @@ namespace YARG.Models
         }
 
         // GET: LocationController/Delete/5
-        public ActionResult Delete(Guid? id)
+        public async Task<ActionResult> Delete(Guid? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            return View(_locationDAL.GetLocationByID(id.Value));
+            return View(await _locationDAL.GetLocationByIDAsync(id.Value));
         }
 
         // POST: LocationController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            _locationDAL.DeleteLocation(id);
+            await _locationDAL.DeleteLocationAsync(id);
 
             return RedirectToAction(nameof(Index));
         }
