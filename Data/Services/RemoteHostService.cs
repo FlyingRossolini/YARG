@@ -19,16 +19,16 @@ namespace YARG.Data.Services
             _mixingFanScheduleDAL = new(configuration);
         }
 
-        public void AcknowledgeWateringSchedule(RemoteHostCommandViewModel remoteHostViewModel)
+        public async Task AcknowledgeWateringSchedule(RemoteHostCommandViewModel remoteHostViewModel)
         {
-            _wateringScheduleDAL.AcknowledgeWateringSchedule(remoteHostViewModel);
+            await _wateringScheduleDAL.AcknowledgeWateringSchedule(remoteHostViewModel);
         }
 
-        public void CompleteWateringSchedule(RemoteHostCommandViewModel remoteHostViewModel)
+        public async Task CompleteWateringSchedule(RemoteHostCommandViewModel remoteHostViewModel)
         {
-            _wateringScheduleDAL.CompleteWateringSchedule(remoteHostViewModel);
+            await _wateringScheduleDAL.CompleteWateringSchedule(remoteHostViewModel);
         }
-        public void ErrorWateringSchedule(RemoteHostErrorViewModel remoteHostErrorViewModel)
+        public async Task ErrorWateringSchedule(RemoteHostErrorViewModel remoteHostErrorViewModel)
         {
 
         }
@@ -41,9 +41,9 @@ namespace YARG.Data.Services
             await _mixingFanScheduleDAL.CompleteMixingFanScheduleAsync(remoteHostCommandViewModel);
         }
 
-        public void ErrorMixingFanSchedule(RemoteHostErrorViewModel remoteHostErrorViewModel)
+        public async Task ErrorMixingFanSchedule(RemoteHostErrorViewModel remoteHostErrorViewModel)
         {
-
+            await Task.CompletedTask;
         }
 
 

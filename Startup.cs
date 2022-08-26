@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using YARG.Services;
 using YARG.Data;
+using Quartz;
 
 namespace YARG
 {
@@ -77,6 +78,22 @@ namespace YARG
 
             services.AddScoped<RemoteMeasurementService>();
             services.AddScoped<RemoteHostService>();
+
+            services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionJobFactory();
+                q.ScheduleJob<MixingFanJob>(trigger => trigger
+                    .WithIdentity("Combined Configuration Trigger")
+                    .WithCronSchedule("0 0/1 * 1/1 * ? *")
+                    .WithDescription("my awesome trigger configured for a job with single call")
+        );
+            });
+            services.AddQuartzServer(options =>
+            {
+                // when shutting down we want jobs to complete gracefully
+                options.WaitForJobsToComplete = true;
+            });
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -109,7 +126,7 @@ namespace YARG
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            ExecuteTaskServiceCallScheduler.StartAsync().GetAwaiter().GetResult();
+            //ExecuteTaskServiceCallScheduler.StartAsync().GetAwaiter().GetResult();
         }
     }
 }

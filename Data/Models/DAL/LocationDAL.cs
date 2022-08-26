@@ -1,38 +1,39 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using YARG.Models;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using YARG.Models;
 
 namespace YARG.DAL
 {
     public class LocationDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
 
         public LocationDAL(IConfiguration configuration)
         {
-            _config = configuration;
+            _connectionString = configuration.GetConnectionString("GardenConnection");
         }
 
         public async Task<IEnumerable<Location>> GetLocationsAsync()
         {
             List<Location> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetLocations";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
                 while (await sqlDataReader.ReadAsync())
                 {
-                    Location location = new Location
+                    Location location = new()
                     {
                         ID = Guid.Parse(sqlDataReader["id"].ToString()),
                         Name = sqlDataReader["name"].ToString(),
@@ -48,9 +49,13 @@ namespace YARG.DAL
                     lstream.Add(location);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -58,9 +63,10 @@ namespace YARG.DAL
         
         public async Task AddLocationAsync(Location location)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAddLocation";
@@ -79,18 +85,23 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<Location> GetLocationByIDAsync(Guid id)
         {
             Location location = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetLocationByID";
@@ -98,26 +109,28 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
                 await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        location.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                        location.Name = sqlDataReader["name"].ToString();
-                        location.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
-                        location.IsShowOnLandingPage = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isShowOnLandingPage"));
-                        location.CreatedBy = sqlDataReader["createdBy"].ToString();
-                        location.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                        location.ChangedBy = sqlDataReader["changedBy"].ToString();
-                        location.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                        location.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
-                    }
+                    location.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                    location.Name = sqlDataReader["name"].ToString();
+                    location.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
+                    location.IsShowOnLandingPage = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isShowOnLandingPage"));
+                    location.CreatedBy = sqlDataReader["createdBy"].ToString();
+                    location.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                    location.ChangedBy = sqlDataReader["changedBy"].ToString();
+                    location.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                    location.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return location;
@@ -125,9 +138,10 @@ namespace YARG.DAL
 
         public async Task SaveLocationAsync(Location location)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spUpdateLocation";
@@ -144,17 +158,22 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task DeleteLocationAsync(Guid id)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spDeleteLocation";
@@ -165,29 +184,34 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<IEnumerable<Location>> GetLocationsForRecipeAsync()
         {
             List<Location> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetLocationsForRecipe";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
                 while (await sqlDataReader.ReadAsync())
                 {
-                    Location location = new Location
+                    Location location = new()
                     {
                         ID = Guid.Parse(sqlDataReader["id"].ToString()),
                         Name = sqlDataReader["name"].ToString(),
@@ -197,9 +221,13 @@ namespace YARG.DAL
                     lstream.Add(location);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;

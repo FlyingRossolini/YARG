@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 using YARG.Models;
 
 namespace YARG.Data
@@ -96,24 +96,20 @@ namespace YARG.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new MySqlConnection(_connectionString))
-            {
-                await connection.OpenAsync(cancellationToken);
-                return await connection.QuerySingleOrDefaultAsync<ApplicationRole>($@"SELECT * FROM ApplicationRole
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync(cancellationToken);
+            return await connection.QuerySingleOrDefaultAsync<ApplicationRole>($@"SELECT * FROM ApplicationRole
                     WHERE Id = @{nameof(roleId)}", new { roleId });
-            }
         }
 
         public async Task<ApplicationRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using (var connection = new MySqlConnection(_connectionString))
-            {
-                await connection.OpenAsync(cancellationToken);
-                return await connection.QuerySingleOrDefaultAsync<ApplicationRole>($@"SELECT * FROM ApplicationRole
+            using var connection = new MySqlConnection(_connectionString);
+            await connection.OpenAsync(cancellationToken);
+            return await connection.QuerySingleOrDefaultAsync<ApplicationRole>($@"SELECT * FROM ApplicationRole
                     WHERE NormalizedName = @{nameof(normalizedRoleName)}", new { normalizedRoleName });
-            }
         }
 
         public void Dispose()

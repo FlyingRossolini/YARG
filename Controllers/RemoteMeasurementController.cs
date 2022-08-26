@@ -20,9 +20,9 @@ namespace YARG.Controllers
         }
 
         [HttpPost("add-measurement")]
-        public IActionResult AddRemoteMeasurement([FromBody]RemoteMeasurementViewModel measurement)
+        public async Task<IActionResult> AddRemoteMeasurement([FromBody]RemoteMeasurementViewModel measurement)
         {
-            _remoteMeasurementService.AddRemoteMeasurement(measurement);
+            await _remoteMeasurementService.AddRemoteMeasurement(measurement);
             return Ok();
         }
     }

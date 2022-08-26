@@ -1,38 +1,39 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using YARG.Models;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using YARG.Models;
 
 namespace YARG.DAL
 {
     public class LimitTypeDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
 
         public LimitTypeDAL(IConfiguration configuration)
         {
-            _config = configuration;
+            _connectionString = configuration.GetConnectionString("GardenConnection");
         }
 
         public async Task<IEnumerable<LimitType>> GetLimitTypesAsync()
         {
             List<LimitType> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetLimitTypes";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
-
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
                 while (await sqlDataReader.ReadAsync())
                 {
-                    LimitType limitType = new LimitType
+                    LimitType limitType = new()
                     {
                         ID = Guid.Parse(sqlDataReader["id"].ToString()),
                         Name = sqlDataReader["name"].ToString(),
@@ -47,19 +48,24 @@ namespace YARG.DAL
                     lstream.Add(limitType);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
             }
-            
+            finally
+            {
+                await sqlConnection.CloseAsync();
+            }
+
             return lstream;
         }
         
         public async Task AddLimitTypeAsync(LimitType limitType)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAddLimitType";
@@ -77,18 +83,23 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<LimitType> GetLimitTypeByIDAsync(Guid id)
         {
             LimitType limitType = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetLimitTypeByID";
@@ -96,25 +107,27 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
                 await sqlConnection.OpenAsync();
-
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        limitType.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                        limitType.Name = sqlDataReader["name"].ToString();
-                        limitType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
-                        limitType.CreatedBy = sqlDataReader["createdBy"].ToString();
-                        limitType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                        limitType.ChangedBy = sqlDataReader["changedBy"].ToString();
-                        limitType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                        limitType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
-                    }
+                    limitType.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                    limitType.Name = sqlDataReader["name"].ToString();
+                    limitType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
+                    limitType.CreatedBy = sqlDataReader["createdBy"].ToString();
+                    limitType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                    limitType.ChangedBy = sqlDataReader["changedBy"].ToString();
+                    limitType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                    limitType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return limitType;
@@ -122,9 +135,10 @@ namespace YARG.DAL
 
         public async Task SaveLimitTypeAsync(LimitType limitType)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spUpdateLimitType";
@@ -140,17 +154,22 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task DeleteLimitTypeAsync(Guid id)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spDeleteLimitType";
@@ -161,9 +180,13 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
     }

@@ -1,29 +1,28 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using YARG.Common_Types;
 using YARG.Models;
-using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
 
 namespace YARG.DAL
 {
     public class GrowSeasonDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
 
         public GrowSeasonDAL(IConfiguration configuration)
         {
-            _config = configuration;
+            _connectionString = configuration.GetConnectionString("GardenConnection");
         }
 
         public async Task<bool> FlgActiveGrowSeasonAsync()
         {
             bool flg = false;
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spActiveGrowSeason";
@@ -31,15 +30,16 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
-                while (await sqlDataReader.ReadAsync())
-                {
-                    flg = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("flgActiveGrowSeason"));
-                }
+                flg = (bool)await sqlCommand.ExecuteScalarAsync();
+
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return flg;
@@ -48,9 +48,10 @@ namespace YARG.DAL
         public async Task<Guid> IDActiveGrowSeasonAsync()
         {
             Guid id = Guid.Empty;
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spIDofActiveGrowSeason";
@@ -58,15 +59,15 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
-                while (await sqlDataReader.ReadAsync())
-                {
-                    id = Guid.Parse(sqlDataReader["id"].ToString());
-                }
+                id = Guid.Parse((string)await sqlCommand.ExecuteScalarAsync());
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return id;
@@ -75,20 +76,21 @@ namespace YARG.DAL
         public async Task<IEnumerable<GrowSeason>> GetGrowSeasonsAsync()
         {
             List<GrowSeason> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetGrowSeasons";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
                 while (await sqlDataReader.ReadAsync())
                 {
-                    GrowSeason growSeason = new GrowSeason();
+                    GrowSeason growSeason = new();
                     growSeason.ID = Guid.Parse(sqlDataReader["id"].ToString());
                     growSeason.Name = sqlDataReader["name"].ToString();
                     if (sqlDataReader["startDate"] != DBNull.Value)
@@ -116,9 +118,13 @@ namespace YARG.DAL
                     lstream.Add(growSeason);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -126,9 +132,10 @@ namespace YARG.DAL
    
         public async Task AddGrowSeasonAsync(GrowSeason growSeason)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAddGrowSeason";
@@ -153,18 +160,23 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<GrowSeason> GetGrowSeasonByIDAsync(Guid id)
         {
             GrowSeason growSeason = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetGrowSeasonByID";
@@ -172,40 +184,42 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
                 await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
+                    growSeason.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                    growSeason.Name = sqlDataReader["name"].ToString();
+                    if (sqlDataReader["startDate"] != DBNull.Value)
                     {
-                        growSeason.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                        growSeason.Name = sqlDataReader["name"].ToString();
-                        if (sqlDataReader["startDate"] != DBNull.Value)
-                        {
-                            growSeason.StartDate = Convert.ToDateTime(sqlDataReader["startDate"].ToString());
-                        }
-                        if (sqlDataReader["endDate"] != DBNull.Value)
-                        {
-                            growSeason.EndDate = Convert.ToDateTime(sqlDataReader["endDate"].ToString());
-                        }
-                        growSeason.SunriseTime = Convert.ToDateTime(sqlDataReader["sunriseTime"].ToString());
-                        growSeason.SunsetTime = Convert.ToDateTime(sqlDataReader["sunsetTime"].ToString());
-                        growSeason.CropID = Guid.Parse(sqlDataReader["cropID"].ToString());
-                        growSeason.CropName = sqlDataReader["cropName"].ToString();
-                        growSeason.FlgAddMorningSplash = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("flgAddMorningSplash"));
-                        growSeason.FlgAddEveningSplash = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("flgAddEveningSplash"));
-                        growSeason.EFEventsPerDay = sqlDataReader.GetByte(sqlDataReader.GetOrdinal("efEventsPerDay"));
-                        growSeason.IsComplete = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isComplete"));
-                        growSeason.CreatedBy = sqlDataReader["createdBy"].ToString();
-                        growSeason.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                        growSeason.ChangedBy = sqlDataReader["changedBy"].ToString();
-                        growSeason.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                        growSeason.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                        growSeason.StartDate = Convert.ToDateTime(sqlDataReader["startDate"].ToString());
                     }
+                    if (sqlDataReader["endDate"] != DBNull.Value)
+                    {
+                        growSeason.EndDate = Convert.ToDateTime(sqlDataReader["endDate"].ToString());
+                    }
+                    growSeason.SunriseTime = Convert.ToDateTime(sqlDataReader["sunriseTime"].ToString());
+                    growSeason.SunsetTime = Convert.ToDateTime(sqlDataReader["sunsetTime"].ToString());
+                    growSeason.CropID = Guid.Parse(sqlDataReader["cropID"].ToString());
+                    growSeason.CropName = sqlDataReader["cropName"].ToString();
+                    growSeason.FlgAddMorningSplash = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("flgAddMorningSplash"));
+                    growSeason.FlgAddEveningSplash = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("flgAddEveningSplash"));
+                    growSeason.EFEventsPerDay = sqlDataReader.GetByte(sqlDataReader.GetOrdinal("efEventsPerDay"));
+                    growSeason.IsComplete = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isComplete"));
+                    growSeason.CreatedBy = sqlDataReader["createdBy"].ToString();
+                    growSeason.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                    growSeason.ChangedBy = sqlDataReader["changedBy"].ToString();
+                    growSeason.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                    growSeason.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return growSeason;
@@ -214,9 +228,10 @@ namespace YARG.DAL
         
         public async Task SaveGrowSeasonAsync(GrowSeason growSeason)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spUpdateGrowSeason";
@@ -239,18 +254,23 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<DateTime> GetSunriseTodayAsync()
         {
             DateTime dtTemp = DateTime.Today;
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetSunriseToday";
@@ -258,15 +278,15 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
-                while (await sqlDataReader.ReadAsync())
-                {
-                    dtTemp = Convert.ToDateTime(sqlDataReader["sunriseToday"].ToString());
-                }
+                dtTemp = (DateTime)await sqlCommand.ExecuteScalarAsync();
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return dtTemp;
@@ -275,9 +295,10 @@ namespace YARG.DAL
         public async Task<DateTime> GetSunsetToday()
         {
             DateTime dtTemp = DateTime.Today;
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetSunsetToday";
@@ -285,15 +306,15 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
-                while (await sqlDataReader.ReadAsync())
-                {
-                    dtTemp = Convert.ToDateTime(sqlDataReader["sunsetToday"].ToString());
-                }
+                dtTemp = (DateTime)await sqlCommand.ExecuteScalarAsync();
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return dtTemp;

@@ -64,11 +64,11 @@
               "target": "Package",
               "version": "[2.2.0, )"
             },
-            "MySql.Data": {
+            "MySqlConnector": {
               "target": "Package",
-              "version": "[8.0.28, )"
+              "version": "[2.1.12, )"
             },
-            "Quartz": {
+            "Quartz.AspNetCore": {
               "target": "Package",
               "version": "[3.4.0, )"
             },

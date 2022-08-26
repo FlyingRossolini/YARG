@@ -1,35 +1,36 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using YARG.Models;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using YARG.Models;
 
 namespace YARG.DAL
 {
     public class FeedingChartTypeDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
 
         public FeedingChartTypeDAL(IConfiguration configuration)
         {
-            _config = configuration;
+            _connectionString = configuration.GetConnectionString("GardenConnection");
         }
 
         public async Task<IEnumerable<FeedingChartType>> GetFeedingChartTypesAsync()
         {
             List<FeedingChartType> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetFeedingChartTypes";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
-
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
                 while (await sqlDataReader.ReadAsync())
                 {
                     FeedingChartType feedingChartType = new()
@@ -47,9 +48,13 @@ namespace YARG.DAL
                     lstream.Add(feedingChartType);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -57,9 +62,10 @@ namespace YARG.DAL
         
         public async Task AddFeedingChartTypeAsync(FeedingChartType feedingChartType)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAddFeedingChartType";
@@ -77,18 +83,23 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<FeedingChartType> GetFeedingChartTypeByIDAsync(Guid id)
         {
             FeedingChartType feedingChartType = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetFeedingChartTypeByID";
@@ -97,24 +108,26 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        feedingChartType.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                        feedingChartType.Name = sqlDataReader["name"].ToString();
-                        feedingChartType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
-                        feedingChartType.CreatedBy = sqlDataReader["createdBy"].ToString();
-                        feedingChartType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                        feedingChartType.ChangedBy = sqlDataReader["changedBy"].ToString();
-                        feedingChartType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                        feedingChartType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
-                    }
+                    feedingChartType.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                    feedingChartType.Name = sqlDataReader["name"].ToString();
+                    feedingChartType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
+                    feedingChartType.CreatedBy = sqlDataReader["createdBy"].ToString();
+                    feedingChartType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                    feedingChartType.ChangedBy = sqlDataReader["changedBy"].ToString();
+                    feedingChartType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                    feedingChartType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return feedingChartType;
@@ -122,9 +135,10 @@ namespace YARG.DAL
 
         public async Task SaveFeedingChartTypeAsync(FeedingChartType feedingChartType)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spUpdateFeedingChartType";
@@ -140,17 +154,22 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task DeleteFeedingChartTypeAsync(Guid id)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spDeleteFeedingChartType";
@@ -161,9 +180,13 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
     }

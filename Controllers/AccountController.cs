@@ -261,6 +261,8 @@ namespace YARG.Controllers
             return Challenge(properties, provider);
         }
 
+
+
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)

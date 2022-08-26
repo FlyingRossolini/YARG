@@ -20,23 +20,23 @@ namespace YARG.Controllers
         }
 
         [HttpPost("acknowledge-mf-command")]
-        public IActionResult AcknowledgeMixingFanSchedule([FromBody] RemoteHostCommandViewModel remoteHostCommandViewModel)
+        public async Task<IActionResult> AcknowledgeMixingFanSchedule([FromBody] RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
-            _remoteHostService.AcknowledgeMixingFanSchedule(remoteHostCommandViewModel);
+            await _remoteHostService.AcknowledgeMixingFanSchedule(remoteHostCommandViewModel);
             return Ok();
         }
         
         [HttpPost("complete-mf-command")]
-        public IActionResult CompleteMixingFanSchedule([FromBody] RemoteHostCommandViewModel remoteHostCommandViewModel)
+        public async Task<IActionResult> CompleteMixingFanSchedule([FromBody] RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
-            _remoteHostService.CompleteMixingFanSchedule(remoteHostCommandViewModel);
+            await _remoteHostService.CompleteMixingFanSchedule(remoteHostCommandViewModel);
             return Ok();
         }
 
         [HttpPost("error-mf-command")]
-        public IActionResult ErrorMixingFanSchedule([FromBody] RemoteHostErrorViewModel remoteHostErrorViewModel)
+        public async Task<IActionResult> ErrorMixingFanSchedule([FromBody] RemoteHostErrorViewModel remoteHostErrorViewModel)
         {
-            _remoteHostService.ErrorMixingFanSchedule(remoteHostErrorViewModel);
+            await _remoteHostService.ErrorMixingFanSchedule(remoteHostErrorViewModel);
             return Ok();
         }
 

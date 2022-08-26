@@ -1,4 +1,4 @@
-﻿using MySql.Data.MySqlClient;
+﻿using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,77 +12,103 @@ namespace YARG.DAL
 {
     public class WateringScheduleDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
+        private readonly GrowSeasonDAL _growseasonDAL;
+        private readonly PotDAL _potDAL;
+        private readonly LightCycleDAL _lightCycleDAL;
 
         public WateringScheduleDAL(IConfiguration configuration)
         {
-            _config = configuration;
+            _connectionString = configuration.GetConnectionString("GardenConnection");
+            _growseasonDAL = new(configuration);
+            _potDAL = new(configuration);
+            _lightCycleDAL = new(configuration);
         }
 
-        public void DeleteAllWateringSchedules()
+        private async Task DeleteAllWateringSchedulesAsync()
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
-            {
-                MySqlCommand sqlCmd = new MySqlCommand("spDeleteAllWateringSchedules", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
+            using MySqlConnection sqlConnection = new(_connectionString);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            try
+            {
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteAllWateringSchedules";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
             }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
+            }
+
         }
 
-        public void AddWateringSchedule(WateringSchedule wateringSchedule)
+        public async Task AddWateringSchedule(WateringSchedule wateringSchedule)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
-            {
-                MySqlCommand sqlCmd = new MySqlCommand("spAddWateringSchedule", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("id", wateringSchedule.ID.ToString());
-                sqlCmd.Parameters.AddWithValue("potID", wateringSchedule.PotID.ToString());
-                sqlCmd.Parameters.AddWithValue("efAmount", wateringSchedule.EFAmount);
-                sqlCmd.Parameters.AddWithValue("efDuration", wateringSchedule.EFDuration);
-                sqlCmd.Parameters.AddWithValue("efStartTime", wateringSchedule.EFStartTime);
-                sqlCmd.Parameters.AddWithValue("rollover", wateringSchedule.Rollover);
-                sqlCmd.Parameters.AddWithValue("isErrorState", wateringSchedule.IsErrorState);
-                sqlCmd.Parameters.AddWithValue("isAcknowledged", wateringSchedule.IsAcknowledged);
-                sqlCmd.Parameters.AddWithValue("isCompleted", wateringSchedule.IsCompleted);
-                sqlCmd.Parameters.AddWithValue("createdBy", wateringSchedule.CreatedBy);
-                sqlCmd.Parameters.AddWithValue("createDate", wateringSchedule.CreateDate);
-                sqlCmd.Parameters.AddWithValue("changedBy", wateringSchedule.ChangedBy);
-                sqlCmd.Parameters.AddWithValue("changeDate", wateringSchedule.ChangeDate);
-                sqlCmd.Parameters.AddWithValue("isActive", wateringSchedule.IsActive);
+            using MySqlConnection sqlConnection = new(_connectionString);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            try
+            {
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAddWateringSchedule";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("id", wateringSchedule.ID.ToString());
+                sqlCommand.Parameters.AddWithValue("potID", wateringSchedule.PotID.ToString());
+                sqlCommand.Parameters.AddWithValue("efAmount", wateringSchedule.EFAmount);
+                sqlCommand.Parameters.AddWithValue("efDuration", wateringSchedule.EFDuration);
+                sqlCommand.Parameters.AddWithValue("efStartTime", wateringSchedule.EFStartTime);
+                sqlCommand.Parameters.AddWithValue("rollover", wateringSchedule.Rollover);
+                sqlCommand.Parameters.AddWithValue("isErrorState", wateringSchedule.IsErrorState);
+                sqlCommand.Parameters.AddWithValue("isAcknowledged", wateringSchedule.IsAcknowledged);
+                sqlCommand.Parameters.AddWithValue("isCompleted", wateringSchedule.IsCompleted);
+                sqlCommand.Parameters.AddWithValue("createdBy", wateringSchedule.CreatedBy);
+                sqlCommand.Parameters.AddWithValue("createDate", wateringSchedule.CreateDate);
+                sqlCommand.Parameters.AddWithValue("changedBy", wateringSchedule.ChangedBy);
+                sqlCommand.Parameters.AddWithValue("changeDate", wateringSchedule.ChangeDate);
+                sqlCommand.Parameters.AddWithValue("isActive", wateringSchedule.IsActive);
+
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task RebuildWateringSchedule()
         {
-            DeleteAllWateringSchedules();
+            await DeleteAllWateringSchedulesAsync();
 
-            GrowSeasonDAL growSeasonDAL = new(_config);
+            //GrowSeasonDAL growSeasonDAL = new(_configuration);
 
-            GrowSeason growSeason = await growSeasonDAL.GetGrowSeasonByIDAsync(await growSeasonDAL.IDActiveGrowSeasonAsync());
+            GrowSeason growSeason = await _growseasonDAL.GetGrowSeasonByIDAsync(await _growseasonDAL.IDActiveGrowSeasonAsync());
 
-            PotDAL potDAL = new(_config);
+            //PotDAL potDAL = new(_config);
 
-            int cntActiveBuckets = (from pot in await potDAL.GetPotsAsync()
+            int cntActiveBuckets = (from pot in await _potDAL.GetPotsAsync()
                                     where pot.IsActive == true
                                     select pot.ID).Count();
 
-            LightCycleDAL lightCycleDAL = new(_config);
+            //LightCycleDAL lightCycleDAL = new(_config);
 
             //CHANGE FORMULA FOR WEEK LIGHTCYCLE, NOT growSeason anymore.
             //double amtMinsOfDaylight = await lightCycleDAL.GetLightCycleByIDAsync(await growSeason.LightCycleID).DaylightHours * 60;
 
-            foreach (Pot p in await potDAL.GetPotsAsync())
+            foreach (Pot p in await _potDAL.GetPotsAsync())
             {
 
                 if (p.IsActive)
@@ -115,7 +141,7 @@ namespace YARG.DAL
                         ws.ChangeDate = DateTime.Now;
                         ws.IsActive = true;
 
-                        AddWateringSchedule(ws);
+                        await AddWateringSchedule(ws);
                     }
 
                     if (growSeason.FlgAddMorningSplash)
@@ -146,7 +172,7 @@ namespace YARG.DAL
                         ws.ChangeDate = DateTime.Now;
                         ws.IsActive = true;
 
-                        AddWateringSchedule(ws);
+                        await AddWateringSchedule(ws);
                     }
                     if (growSeason.FlgAddEveningSplash)
                     {
@@ -176,7 +202,7 @@ namespace YARG.DAL
                         ws.ChangeDate = DateTime.Now;
                         ws.IsActive = true;
 
-                        AddWateringSchedule(ws);
+                        await AddWateringSchedule (ws);
                     }
 
                 }
@@ -189,20 +215,21 @@ namespace YARG.DAL
         public async Task<IEnumerable<WateringSchedule>> GetWateringSchedulesAsync()
         {
             List<WateringSchedule> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetWateringSchedules";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
-
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
                 while (await sqlDataReader.ReadAsync())
                 {
-                    WateringSchedule wateringSchedule = new WateringSchedule
+                    WateringSchedule wateringSchedule = new()
                     {
                         ID = Guid.Parse(sqlDataReader["id"].ToString()),
                         PotID = Guid.Parse(sqlDataReader["potID"].ToString()),
@@ -225,50 +252,72 @@ namespace YARG.DAL
                     lstream.Add(wateringSchedule);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
         }
 
-        public void AcknowledgeWateringSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
+        public async Task AcknowledgeWateringSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            using MySqlConnection sqlConnection = new(_connectionString);
+
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spAcknowledgeWateringSchedule", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("wateringScheduleID", remoteHostCommandViewModel.CommandID.ToString());
-                sqlCmd.Parameters.AddWithValue("remoteHostName", remoteHostCommandViewModel.RemoteHostname);
-                sqlCmd.Parameters.AddWithValue("ackDate", DateTime.Now);
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spAcknowledgeWateringSchedule";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("wateringScheduleID", remoteHostCommandViewModel.CommandID.ToString());
+                sqlCommand.Parameters.AddWithValue("remoteHostName", remoteHostCommandViewModel.RemoteHostname);
+                sqlCommand.Parameters.AddWithValue("ackDate", DateTime.Now);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
             }
-
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
+            }
         }
 
-        public void CompleteWateringSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
+        public async Task CompleteWateringSchedule(RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            using MySqlConnection sqlConnection = new(_connectionString);
+
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spCompleteWateringSchedule", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("wateringScheduleID", remoteHostCommandViewModel.CommandID.ToString());
-                sqlCmd.Parameters.AddWithValue("remoteHostName", remoteHostCommandViewModel.RemoteHostname);
-                sqlCmd.Parameters.AddWithValue("ackDate", DateTime.Now);
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spCompleteWateringSchedule";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("wateringScheduleID", remoteHostCommandViewModel.CommandID.ToString());
+                sqlCommand.Parameters.AddWithValue("remoteHostName", remoteHostCommandViewModel.RemoteHostname);
+                sqlCommand.Parameters.AddWithValue("ackDate", DateTime.Now);
 
-                sqlConnection.Open();
-                sqlCmd.ExecuteNonQuery();
-                sqlCmd.Dispose();
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                await sqlCommand.ExecuteNonQueryAsync();
+
             }
-
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
+            }
         }
 
         public async Task<WateringScheduleCommand> AreWeThereYetAsync()
@@ -276,39 +325,59 @@ namespace YARG.DAL
             WateringScheduleCommand wateringScheduleCommand = null;
             Guid wsID = Guid.Empty;
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            using MySqlConnection sqlConnection = new(_connectionString);
+            try
             {
-                MySqlCommand sqlCmd = new MySqlCommand("spGetCurrentWateringScheduleID", sqlConnection);
-                sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCmd.Parameters.AddWithValue("dtTheDate", DateTime.Now);
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetCurrentWateringScheduleID";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("dtTheDate", DateTime.Now);
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCmd.ExecuteReader();
-                sqlCmd.Dispose();
-
-                while (sqlDataReader.Read())
-                {
-                    wsID = Guid.Parse(sqlDataReader["id"].ToString());
-                }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+                await sqlConnection.OpenAsync();
+                wsID = Guid.Parse((string)await sqlCommand.ExecuteScalarAsync());
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
-            PotDAL potDAL = new(_config);
+            //{
+            //    MySqlCommand sqlCmd = new("spGetCurrentWateringScheduleID", sqlConnection);
+            //    sqlCmd.CommandType = System.Data.CommandType.StoredProcedure;
+            //    sqlCmd.Parameters.AddWithValue("dtTheDate", DateTime.Now);
+
+            //    sqlConnection.Open();
+            //    MySqlDataReader sqlDataReader = sqlCmd.ExecuteReader();
+            //    sqlCmd.Dispose();
+
+            //    while (sqlDataReader.Read())
+            //    {
+            //        wsID = Guid.Parse(sqlDataReader["id"].ToString());
+            //    }
+
+            //    sqlDataReader.Close();
+            //    sqlDataReader.Dispose();
+
+            //    sqlConnection.Close();
+            //    sqlConnection.Dispose();
+            //}
+
+            //PotDAL potDAL = new(_config);
 
             if (wsID != Guid.Empty)
             {
-                WateringSchedule ws = GetWateringScheduleByID(wsID);
+                WateringSchedule ws = await GetWateringScheduleByID(wsID);
                 wateringScheduleCommand = new();
                 wateringScheduleCommand.WateringScheduleID = ws.ID;
                 wateringScheduleCommand.PotNumber = ws.PotQueuePosition;
                 wateringScheduleCommand.Amount = Convert.ToInt16(ws.EFAmount * 1000);
-                wateringScheduleCommand.EbbSpeed = await potDAL.GetEbbSpeedFromQueuePositionAsync(ws.PotQueuePosition);
-                wateringScheduleCommand.FlowSpeed = await potDAL.GetFlowSpeedFromQueuePositionAsync(ws.PotQueuePosition);
+                wateringScheduleCommand.EbbSpeed = await _potDAL.GetEbbSpeedFromQueuePositionAsync(ws.PotQueuePosition);
+                wateringScheduleCommand.FlowSpeed = await _potDAL.GetFlowSpeedFromQueuePositionAsync(ws.PotQueuePosition);
                 wateringScheduleCommand.Duration = ws.EFDuration;
 
             } 
@@ -316,47 +385,49 @@ namespace YARG.DAL
             return wateringScheduleCommand;
 
         }
-        private WateringSchedule GetWateringScheduleByID(Guid wsID)
+        private async Task<WateringSchedule> GetWateringScheduleByID(Guid wsID)
         {
             WateringSchedule wateringSchedule = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
 
-            using (MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection")))
+            try
             {
-                MySqlCommand sqlCommand = new MySqlCommand("spGetWateringScheduleByID", sqlConnection);
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spGetWateringScheduleByID";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCommand.Parameters.AddWithValue("thisid",wsID.ToString());
+                sqlCommand.Parameters.AddWithValue("thisid", wsID.ToString());
 
-                sqlConnection.Open();
-                MySqlDataReader sqlDataReader = sqlCommand.ExecuteReader();
-                sqlCommand.Dispose();
-
-                while (sqlDataReader.Read())
+                await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
+                while (await sqlDataReader.ReadAsync())
                 {
-                    {
-                        wateringSchedule.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                        wateringSchedule.PotID = Guid.Parse(sqlDataReader["potID"].ToString());
-                        wateringSchedule.PotName = sqlDataReader["potName"].ToString();
-                        wateringSchedule.PotQueuePosition = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("potQueuePosition"));
-                        wateringSchedule.EFStartTime = Convert.ToDateTime(sqlDataReader["efStartTime"].ToString());
-                        wateringSchedule.EFEndTime = Convert.ToDateTime(sqlDataReader["efEndTime"].ToString());
-                        wateringSchedule.EFDuration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("efDuration"));
-                        wateringSchedule.EFAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("efAmount"));
-                        wateringSchedule.IsAcknowledged = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isAcknowledged"));
-                        wateringSchedule.IsCompleted = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isCompleted"));
-                        wateringSchedule.IsErrorState = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isErrorState"));
-                        wateringSchedule.CreatedBy = sqlDataReader["createdBy"].ToString();
-                        wateringSchedule.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                        wateringSchedule.ChangedBy = sqlDataReader["changedBy"].ToString();
-                        wateringSchedule.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                        wateringSchedule.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
-                    };
+                    wateringSchedule.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                    wateringSchedule.PotID = Guid.Parse(sqlDataReader["potID"].ToString());
+                    wateringSchedule.PotName = sqlDataReader["potName"].ToString();
+                    wateringSchedule.PotQueuePosition = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("potQueuePosition"));
+                    wateringSchedule.EFStartTime = Convert.ToDateTime(sqlDataReader["efStartTime"].ToString());
+                    wateringSchedule.EFEndTime = Convert.ToDateTime(sqlDataReader["efEndTime"].ToString());
+                    wateringSchedule.EFDuration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("efDuration"));
+                    wateringSchedule.EFAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("efAmount"));
+                    wateringSchedule.IsAcknowledged = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isAcknowledged"));
+                    wateringSchedule.IsCompleted = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isCompleted"));
+                    wateringSchedule.IsErrorState = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isErrorState"));
+                    wateringSchedule.CreatedBy = sqlDataReader["createdBy"].ToString();
+                    wateringSchedule.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                    wateringSchedule.ChangedBy = sqlDataReader["changedBy"].ToString();
+                    wateringSchedule.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                    wateringSchedule.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
-
-                sqlDataReader.Close();
-                sqlDataReader.Dispose();
-
-                sqlConnection.Close();
-                sqlConnection.Dispose();
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return wateringSchedule;

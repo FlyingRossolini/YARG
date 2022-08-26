@@ -101,9 +101,9 @@ namespace YARG.Models
         // POST: MeasurementTypeController/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            _measurementTypeDAL.DeleteMeasurementTypeAsync(id);
+            await _measurementTypeDAL.DeleteMeasurementTypeAsync(id);
 
             return RedirectToAction(nameof(Index));
         }

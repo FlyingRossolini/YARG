@@ -1,27 +1,28 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using YARG.Models;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using YARG.Models;
 
 namespace YARG.DAL
 {
     public class ChemicalTypeDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
 
-        public ChemicalTypeDAL(IConfiguration config)
+        public ChemicalTypeDAL(IConfiguration configuration)
         {
-            _config = config;
+            _connectionString = configuration.GetConnectionString("GardenConnection");
         }
 
         public async Task<IEnumerable<ChemicalType>> GetChemicalTypesAsync()
         {
             List<ChemicalType> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetChemicalTypes";
@@ -29,32 +30,34 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
+                    ChemicalType chemicalType = new()
                     {
-                        ChemicalType chemicalType = new ChemicalType
-                        {
-                            ID = Guid.Parse(sqlDataReader["id"].ToString()),
-                            Name = sqlDataReader["name"].ToString(),
-                            IsH2O2 = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isH2O2")),
-                            IsPhUp = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isPhUp")),
-                            IsPhDown = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isPhDown")),
-                            Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting")),
-                            CreatedBy = sqlDataReader["createdBy"].ToString(),
-                            CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString()),
-                            ChangedBy = sqlDataReader["changedBy"].ToString(),
-                            ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString()),
-                            IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"))
-                        };
+                        ID = Guid.Parse(sqlDataReader["id"].ToString()),
+                        Name = sqlDataReader["name"].ToString(),
+                        IsH2O2 = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isH2O2")),
+                        IsPhUp = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isPhUp")),
+                        IsPhDown = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isPhDown")),
+                        Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting")),
+                        CreatedBy = sqlDataReader["createdBy"].ToString(),
+                        CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString()),
+                        ChangedBy = sqlDataReader["changedBy"].ToString(),
+                        ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString()),
+                        IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"))
+                    };
 
-                        lstream.Add(chemicalType);
-                    }
+                    lstream.Add(chemicalType);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -62,9 +65,10 @@ namespace YARG.DAL
         
         public async Task AddChemicalTypeAsync(ChemicalType chemicalType)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAddChemicalType";
@@ -85,18 +89,23 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<ChemicalType> GetChemicalTypeByIDAsync(Guid id)
         {
             ChemicalType chemicalType = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetChemicalTypeByID";
@@ -105,7 +114,7 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
                 while (await sqlDataReader.ReadAsync())
                 {
                     chemicalType.ID = Guid.Parse(sqlDataReader["id"].ToString());
@@ -121,9 +130,13 @@ namespace YARG.DAL
                     chemicalType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return chemicalType;
@@ -131,9 +144,10 @@ namespace YARG.DAL
 
         public async Task SaveChemicalTypeAsync(ChemicalType chemicalType)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spUpdateChemicalType";
@@ -152,17 +166,22 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task DeleteChemicalType(Guid id)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spDeleteChemicalType";
@@ -170,11 +189,14 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
                 await sqlConnection.OpenAsync();
                 await sqlCommand.ExecuteNonQueryAsync();
-
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
         }

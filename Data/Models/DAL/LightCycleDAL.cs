@@ -1,38 +1,39 @@
-﻿using YARG.Models;
-using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
+﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YARG.Models;
 
 namespace YARG.DAL
 {
     public class LightCycleDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
 
         public LightCycleDAL(IConfiguration configuration)
         {
-            _config = configuration;
+            _connectionString = configuration.GetConnectionString("GardenConnection");
         }
 
         public async Task<IEnumerable<LightCycle>> GetLightCyclesAsync()
         {
             List<LightCycle> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetLightCycles";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
-
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
                 while (await sqlDataReader.ReadAsync())
                 {
-                    LightCycle lightCycle = new LightCycle
+                    LightCycle lightCycle = new()
                     {
                         ID = Guid.Parse(sqlDataReader["id"].ToString()),
                         Name = sqlDataReader["name"].ToString(),
@@ -47,9 +48,13 @@ namespace YARG.DAL
                     lstream.Add(lightCycle);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -57,9 +62,10 @@ namespace YARG.DAL
     
         public async Task AddLightCycleAsync(LightCycle lightCycle)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAddLightCycle";
@@ -77,18 +83,23 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<LightCycle> GetLightCycleByIDAsync(Guid id)
         {
             LightCycle lightCycle = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetLightCycleByID";
@@ -96,25 +107,27 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
                 await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        lightCycle.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                        lightCycle.Name = sqlDataReader["name"].ToString();
-                        lightCycle.DaylightHours = sqlDataReader.GetByte(sqlDataReader.GetOrdinal("daylightHours"));
-                        lightCycle.CreatedBy = sqlDataReader["createdBy"].ToString();
-                        lightCycle.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                        lightCycle.ChangedBy = sqlDataReader["changedBy"].ToString();
-                        lightCycle.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                        lightCycle.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
-                    }
+                    lightCycle.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                    lightCycle.Name = sqlDataReader["name"].ToString();
+                    lightCycle.DaylightHours = sqlDataReader.GetByte(sqlDataReader.GetOrdinal("daylightHours"));
+                    lightCycle.CreatedBy = sqlDataReader["createdBy"].ToString();
+                    lightCycle.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                    lightCycle.ChangedBy = sqlDataReader["changedBy"].ToString();
+                    lightCycle.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                    lightCycle.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lightCycle;
@@ -122,9 +135,10 @@ namespace YARG.DAL
     
         public async Task SaveLightCycleAsync(LightCycle lightCycle)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spUpdateLightCycle";
@@ -136,22 +150,25 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("thischangeDate", lightCycle.ChangeDate);
                 sqlCommand.Parameters.AddWithValue("thisisActive", lightCycle.IsActive);
 
-
                 await sqlConnection.OpenAsync();
                 await sqlCommand.ExecuteNonQueryAsync();
-
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task DeleteLightCycleAsync(Guid id)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spDeleteLightCycle";
@@ -160,11 +177,14 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
                 await sqlCommand.ExecuteNonQueryAsync();
-
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
     }

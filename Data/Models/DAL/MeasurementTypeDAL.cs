@@ -1,38 +1,39 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using YARG.Models;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using YARG.Models;
 
 namespace YARG.DAL
 {
     public class MeasurementTypeDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
 
         public MeasurementTypeDAL(IConfiguration configuration)
         {
-            _config = configuration;
+            _connectionString = configuration.GetConnectionString("GardenConnection");
         }
 
         public async Task<IEnumerable<MeasurementType>> GetMeasurementTypesAsync()
         {
             List<MeasurementType> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetMeasurementTypes";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
                 while (await sqlDataReader.ReadAsync())
                 {
-                    MeasurementType measurementType = new MeasurementType
+                    MeasurementType measurementType = new()
                     {
                         ID = Guid.Parse(sqlDataReader["id"].ToString()),
                         Name = sqlDataReader["name"].ToString(),
@@ -47,9 +48,13 @@ namespace YARG.DAL
                     lstream.Add(measurementType);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -57,9 +62,10 @@ namespace YARG.DAL
         
         public async Task AddMeasurementTypeAsync(MeasurementType measurementType)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAddMeasurementType";
@@ -76,18 +82,23 @@ namespace YARG.DAL
                 await sqlConnection.OpenAsync();
                 await sqlCommand.ExecuteNonQueryAsync();
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<MeasurementType> GetMeasurementTypeByIDAsync(Guid id)
         {
             MeasurementType measurementType = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetMeasurementTypeByID";
@@ -95,25 +106,27 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
                 await sqlConnection.OpenAsync();
-
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        measurementType.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                        measurementType.Name = sqlDataReader["name"].ToString();
-                        measurementType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
-                        measurementType.CreatedBy = sqlDataReader["createdBy"].ToString();
-                        measurementType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                        measurementType.ChangedBy = sqlDataReader["changedBy"].ToString();
-                        measurementType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                        measurementType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
-                    }
+                    measurementType.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                    measurementType.Name = sqlDataReader["name"].ToString();
+                    measurementType.Sorting = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("sorting"));
+                    measurementType.CreatedBy = sqlDataReader["createdBy"].ToString();
+                    measurementType.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                    measurementType.ChangedBy = sqlDataReader["changedBy"].ToString();
+                    measurementType.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                    measurementType.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return measurementType;
@@ -121,9 +134,10 @@ namespace YARG.DAL
 
         public async Task SaveMeasurementTypeAsync(MeasurementType measurementType)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spUpdateMeasurementType";
@@ -139,17 +153,22 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task DeleteMeasurementTypeAsync(Guid id)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spDeleteMeasurementType";
@@ -160,9 +179,13 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
     }

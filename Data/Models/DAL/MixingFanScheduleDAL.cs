@@ -1,29 +1,29 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using YARG.Models;
 using YARG.Common_Types;
 using YARG.Data.Models.ViewModels;
-using Microsoft.Extensions.Configuration;
+using YARG.Models;
 
 namespace YARG.DAL
 {
     public class MixingFanScheduleDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
 
         public MixingFanScheduleDAL(IConfiguration configuration)
         {
-            _config = configuration;
+            _connectionString = configuration.GetConnectionString("GardenConnection");
         }
 
         public async Task DeleteAllMixingFanSchedulesByJarIDAsync(Guid jarID)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spDeleteMixingFanScheduleByJarID";
@@ -34,17 +34,22 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task PrepMixingFanScheduleByIDAsync(Guid jarID)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spPrepMixingFanScheduleByID";
@@ -55,17 +60,22 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task AddMixingFanScheduleAsync(MixingFanSchedule mixingFanSchedule)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAddMixingFanSchedule";
@@ -89,9 +99,13 @@ namespace YARG.DAL
                 await sqlConnection.OpenAsync();
                 await sqlCommand.ExecuteNonQueryAsync();
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
@@ -126,17 +140,18 @@ namespace YARG.DAL
         public async Task<IEnumerable<MixingFanSchedule>> GetMixingFanSchedulesAsync()
         {
             List<MixingFanSchedule> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetMixingFanSchedules";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
                 while (await sqlDataReader.ReadAsync())
                 {
                     MixingFanSchedule mixingFanSchedule = new();
@@ -171,9 +186,13 @@ namespace YARG.DAL
                     lstream.Add(mixingFanSchedule);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -181,9 +200,10 @@ namespace YARG.DAL
 
         public async Task AcknowledgeMixingFanScheduleAsync(RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAcknowledgeMixingFanSchedule";
@@ -196,17 +216,22 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task CompleteMixingFanScheduleAsync(RemoteHostCommandViewModel remoteHostCommandViewModel)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spCompleteMixingFanSchedule";
@@ -219,18 +244,23 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
-        public async Task <IEnumerable<MixingFanScheduleCommand>> AreWeThereYetAsync()
+        public async Task<IEnumerable<MixingFanScheduleCommand>> AreWeThereYetAsync()
         {
             List<MixingFanScheduleCommand> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetCurrentMixingFanSchedules";
@@ -238,25 +268,27 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("dtTheDate", DateTime.Now);
 
                 await sqlConnection.OpenAsync();
-
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        MixingFanScheduleCommand mixingFanScheduleCommand = new();
-                        mixingFanScheduleCommand.FanNumber = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("position"));
-                        mixingFanScheduleCommand.PumpSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("pumpSpeed"));
-                        mixingFanScheduleCommand.OverSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixFanOverSpeed"));
-                        mixingFanScheduleCommand.Duration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mfDuration"));
-                        mixingFanScheduleCommand.MixingFanScheduleID = Guid.Parse(sqlDataReader["id"].ToString());
+                    MixingFanScheduleCommand mixingFanScheduleCommand = new();
+                    mixingFanScheduleCommand.FanNumber = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("position"));
+                    mixingFanScheduleCommand.PumpSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("pumpSpeed"));
+                    mixingFanScheduleCommand.OverSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixFanOverSpeed"));
+                    mixingFanScheduleCommand.Duration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mfDuration"));
+                    mixingFanScheduleCommand.MixingFanScheduleID = Guid.Parse(sqlDataReader["id"].ToString());
 
-                        lstream.Add(mixingFanScheduleCommand);
-                    }
+                    lstream.Add(mixingFanScheduleCommand);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -265,9 +297,10 @@ namespace YARG.DAL
         private async Task<MixingFanSchedule> GetMixingFanScheduleByID(Guid mfsID)
         {
             MixingFanSchedule mixingFanSchedule = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetMixingFanScheduleByID";
@@ -275,45 +308,47 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("thisid", mfsID.ToString());
 
                 await sqlConnection.OpenAsync();
-
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
+                    mixingFanSchedule.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                    mixingFanSchedule.JarID = Guid.Parse(sqlDataReader["jarID"].ToString());
+                    mixingFanSchedule.JarChemicalName = sqlDataReader["jarChemicalName"].ToString();
+                    mixingFanSchedule.Position = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("position"));
+                    mixingFanSchedule.PumpSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("pumpSpeed"));
+                    mixingFanSchedule.MFStartTime = Convert.ToDateTime(sqlDataReader["mfStartTime"].ToString());
+                    mixingFanSchedule.MFEndTime = Convert.ToDateTime(sqlDataReader["mfEndTime"].ToString());
+                    mixingFanSchedule.MFDuration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mfDuration"));
+                    mixingFanSchedule.IsAcknowledged = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isAcknowledged"));
+                    mixingFanSchedule.IsCompleted = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isCompleted"));
+                    mixingFanSchedule.IsErrorState = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isErrorState"));
+                    if (sqlDataReader["errorDate"] != DBNull.Value)
                     {
-                        mixingFanSchedule.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                        mixingFanSchedule.JarID = Guid.Parse(sqlDataReader["jarID"].ToString());
-                        mixingFanSchedule.JarChemicalName = sqlDataReader["jarChemicalName"].ToString();
-                        mixingFanSchedule.Position = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("position"));
-                        mixingFanSchedule.PumpSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("pumpSpeed"));
-                        mixingFanSchedule.MFStartTime = Convert.ToDateTime(sqlDataReader["mfStartTime"].ToString());
-                        mixingFanSchedule.MFEndTime = Convert.ToDateTime(sqlDataReader["mfEndTime"].ToString());
-                        mixingFanSchedule.MFDuration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mfDuration"));
-                        mixingFanSchedule.IsAcknowledged = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isAcknowledged"));
-                        mixingFanSchedule.IsCompleted = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isCompleted"));
-                        mixingFanSchedule.IsErrorState = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isErrorState"));
-                        if (sqlDataReader["errorDate"] != DBNull.Value)
-                        {
-                            mixingFanSchedule.ErrorDate = Convert.ToDateTime(sqlDataReader["errorDate"].ToString());
-                        }
-                        if (sqlDataReader["completeDate"] != DBNull.Value)
-                        {
-                            mixingFanSchedule.CompleteDate = Convert.ToDateTime(sqlDataReader["completeDate"].ToString());
-                        }
-                        if (sqlDataReader["acknowledgeDate"] != DBNull.Value)
-                        {
-                            mixingFanSchedule.AcknowledgeDate = Convert.ToDateTime(sqlDataReader["acknowledgeDate"].ToString());
-                        }
-                        mixingFanSchedule.CreatedBy = sqlDataReader["createdBy"].ToString();
-                        mixingFanSchedule.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                        mixingFanSchedule.ChangedBy = sqlDataReader["changedBy"].ToString();
-                        mixingFanSchedule.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                        mixingFanSchedule.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
+                        mixingFanSchedule.ErrorDate = Convert.ToDateTime(sqlDataReader["errorDate"].ToString());
                     }
+                    if (sqlDataReader["completeDate"] != DBNull.Value)
+                    {
+                        mixingFanSchedule.CompleteDate = Convert.ToDateTime(sqlDataReader["completeDate"].ToString());
+                    }
+                    if (sqlDataReader["acknowledgeDate"] != DBNull.Value)
+                    {
+                        mixingFanSchedule.AcknowledgeDate = Convert.ToDateTime(sqlDataReader["acknowledgeDate"].ToString());
+                    }
+                    mixingFanSchedule.CreatedBy = sqlDataReader["createdBy"].ToString();
+                    mixingFanSchedule.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                    mixingFanSchedule.ChangedBy = sqlDataReader["changedBy"].ToString();
+                    mixingFanSchedule.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                    mixingFanSchedule.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return mixingFanSchedule;

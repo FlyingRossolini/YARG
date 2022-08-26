@@ -1,37 +1,39 @@
-﻿using YARG.Models;
-using Microsoft.Extensions.Configuration;
-using MySql.Data.MySqlClient;
+﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using YARG.Models;
 
 namespace YARG.DAL
 {
     public class PotDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
+
         public PotDAL(IConfiguration configuration)
         {
-            _config = configuration;
+            _connectionString = configuration.GetConnectionString("GardenConnection");
         }
 
         public async Task<IEnumerable<Pot>> GetPotsAsync()
         {
             List<Pot> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetPots";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
                 while (await sqlDataReader.ReadAsync())
                 {
-                    Pot pot = new Pot
+                    Pot pot = new()
                     {
                         ID = Guid.Parse(sqlDataReader["id"].ToString()),
                         Name = sqlDataReader["name"].ToString(),
@@ -50,9 +52,13 @@ namespace YARG.DAL
                     lstream.Add(pot);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -61,20 +67,21 @@ namespace YARG.DAL
         public async Task<IEnumerable<Pot>> GetActivePotsAsync()
         {
             List<Pot> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetPots";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
-
-                await using MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
                 while (await sqlDataReader.ReadAsync())
                 {
-                    Pot pot = new Pot
+                    Pot pot = new()
                     {
                         ID = Guid.Parse(sqlDataReader["id"].ToString()),
                         Name = sqlDataReader["name"].ToString(),
@@ -96,9 +103,13 @@ namespace YARG.DAL
                     }
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -106,9 +117,10 @@ namespace YARG.DAL
 
         public async Task AddPotAsync(Pot pot)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAddPot";
@@ -130,18 +142,23 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<Pot> GetPotByIDAsync(Guid id)
         {
             Pot pot = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetPotByID";
@@ -149,28 +166,30 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
                 await sqlConnection.OpenAsync();
-
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        pot.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                        pot.Name = sqlDataReader["name"].ToString();
-                        pot.EFDuration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("efDuration"));
-                        pot.EFAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("efAmount"));
-                        pot.EbbSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("ebbSpeed"));
-                        pot.FlowSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("flowSpeed"));
-                        pot.CreatedBy = sqlDataReader["createdBy"].ToString();
-                        pot.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                        pot.ChangedBy = sqlDataReader["changedBy"].ToString();
-                        pot.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                        pot.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
-                    }
+                    pot.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                    pot.Name = sqlDataReader["name"].ToString();
+                    pot.EFDuration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("efDuration"));
+                    pot.EFAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("efAmount"));
+                    pot.EbbSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("ebbSpeed"));
+                    pot.FlowSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("flowSpeed"));
+                    pot.CreatedBy = sqlDataReader["createdBy"].ToString();
+                    pot.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                    pot.ChangedBy = sqlDataReader["changedBy"].ToString();
+                    pot.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                    pot.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return pot;
@@ -179,9 +198,10 @@ namespace YARG.DAL
         public async Task<short> PotCountAsync()
         {
             short count = 0;
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spPotCount";
@@ -189,17 +209,21 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
-                {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        count = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("cntPots"));
-                    }
-                }
+                //await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                //while (await sqlDataReader.ReadAsync())
+                //{
+                //    count = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("cntPots"));
+                //}
+
+                count = Convert.ToInt16((long)await sqlCommand.ExecuteScalarAsync());
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return count;
@@ -217,9 +241,10 @@ namespace YARG.DAL
                 flgUpdateWateringSchedule = true;
             }
 
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spUpdatePot";
@@ -238,9 +263,13 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return flgUpdateWateringSchedule;
@@ -248,9 +277,10 @@ namespace YARG.DAL
 
         public async Task DeletePotAsync(Guid id)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spDeletePotsFromWateringSchedule";
@@ -260,54 +290,41 @@ namespace YARG.DAL
                 await sqlConnection.OpenAsync();
                 await sqlCommand.ExecuteNonQueryAsync();
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            try
-            {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
-                using MySqlCommand sqlCommand = new();
-                sqlCommand.Connection = sqlConnection;
-                sqlCommand.CommandText = "spDeletePot";
-                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
+                using MySqlCommand sqlCommand2 = new();
+                sqlCommand2.Connection = sqlConnection;
+                sqlCommand2.CommandText = "spDeletePot";
+                sqlCommand2.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand2.Parameters.AddWithValue("thisid", id.ToString());
 
                 await sqlConnection.OpenAsync();
-                await sqlCommand.ExecuteNonQueryAsync();
+                await sqlCommand2.ExecuteNonQueryAsync();
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-
-            try
-            {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
-                using MySqlCommand sqlCommand = new();
-                sqlCommand.Connection = sqlConnection;
-                sqlCommand.CommandText = "spFixPotQueuePositions";
-                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                using MySqlCommand sqlCommand3 = new();
+                sqlCommand3.Connection = sqlConnection;
+                sqlCommand3.CommandText = "spFixPotQueuePositions";
+                sqlCommand3.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
-                await sqlCommand.ExecuteNonQueryAsync();
+                await sqlCommand3.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
         }
 
         public async Task<short> GetNextQueuePositionAsync()
         {
             short r = 0;
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetNextPotQueuePosition";
@@ -315,28 +332,28 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
-                {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        r = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("queuePos"));
-                    }
-                }
+                r = (short)await sqlCommand.ExecuteScalarAsync();
+
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
             }
-            
+            finally
+            {
+                await sqlConnection.CloseAsync();
+            }
+
             return r;
         }
 
         public async Task<short> GetEbbSpeedFromQueuePositionAsync(short queuePos)
         {
             short speed = 0;
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetEbbSpeedFromQueuePosition";
@@ -345,17 +362,16 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
-                {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        speed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("ebbSpeed"));
-                    }
-                }
+                speed = (short)await sqlCommand.ExecuteScalarAsync();
+
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return speed;
@@ -364,9 +380,10 @@ namespace YARG.DAL
         public async Task<short> GetFlowSpeedFromQueuePositionAsync(short queuePos)
         {
             short speed = 0;
+            using MySqlConnection sqlConnection = new(_connectionString);
+
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetFlowSpeedFromQueuePosition";
@@ -375,19 +392,17 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
-                {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        speed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("ebbSpeed"));
-                    }
-                }
+                speed = (short)await sqlCommand.ExecuteScalarAsync();
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
             }
-            
+            finally
+            {
+                await sqlConnection.CloseAsync();
+            }
+
             return speed;
         }
     }

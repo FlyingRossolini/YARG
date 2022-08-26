@@ -1,63 +1,66 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Microsoft.Extensions.Configuration;
+using MySqlConnector;
 using System;
 using System.Collections.Generic;
-using YARG.Models;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using YARG.Models;
 
 namespace YARG.DAL
 {
     public class JarDAL
     {
-        private readonly IConfiguration _config;
+        private readonly string _connectionString;
 
         public JarDAL(IConfiguration configuration)
         {
-            _config = configuration;
+            _connectionString = configuration.GetConnectionString("GardenConnection"); 
         }
 
         public async Task<IEnumerable<Jar>> GetJarsAsync()
         {
             List<Jar> lstream = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+            
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetJars";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
+                    Jar jar = new()
                     {
-                        Jar jar = new()
-                        {
-                            ID = Guid.Parse(sqlDataReader["id"].ToString()),
-                            MixFanPosition = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixFanPosition")),
-                            ChemicalID = Guid.Parse(sqlDataReader["chemicalID"].ToString()),
-                            ChemicalName = sqlDataReader["chemicalName"].ToString(),
-                            MixTimesPerDay = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixTimesPerDay")),
-                            Duration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("duration")),
-                            Capacity = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("capacity")),
-                            CurrentAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("currentAmount")),
-                            MixFanOverSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixFanOverSpeed")),
-                            CreatedBy = sqlDataReader["createdBy"].ToString(),
-                            CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString()),
-                            ChangedBy = sqlDataReader["changedBy"].ToString(),
-                            ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString()),
-                            IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"))
-                        };
+                        ID = Guid.Parse(sqlDataReader["id"].ToString()),
+                        MixFanPosition = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixFanPosition")),
+                        ChemicalID = Guid.Parse(sqlDataReader["chemicalID"].ToString()),
+                        ChemicalName = sqlDataReader["chemicalName"].ToString(),
+                        MixTimesPerDay = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixTimesPerDay")),
+                        Duration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("duration")),
+                        Capacity = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("capacity")),
+                        CurrentAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("currentAmount")),
+                        MixFanOverSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixFanOverSpeed")),
+                        CreatedBy = sqlDataReader["createdBy"].ToString(),
+                        CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString()),
+                        ChangedBy = sqlDataReader["changedBy"].ToString(),
+                        ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString()),
+                        IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"))
+                    };
 
-                        lstream.Add(jar);
-                    }
+                    lstream.Add(jar);
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return lstream;
@@ -65,9 +68,10 @@ namespace YARG.DAL
 
         public async Task AddJarAsync(Jar jar)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+            
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spAddJar";
@@ -90,9 +94,13 @@ namespace YARG.DAL
                 await sqlCommand.ExecuteNonQueryAsync();
 
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
         }
@@ -100,9 +108,10 @@ namespace YARG.DAL
         public async Task<Jar> GetJarByIDAsync(Guid id)
         {
             Jar jar = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+            
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spGetJarByID";
@@ -111,32 +120,33 @@ namespace YARG.DAL
 
                 await sqlConnection.OpenAsync();
 
-                await using (MySqlDataReader sqlDataReader = (MySqlDataReader)await sqlCommand.ExecuteReaderAsync())
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                while (await sqlDataReader.ReadAsync())
                 {
-                    while (await sqlDataReader.ReadAsync())
-                    {
-                        jar.ID = Guid.Parse(sqlDataReader["id"].ToString());
-                        jar.MixFanPosition = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixFanPosition"));
-                        jar.ChemicalID = Guid.Parse(sqlDataReader["chemicalID"].ToString());
-                        jar.ChemicalName = sqlDataReader["chemicalName"].ToString();
-                        jar.MixTimesPerDay = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixTimesPerDay"));
-                        jar.Duration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("duration"));
-                        jar.Capacity = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("capacity"));
-                        jar.CurrentAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("currentAmount"));
-                        jar.MixFanOverSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixFanOverSpeed"));
-                        jar.CreatedBy = sqlDataReader["createdBy"].ToString();
-                        jar.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
-                        jar.ChangedBy = sqlDataReader["changedBy"].ToString();
-                        jar.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
-                        jar.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
-                    }
+                    jar.ID = Guid.Parse(sqlDataReader["id"].ToString());
+                    jar.MixFanPosition = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixFanPosition"));
+                    jar.ChemicalID = Guid.Parse(sqlDataReader["chemicalID"].ToString());
+                    jar.ChemicalName = sqlDataReader["chemicalName"].ToString();
+                    jar.MixTimesPerDay = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixTimesPerDay"));
+                    jar.Duration = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("duration"));
+                    jar.Capacity = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("capacity"));
+                    jar.CurrentAmount = sqlDataReader.GetDecimal(sqlDataReader.GetOrdinal("currentAmount"));
+                    jar.MixFanOverSpeed = sqlDataReader.GetInt16(sqlDataReader.GetOrdinal("mixFanOverSpeed"));
+                    jar.CreatedBy = sqlDataReader["createdBy"].ToString();
+                    jar.CreateDate = Convert.ToDateTime(sqlDataReader["createDate"].ToString());
+                    jar.ChangedBy = sqlDataReader["changedBy"].ToString();
+                    jar.ChangeDate = Convert.ToDateTime(sqlDataReader["changeDate"].ToString());
+                    jar.IsActive = sqlDataReader.GetBoolean(sqlDataReader.GetOrdinal("isActive"));
                 }
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
             }
-
+            finally
+            {
+                await sqlConnection.CloseAsync();
+            }
             return jar;
         }
 
@@ -152,10 +162,11 @@ namespace YARG.DAL
             {
                 flgUpdateMixingFanSchedule = true;
             }
+                
+            using MySqlConnection sqlConnection = new(_connectionString);
 
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spUpdateJar";
@@ -178,7 +189,11 @@ namespace YARG.DAL
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return flgUpdateMixingFanSchedule;
@@ -186,23 +201,27 @@ namespace YARG.DAL
 
         public async Task DeleteJarAsync(Guid id)
         {
+            using MySqlConnection sqlConnection = new(_connectionString);
+            
             try
             {
-                using MySqlConnection sqlConnection = new MySqlConnection(_config.GetConnectionString("GardenConnection"));
                 using MySqlCommand sqlCommand = new();
                 sqlCommand.Connection = sqlConnection;
                 sqlCommand.CommandText = "spDeleteJar";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
+
                 await sqlConnection.OpenAsync();
                 await sqlCommand.ExecuteNonQueryAsync();
-
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.ToString());
             }
-
+            finally
+            {
+                await sqlConnection.CloseAsync();
+            }
         }
     }
 }
