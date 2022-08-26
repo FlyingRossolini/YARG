@@ -1,12 +1,23 @@
 # YARG
 Yet Another Robotic Garden. Adventures in architecting a minimalistic approach to an automated ebb and flow hydroponic garden.
 
-## Design Considerations
+## General Design Considerations (aka incoherant rambling)
 * Completely autonomous, where it can be left without human intervention for weeks at a time.
 * Works without internet connection (no cloud based services)
-* Schedule entire growing season on per week basis including feeding schedule, lighting schedule, environment and reservior upper / lower control limits, ebb and flow frequency and duration.
+* Schedule entire growing season on per week basis including feeding, lighting, environment (temp and humidity) and reservior upper / lower control limits, ebb and flow frequency, duration and amount.
 * pH and EC readings taken automatically via Atlas Scientific sensors.
 * Up to 4 plants total, independantly ebb'd and flowed schedule from a 20L reservoir (one plant is watered at a time). Each pot is a 3" net cup in a 20L plastic pail. Mathematically, it should be possible to water each pot individually. In practice, this is not the norm - a reservoir is usually much bigger in order to more easily maintain pH stabilty. 
+* Flood detection for each pot - I expect that the roots will grow sufficiently that it will cause water to overflow the pot. This will be detected via a moisture sensor and will signal the server to adjust the nutrient amount. Warning notification to Admin role; email? Email to text? TBD
+* Maintenance tracking for pumps.
+* Inventory tracking of chemicals; interface for automatic procurement of chems when in-stock amount reaches threshold?
+
+## Software Design Considerations
+* MVC design pattern, C# (VS2019 .Net5), Bootstrap, JQuery, Plotly javascript libraries.
+* Compiled for ARM64 linux and installed on RPI3 + nginx
+* Database - MariaDB on RPI4
+* Authentication - local user account + Google sign-on via Micorosft Identity
+* No Entity Framework tyvm.
+
 
 ## Grow Room
 * Current setup is a 4' x 5' physical room - each pot (up to 4) will house a plant that will occupy a 2' x 2' area. Each plant will have a Spider Farmer SF1000 led grow light mounted directly above it. 
