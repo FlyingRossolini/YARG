@@ -1,5 +1,5 @@
 # YARG
-Yet Another Robotic Garden. Adventures in architecting a minimalistic approach to an automated ebb and flow hydroponic garden.
+**Y**et **A**nother **R**obotic **G**arden. Not that there are many out there mind you. 'Adventures in architecting a minimalistic approach to an automated ebb and flow hydroponic garden' seemed too long.
 
 ## General Design Considerations (aka incoherant rambling)
 * Completely autonomous, where it can be left without human intervention for weeks at a time.
@@ -11,16 +11,27 @@ Yet Another Robotic Garden. Adventures in architecting a minimalistic approach t
 * Maintenance tracking for pumps.
 * Inventory tracking of chemicals; interface for automatic procurement of chems when in-stock amount reaches threshold?
 
+## Automation Considerations
+* Grow room environmental conditions (temp and humidity) recorded and adjusted if they are outside parameters. If humidity too high, turn on dehumidifier. If humidity too low, turn on humidifier. Same idea with the room temp. All external applicances will be controlled via Sonoff S31 Lite reflased with Tasmota, controlled via MQTT. (TO-DO) 
+* Reservoir temperature recorded and adjusted, same principle as above except pump reservoir contents through external aquiarium heater or water chiller (TO-DO) 
+* Chemical jars are mixed on individual schedule. 4 wire Arctic F8 fans are commanded to spin at certain rpm (depandant on amount of chemical remaining in jar) rpm measured back.
+
 ## Software Design Considerations
 * MVC design pattern, C# (VS2019 .Net5), Bootstrap, JQuery, Plotly javascript libraries.
-* Compiled for ARM64 linux and installed on RPI3 + nginx
+* Compiled for ARM64 linux and installed on RPI3 + nginx. (RPI3 is what I had laying around at the time. And yes, a .net5 app can be deployed on it and it runs reasonably well!) 
 * Database - MariaDB on RPI4
-* Authentication - local user account + Google sign-on via Micorosft Identity
-* No Entity Framework tyvm.
+* Authentication - local user account + Google sign-on via Micorosft Identity. Add other 3rd party sign-ons (fb, microsoft, etc)
+* No Entity Framework tyvm. If that's your bag, that's awesome. My beef with EF is purely personal. 
+* At the end of the day, I needed a project where I could ... keep relevant I guess? Trying to keep the old skills honed up and learn a few new things along the way.
 
+## Microcontroller Design Considerations
+* ESP32s will be interfacing with the outisde world; controlling relays for solenoids, perstaltic pumps, circulatory pumps.
+* ATMega will measure pH and EC via Atlas Scientific sensors, isolation board. ATMega serial comms to ESP32, relay info back to server.
+* YARG server communicates to ESP32 via MQTT (SSL)
+* ESP32 communicates to YARG server via webapi (SSL part is TO-DO)
 
 ## Grow Room
-* Current setup is a 4' x 5' physical room - each pot (up to 4) will house a plant that will occupy a 2' x 2' area. Each plant will have a Spider Farmer SF1000 led grow light mounted directly above it. 
+* Current setup is a 4' x 5' physical room - a pot (up to 4) will house a plant that will occupy a 2' x 2' area. Each plant will have a Spider Farmer SF1000 led grow light mounted directly above it. Grow lights will be turned on/off via the app at prescribed intervals. 
 * Environmental elements (temperature & humidity) are monitored and adjusted if they fall outside of control limits.
 ![room](https://user-images.githubusercontent.com/104273089/183456428-f9fa0bb5-8f7b-4a57-be50-5460d07d6436.jpg)
 
