@@ -40,10 +40,6 @@
         "net5.0": {
           "targetAlias": "net5.0",
           "dependencies": {
-            "Dapper": {
-              "target": "Package",
-              "version": "[2.0.123, )"
-            },
             "MQTTnet": {
               "target": "Package",
               "version": "[3.1.2, )"
@@ -67,6 +63,10 @@
             "MySqlConnector": {
               "target": "Package",
               "version": "[2.1.12, )"
+            },
+            "NETCore.MailKit": {
+              "target": "Package",
+              "version": "[2.1.0, )"
             },
             "Quartz.AspNetCore": {
               "target": "Package",

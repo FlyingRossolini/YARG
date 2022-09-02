@@ -18,7 +18,6 @@ C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\ref\YARG.dll
 C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\YARG.pdb
 C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\YARG.Views.dll
 C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\YARG.Views.pdb
-C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\Dapper.dll
 C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\System.Net.Http.Formatting.dll
 C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\Microsoft.AspNetCore.Authentication.Google.dll
 C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\Microsoft.Extensions.Configuration.dll
@@ -142,3 +141,9 @@ C:\Users\rosscj1\source\repos\GardenMVC\obj\Debug\net5.0\YARG.csproj.AssemblyRef
 C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\Quartz.AspNetCore.dll
 C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\Quartz.Extensions.DependencyInjection.dll
 C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\Quartz.Extensions.Hosting.dll
+C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\MailKit.dll
+C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\MimeKit.dll
+C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\NETCore.MailKit.dll
+C:\Users\rosscj1\source\repos\GardenMVC\bin\Debug\net5.0\BouncyCastle.Crypto.dll

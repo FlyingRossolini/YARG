@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Dapper;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using YARG.Models;
 
 namespace YARG.Data
@@ -23,14 +19,36 @@ namespace YARG.Data
 
         public async Task<IdentityResult> CreateAsync(ApplicationRole role, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            using (var connection = new MySqlConnection(_connectionString))
+            if (role == null)
             {
-                await connection.OpenAsync(cancellationToken);
-                role.Id = await connection.QuerySingleAsync<int>($@"INSERT INTO ApplicationRole (Name, NormalizedName)
-                    VALUES (@{nameof(ApplicationRole.Name)}, @{nameof(ApplicationRole.NormalizedName)});
-                    SELECT LAST_INSERT_ID())", role);
+                throw new ArgumentNullException(nameof(role));
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            using MySqlConnection sqlConnection = new(_connectionString);
+            try
+            {
+                using MySqlCommand mySqlCommand = new();
+                mySqlCommand.Connection = sqlConnection;
+                mySqlCommand.CommandText = "spAddRole";
+                mySqlCommand.Parameters.AddWithValue("thisName", role.Name);
+                mySqlCommand.Parameters.AddWithValue("thisNormailizedName", role.NormalizedName);
+                mySqlCommand.Parameters.Add("LID", MySqlDbType.Int32);
+                mySqlCommand.Parameters["LID"].Direction = System.Data.ParameterDirection.Output;
+
+                await sqlConnection.OpenAsync(cancellationToken);
+                await mySqlCommand.ExecuteNonQueryAsync(cancellationToken);
+
+                role.Id = (int)mySqlCommand.Parameters["LID"].Value;
+
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return IdentityResult.Success;
@@ -38,31 +56,74 @@ namespace YARG.Data
 
         public async Task<IdentityResult> UpdateAsync(ApplicationRole role, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            using (var connection = new MySqlConnection(_connectionString))
+            if (role == null)
             {
-                await connection.OpenAsync(cancellationToken);
-                await connection.ExecuteAsync($@"UPDATE ApplicationRole SET
-                    Name = @{nameof(ApplicationRole.Name)},
-                    NormalizedName = @{nameof(ApplicationRole.NormalizedName)}
-                    WHERE Id = @{nameof(ApplicationRole.Id)}", role);
+                throw new ArgumentNullException(nameof(role));
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
+            try
+            {
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spUpdateRole";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", role.Id);
+                sqlCommand.Parameters.AddWithValue("thisName", role.Name);
+                sqlCommand.Parameters.AddWithValue("thisNormalizedName", role.NormalizedName);
+
+                await sqlConnection.OpenAsync(cancellationToken);
+                await sqlCommand.ExecuteNonQueryAsync(cancellationToken);
+
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return IdentityResult.Success;
+
         }
 
         public async Task<IdentityResult> DeleteAsync(ApplicationRole role, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            using (var connection = new MySqlConnection(_connectionString))
+            if (role == null)
             {
-                await connection.OpenAsync(cancellationToken);
-                await connection.ExecuteAsync($"DELETE FROM ApplicationRole WHERE Id = @{nameof(ApplicationRole.Id)}", role);
+                throw new ArgumentNullException(nameof(role));
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
+            try
+            {
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spDeleteRole";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", role.Id);
+
+                await sqlConnection.OpenAsync(cancellationToken);
+                await sqlCommand.ExecuteNonQueryAsync(cancellationToken);
+
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
             }
 
             return IdentityResult.Success;
+
         }
 
         public Task<string> GetRoleIdAsync(ApplicationRole role, CancellationToken cancellationToken)
@@ -96,20 +157,75 @@ namespace YARG.Data
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            using var connection = new MySqlConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-            return await connection.QuerySingleOrDefaultAsync<ApplicationRole>($@"SELECT * FROM ApplicationRole
-                    WHERE Id = @{nameof(roleId)}", new { roleId });
+            ApplicationRole applicationRole = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
+
+            try
+            {
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spFindRoleById";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisid", roleId);
+
+                await sqlConnection.OpenAsync(cancellationToken);
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync(cancellationToken);
+
+                while (await sqlDataReader.ReadAsync(cancellationToken))
+                {
+                    applicationRole.Id = sqlDataReader.GetInt32(sqlDataReader.GetOrdinal("Id"));
+                    applicationRole.Name = sqlDataReader["Name"].ToString();
+                    applicationRole.NormalizedName = sqlDataReader["NormalizedName"].ToString();
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
+            }
+
+            return applicationRole;
+
         }
 
         public async Task<ApplicationRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            ApplicationRole applicationRole = new();
+            using MySqlConnection sqlConnection = new(_connectionString);
 
-            using var connection = new MySqlConnection(_connectionString);
-            await connection.OpenAsync(cancellationToken);
-            return await connection.QuerySingleOrDefaultAsync<ApplicationRole>($@"SELECT * FROM ApplicationRole
-                    WHERE NormalizedName = @{nameof(normalizedRoleName)}", new { normalizedRoleName });
+            try
+            {
+                using MySqlCommand sqlCommand = new();
+                sqlCommand.Connection = sqlConnection;
+                sqlCommand.CommandText = "spFindRoleByName";
+                sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
+                sqlCommand.Parameters.AddWithValue("thisname", normalizedRoleName);
+
+                await sqlConnection.OpenAsync(cancellationToken);
+                await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync(cancellationToken);
+
+                while (await sqlDataReader.ReadAsync(cancellationToken))
+                {
+                    applicationRole.Id = sqlDataReader.GetInt32(sqlDataReader.GetOrdinal("Id"));
+                    applicationRole.Name = sqlDataReader["Name"].ToString();
+                    applicationRole.NormalizedName = sqlDataReader["NormalizedName"].ToString();
+                }
+            }
+            catch (MySqlException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                await sqlConnection.CloseAsync();
+            }
+
+            return applicationRole;
+
         }
 
         public void Dispose()

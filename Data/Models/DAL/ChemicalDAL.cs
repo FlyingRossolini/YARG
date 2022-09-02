@@ -29,8 +29,8 @@ namespace YARG.DAL
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
 
                 await sqlConnection.OpenAsync();
-
                 await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
                 while (await sqlDataReader.ReadAsync())
                 {
                     Chemical chemical = new()
@@ -118,8 +118,8 @@ namespace YARG.DAL
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
 
                 await sqlConnection.OpenAsync();
-
                 await using MySqlDataReader sqlDataReader = await sqlCommand.ExecuteReaderAsync();
+                
                 while (await sqlDataReader.ReadAsync())
                 {
                     chemical.ID = Guid.Parse(sqlDataReader["id"].ToString());
@@ -199,6 +199,7 @@ namespace YARG.DAL
                 sqlCommand.CommandText = "spDeleteChemical";
                 sqlCommand.CommandType = System.Data.CommandType.StoredProcedure;
                 sqlCommand.Parameters.AddWithValue("thisid", id.ToString());
+
                 await sqlConnection.OpenAsync();
                 await sqlCommand.ExecuteNonQueryAsync();
 
