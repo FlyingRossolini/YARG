@@ -1,164 +1,192 @@
 ﻿<!DOCTYPE html>
-<script src="~/lib/jquery/jquery.min.js"></script>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - YARG</title>
-
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="~/lib/jquery/jquery.js"></script>
+    <script src="~/lib/bootstrap/js/bootstrap.min.js"></script>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" />
     <link href="~/lib/font-awesome/css/all.css" rel="stylesheet" />
     <script src="~/lib/plotly/plotly.min.js"></script>
 
 </head>
 <body>
-    <div class="wrapper">
-        <div class="sidebar">
-            <h1><i class="fa-solid fa-seedling text-success"></i><a href="@Url.Action("Index","Home")" style="color: white;">YARG</a></h1>
-            <h6 class="text-center text-white-50"><i><small>Yet Another Robotic Garden</small></i></h6>
-            <ul>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-book text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","Recipe")"><span class="text-warning">Recipe Book</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-wheat-awn fa-xl text-black-50"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","GrowSeason")"><span class="text-warning">Grow Seasons</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-bucket text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","Pot")"><span class="text-warning">Buckets</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-jar text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","Jar")"><span class="text-warning">Jars</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-cannabis text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","Crop")"><span class="text-warning">Crops</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-flask-vial text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","Chemical")"><span class="text-warning">Chemicals</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-satellite-dish text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","RemoteProbe")"><span class="text-warning">Sensors</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-location-crosshairs text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","Location")"><span class="text-warning">Locations</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-vials text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","ChemicalType")"><span class="text-warning">Chemical Types</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-ruler text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","MeasurementType")"><span class="text-warning">Measurement Types</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-regular fa-sun text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","LightCycle")"><span class="text-warning">Light Cycles</span></a>
-                        </div>
-                    </div>
-                </li>
-                <li>
-                    <div class="row">
-                        <div class="col-3 center">
-                            <i class="fa-solid fa-angles-up text-black-50 fa-xl"></i>
-                        </div>
-                        <div>
-                            <a href="@Url.Action("Index","LimitType")"><span class="text-warning">Limit Types</span></a>
-                        </div>
-                    </div>
-                </li>
-                <hr />
-                @await Html.PartialAsync("_LoginPartial")
-            </ul>
-        </div>
-        <div class="main-content">
-            <main role="main" class="pb-3">
-                @RenderBody()
-            </main>
-        </div>
-    </div>
+    <!--<nav class="navbar sticky-top navbar-expand-md navbar-dark bg-dark">
+        <div class="container-fluid" style="margin-left:initial">
+            <a href="#"
+               class="navbar-brand mb-0 h1">
+                <img class="d-inline-block align-top"
+                     src="~/images/seedling30.png"
+                     width="30" height="30" />
+                YARG
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    @{
+                        if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Configuration
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li><a class="dropdown-item" href="#">Action</a></li>
+                                    <li><a class="dropdown-item" href="#">Another action</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                </ul>
+                            </li>
 
-    <footer class="border-top footer text-muted">
-        <div>
-            &copy; 2022 - <small>A FlyingRossolini UberTrainer Experience!</small>
+                        }
+                    }
+                    <li class="nav-item">
+                        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Menu </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#">Action</a></li>
+                            <li><a class="dropdown-item" href="#">Another action</a></li>
+                        </ul>
+                    </li>
+                </ul>-->
+    @*<div class="d-flex justify-content-end">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                @{
+                    if (User.Identity.IsAuthenticated)
+                    {
+                    <li class="nav-item"><a class="nav-link" runat="server" href="~/members/signout.aspx">Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" runat="server" href="~/members/myaccount.aspx">My Account</a></li>
+                }
+                else
+                {
+                    <li class="nav-item"><a class="nav-link" runat="server" href="~/signin.aspx">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" runat="server" href="~/register.aspx">Register</a></li>
+                }
+                }
+            </ul>
+        </div>*@
+
+    <!--</div>
         </div>
-    </footer>
-    <script src="~/lib/jquery/jquery.min.js"></script>
-    <script src="~/lib/popper/umd/popper.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
-    @*<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>*@
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    </nav>-->
+    <nav class="navbar sticky-top navbar-expand-md navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a href="#"
+               class="navbar-brand mb-0 h1">
+                <img class="d-inline-block align-top"
+                     src="~/images/seedling30.png"
+                     width="30" height="30" />
+                YARG
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse justify-content-between" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item @Html.IsSelected(actions: "Index", controllers: "Home")">
+                        <a class="nav-link" href="@Url.Action("Index", "Home")">Home</a>
+                    </li>
+                    @{
+                        if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Configuration
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <li class="nav-item @Html.IsSelected(actions: "Index", controllers: "Recipe")">
+                                        <a class="dropdown-item" href="@Url.Action("Index", "Recipe")">
+                                            <span class="fa-solid fa-book" style="color:saddlebrown;">
+                                                &nbsp;&nbsp;
+                                            </span>Recipe Book
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li class="@Html.IsSelected(actions: "Index", controllers: "Chemical")">
+                                        <a class="dropdown-item" href="@Url.Action("Index", "Chemical")">
+                                            <span class="fa-solid fa-flask" style="color:saddlebrown;">
+                                                &nbsp;&nbsp;
+                                            </span>Chemicals
+                                        </a>
+                                    </li>
+                                    <li class="@Html.IsSelected(actions: "Index", controllers: "Jar")">
+                                        <a class="dropdown-item" href="@Url.Action("Index", "Jar")">
+                                            <span class="fa-solid fa-jar" style="color:saddlebrown;">
+                                                &nbsp;&nbsp;
+                                            </span>Jars
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li class="@Html.IsSelected(actions: "Index", controllers: "LightCycle")">
+                                        <a class="dropdown-item" href="@Url.Action("Index", "LightCycle")">
+                                            <span class="fa-solid fa-sun" style="color:saddlebrown;">
+                                                &nbsp;&nbsp;
+                                            </span>Light Cycles
+                                        </a>
+                                    </li>
+                                    <li class="@Html.IsSelected(actions: "Index", controllers: "ChemcialType")">
+                                        <a class="dropdown-item" href="@Url.Action("Index", "ChemicalType")">
+                                            <span class="fa-solid fa-question" style="color:saddlebrown;">
+                                                &nbsp;&nbsp;
+                                            </span>Chemcial Types
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                        }
+                    }
+                </ul>
+                <ul class="navbar-nav">
+                    @*@{
+            if (User.Identity.IsAuthenticated)
+            {
+                <li class="nav-item"><a class="nav-link" runat="server" href="~/members/signout.aspx">Logout</a></li>
+                <li class="nav-item"><a class="nav-link" runat="server" href="~/members/myaccount.aspx">My Account</a></li>
+            }
+            else
+            {
+                <li class="nav-item"><a class="nav-link" runat="server" href="~/signin.aspx">Login</a></li>
+                <li class="nav-item"><a class="nav-link" runat="server" href="~/register.aspx">Register</a></li>
+            }
+        }*@
+                    @await Html.PartialAsync("_LoginPartial")
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="main-content">
+        @*<main role="main" class="pb-3">*@
+        <main role="main">
+            @RenderBody()
+        </main>
+        <footer class="border-top footer text-muted">
+            <div>
+                YARG - <small>Yet Another Robotic Garden</small>
+            </div>
+        </footer>
+    </div>
 </body>
+
 </html>
+@*<script src="~/lib/jquery/jquery.min.js"></script>
+<script src="~/lib/popper/umd/popper.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>*@
+@*<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>*@
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+

@@ -18,6 +18,11 @@ using Microsoft.AspNetCore.Identity;
 using YARG.Services;
 using YARG.Data;
 using Quartz;
+using System.Threading;
+using System.Globalization;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Localization.Routing;
+using Microsoft.Extensions.Options;
 
 namespace YARG
 {
@@ -39,8 +44,6 @@ namespace YARG
             services.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
-
             })
                 .AddCookie(options =>
                 {
@@ -50,7 +53,6 @@ namespace YARG
                 {
                     options.ClientId = _config.GetValue<string>("Authentication:Google:ClientId");
                     options.ClientSecret = _config.GetValue<string>("Authentication:Google:ClientSecret");
-
                 });
 
             services.Configure<CookiePolicyOptions>(options =>
@@ -59,20 +61,27 @@ namespace YARG
                 options.MinimumSameSitePolicy = SameSiteMode.Lax;
             });
 
-            //services.AddAuthentication(options =>
-            //{
-            //    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            //    options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-            //})
-            //    .AddCookie
             services.AddTransient<IUserStore<ApplicationUser>, UserStore>();
             services.AddTransient<IRoleStore<ApplicationRole>, RoleStore>();
 
             services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddDefaultTokenProviders();
 
-            // Add application services.
-            //services.AddTransient<IEmailSender, EmailSender>();
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+            services.Configure<RequestLocalizationOptions>(
+                options =>
+                {
+                    var supportedCultures = new List<CultureInfo>
+                    {
+                        new CultureInfo("en-US"),
+                        new CultureInfo("fr-FR")
+                    };
+
+                    options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
+                    options.SupportedCultures = supportedCultures;
+                    options.SupportedUICultures = supportedCultures;
+
+                });
 
             services.AddControllersWithViews();
 
@@ -86,7 +95,7 @@ namespace YARG
                     .WithIdentity("Combined Configuration Trigger")
                     .WithCronSchedule("0 0/1 * 1/1 * ? *")
                     .WithDescription("my awesome trigger configured for a job with single call")
-        );
+                    );
             });
             services.AddQuartzServer(options =>
             {
@@ -103,10 +112,13 @@ namespace YARG
                 options.Sender_EMail = Configuration["ExternalProviders:MailKit:SMTP:SenderEmail"];
                 options.Sender_Name = Configuration["ExternalProviders:MailKit:SMTP:SenderName"]; ;
             });
+
+            services.AddTransient<SeedData.SeedData>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, SeedData.SeedData seedData)
         {
             if (env.IsDevelopment())
             {
@@ -120,6 +132,10 @@ namespace YARG
                 app.UseHsts();
             }
             //app.UseHttpsRedirection();
+
+            var localizeOptions = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>();
+            app.UseRequestLocalization(localizeOptions.Value);
+
             app.UseStaticFiles();
             app.UseCookiePolicy();
 
@@ -135,7 +151,7 @@ namespace YARG
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            //ExecuteTaskServiceCallScheduler.StartAsync().GetAwaiter().GetResult();
+            seedData.SeedAdminUser();
         }
     }
 }

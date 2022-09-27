@@ -14,7 +14,7 @@ namespace YARG.Data
 
         public RoleStore(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("GardenConnection");
+            _connectionString = configuration.GetConnectionString("IdentityConnection");
         }
 
         public async Task<IdentityResult> CreateAsync(ApplicationRole role, CancellationToken cancellationToken)
@@ -32,7 +32,7 @@ namespace YARG.Data
                 mySqlCommand.Connection = sqlConnection;
                 mySqlCommand.CommandText = "spAddRole";
                 mySqlCommand.Parameters.AddWithValue("thisName", role.Name);
-                mySqlCommand.Parameters.AddWithValue("thisNormailizedName", role.NormalizedName);
+                mySqlCommand.Parameters.AddWithValue("thisNormalizedName", role.NormalizedName);
                 mySqlCommand.Parameters.Add("LID", MySqlDbType.Int32);
                 mySqlCommand.Parameters["LID"].Direction = System.Data.ParameterDirection.Output;
 

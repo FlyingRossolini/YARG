@@ -7,11 +7,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace YARG.Models
 {
     public class RecipeController : Controller
     {
+
         private readonly RecipeDAL _recipeDAL;
         private readonly LightCycleDAL _lightCycleDAL;
         private readonly LocationDAL _locationDAL;
@@ -26,6 +28,7 @@ namespace YARG.Models
         }
 
         // GET: RecipeController
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Index()
         {
             List<SelectListItem> ddDaylight = new();

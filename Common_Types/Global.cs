@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Html;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using System.IO;
+using System.Text.Encodings.Web;
 
 namespace YARG.Common_Types
 {
@@ -12,7 +18,6 @@ namespace YARG.Common_Types
         SequentialAsBinary,
         SequentialAtEnd
     }
-
 
     public class Global
     {
@@ -73,5 +78,7 @@ namespace YARG.Common_Types
         public static readonly Guid LocationType_Habitat = new("3a030487-3e43-0455-fe56-125537762d27");
         public static readonly Guid LocationType_Reservoir = new("3a030486-4c6e-174a-5cda-f6eb18dbb247");
 
+
     }
+
 }

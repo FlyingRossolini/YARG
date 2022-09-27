@@ -397,8 +397,6 @@ namespace YARG.Data
 
         public async Task AddToRoleAsync(ApplicationUser user, string roleName, CancellationToken cancellationToken)
         {
-            //UNTESTED SINCE MOVE TO DEDICATED IDENTITY DB
-
             if (user == null)
             {
                 throw new ArgumentNullException(nameof(user));
@@ -426,8 +424,9 @@ namespace YARG.Data
                     using MySqlCommand mySqlCommandNewRole = new();
                     mySqlCommandNewRole.Connection = mySqlConnectionNewRole;
                     mySqlCommandNewRole.CommandText = "spAddRole";
+                    mySqlCommandNewRole.CommandType = System.Data.CommandType.StoredProcedure;
                     mySqlCommandNewRole.Parameters.AddWithValue("thisName", roleName);
-                    mySqlCommandNewRole.Parameters.AddWithValue("thisNormailizedName", roleName.ToUpper());
+                    mySqlCommandNewRole.Parameters.AddWithValue("thisNormalizedName", roleName.ToUpper());
                     mySqlCommandNewRole.Parameters.Add("LID", MySqlDbType.Int32);
                     mySqlCommandNewRole.Parameters["LID"].Direction = System.Data.ParameterDirection.Output;
 
@@ -437,16 +436,31 @@ namespace YARG.Data
                     roleId = (int)mySqlCommandNewRole.Parameters["LID"].Value;
                 }
 
-                using MySqlConnection mySqlConnectionAddToRole = new(_connectionString);
-                using MySqlCommand sqlCommandAddToRole = new();
-                sqlCommandAddToRole.Connection = mySqlConnectionAddToRole;
-                sqlCommandAddToRole.CommandText = "spGetRoleIdFromNormalizedName";
-                sqlCommandAddToRole.CommandType = System.Data.CommandType.StoredProcedure;
-                sqlCommandAddToRole.Parameters.AddWithValue("thisUserId", user.Id);
-                sqlCommandAddToRole.Parameters.AddWithValue("thisRoleId", roleId);
+                using MySqlConnection sqlConnectionUserIdFromEmail = new(_connectionString);
+                using MySqlCommand sqlCommandUserIdFromEmail = new();
+                sqlCommandUserIdFromEmail.Connection = sqlConnectionUserIdFromEmail;
+                sqlCommandUserIdFromEmail.CommandText = "spGetUserIdFromEmail";
+                sqlCommandUserIdFromEmail.Parameters.AddWithValue("thisEmail", user.Email);
+                sqlCommandUserIdFromEmail.CommandType = System.Data.CommandType.StoredProcedure;
 
-                await mySqlConnectionAddToRole.OpenAsync(cancellationToken);
-                await sqlCommandAddToRole.ExecuteNonQueryAsync(cancellationToken);
+                await sqlConnectionUserIdFromEmail.OpenAsync(cancellationToken);
+                var userId = (int?)await sqlCommandUserIdFromEmail.ExecuteScalarAsync(cancellationToken);
+
+
+                if (userId.HasValue)
+                {
+                    using MySqlConnection mySqlConnectionAddToRole = new(_connectionString);
+                    using MySqlCommand sqlCommandAddToRole = new();
+                    sqlCommandAddToRole.Connection = mySqlConnectionAddToRole;
+                    sqlCommandAddToRole.CommandText = "spAddToRole";
+                    sqlCommandAddToRole.CommandType = System.Data.CommandType.StoredProcedure;
+                    sqlCommandAddToRole.Parameters.AddWithValue("thisUserId", userId);
+                    sqlCommandAddToRole.Parameters.AddWithValue("thisRoleId", roleId);
+
+                    await mySqlConnectionAddToRole.OpenAsync(cancellationToken);
+                    await sqlCommandAddToRole.ExecuteNonQueryAsync(cancellationToken);
+
+                }
 
 
             }
@@ -545,7 +559,7 @@ namespace YARG.Data
                 throw new ArgumentNullException(nameof(user));
             }
 
-            int matchingRoles = 0;
+            long matchingRoles = 0;
             cancellationToken.ThrowIfCancellationRequested();
             using MySqlConnection sqlConnection = new(_connectionString);
 
@@ -571,7 +585,7 @@ namespace YARG.Data
                 sqlCommandGetCountOfRoles.Parameters.AddWithValue("thisRoleId", roleId);
 
                 await sqlConnectionGetCountOfRoles.OpenAsync(cancellationToken);
-                matchingRoles = (int)await sqlCommandGetCountOfRoles.ExecuteScalarAsync(cancellationToken);
+                matchingRoles = (long)await sqlCommandGetCountOfRoles.ExecuteScalarAsync(cancellationToken);
 
             }
             catch (MySqlException ex)
