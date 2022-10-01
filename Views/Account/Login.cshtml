@@ -4,10 +4,8 @@
 @*@using Microsoft.AspNetCore.Http.Authentication*@
 @model YARG.Models.AccountViewModels.LoginViewModel
 @inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> SignInManager
-
-@{
-    ViewData["Title"] = "Log in";
-}
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@{ ViewData["Title"] = "Log in"; }
 
 <h2>@ViewData["Title"]</h2>
 <div class="row">
@@ -53,31 +51,26 @@
         <section>
             <h4>Use another service to log in.</h4>
             <hr />
-            @{
-                var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-                if (loginProviders.Count == 0)
-                {
+            @{ var loginProviders = (await SignInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+                            if (loginProviders.Count == 0)
+                            {
+                <div>
+                    <p>
+                        There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
+                        for details on setting up this ASP.NET application to support logging in via external services.
+                    </p>
+                </div> }
+                            else
+                            {
+                <form asp-action="ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
                     <div>
                         <p>
-                            There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
-                            for details on setting up this ASP.NET application to support logging in via external services.
+                            @foreach (var provider in loginProviders)
+                            {
+            <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.Name</button>}
                         </p>
                     </div>
-                }
-                else
-                {
-                    <form asp-action="ExternalLogin" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal">
-                        <div>
-                            <p>
-                                @foreach (var provider in loginProviders)
-                                {
-                                    <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.Name</button>
-                                }
-                            </p>
-                        </div>
-                    </form>
-                }
-            }
+                </form> } }
         </section>
     </div>
 </div>

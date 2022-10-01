@@ -1,28 +1,23 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Quartz;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using YARG.Models;
-using YARG.Data.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity;
-using YARG.Services;
-using YARG.Data;
-using Quartz;
-using System.Threading;
 using System.Globalization;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.AspNetCore.Localization.Routing;
-using Microsoft.Extensions.Options;
+using YARG.Data;
+using YARG.Data.Services;
+using YARG.Models;
+using YARG.Services;
+
 
 namespace YARG
 {
@@ -48,16 +43,18 @@ namespace YARG
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/account/google-login";
+                    options.Cookie.SameSite = SameSiteMode.Lax;
                 })
                 .AddGoogle(options =>
                 {
                     options.ClientId = _config.GetValue<string>("Authentication:Google:ClientId");
                     options.ClientSecret = _config.GetValue<string>("Authentication:Google:ClientSecret");
+                    options.CorrelationCookie.SameSite = SameSiteMode.Lax;
                 });
 
             services.Configure<CookiePolicyOptions>(options =>
             {
-                options.CheckConsentNeeded = context => true;
+                options.CheckConsentNeeded = context => false;
                 options.MinimumSameSitePolicy = SameSiteMode.Lax;
             });
 
@@ -67,21 +64,30 @@ namespace YARG
             services.AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddDefaultTokenProviders();
 
-            services.AddLocalization(options => options.ResourcesPath = "Resources");
+            services.AddLocalization(options => { options.ResourcesPath = "Resources"; });
+
+            services.AddMvc()
+                    .AddViewLocalization()
+                    .AddDataAnnotationsLocalization();
+
+
             services.Configure<RequestLocalizationOptions>(
                 options =>
                 {
                     var supportedCultures = new List<CultureInfo>
                     {
-                        new CultureInfo("en-US"),
-                        new CultureInfo("fr-FR")
+                        new CultureInfo("en"),
+                        new CultureInfo("fr"),
+                        new CultureInfo("es"),
+                        new CultureInfo("uk")
                     };
 
-                    options.DefaultRequestCulture = new RequestCulture(culture: "en-US", uiCulture: "en-US");
+                    options.DefaultRequestCulture = new RequestCulture(culture: "en", uiCulture: "en");
                     options.SupportedCultures = supportedCultures;
                     options.SupportedUICultures = supportedCultures;
-
                 });
+
+            
 
             services.AddControllersWithViews();
 
@@ -133,13 +139,15 @@ namespace YARG
             }
             //app.UseHttpsRedirection();
 
-            var localizeOptions = app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>();
-            app.UseRequestLocalization(localizeOptions.Value);
-
             app.UseStaticFiles();
-            app.UseCookiePolicy();
+            //app.UseCookiePolicy();
+            app.UseCookiePolicy(new CookiePolicyOptions()
+            {
+                MinimumSameSitePolicy = SameSiteMode.Lax
+            });
 
             app.UseRouting();
+            app.UseRequestLocalization(app.ApplicationServices.GetRequiredService<IOptions<RequestLocalizationOptions>>().Value);
 
             app.UseAuthentication();
             app.UseAuthorization();
@@ -150,7 +158,6 @@ namespace YARG
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
-
             seedData.SeedAdminUser();
         }
     }

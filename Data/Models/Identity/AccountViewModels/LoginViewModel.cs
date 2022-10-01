@@ -8,11 +8,14 @@ namespace YARG.Models.AccountViewModels
 {
     public class LoginViewModel
     {
-        [Required]
-        [EmailAddress]
+        [Display(Name = "Email")]
+        [Required(ErrorMessage = "EmailRequired")]
+        [DataType(DataType.EmailAddress)]
+        [EmailAddress(ErrorMessage = "EmailIsNotValid")]
         public string Email { get; set; }
 
         [Required]
+        [Display(Name = "Password")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 

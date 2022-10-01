@@ -60,6 +60,10 @@
               "target": "Package",
               "version": "[2.2.0, )"
             },
+            "Microsoft.VisualStudio.Web.CodeGeneration.Design": {
+              "target": "Package",
+              "version": "[5.0.2, )"
+            },
             "MySqlConnector": {
               "target": "Package",
               "version": "[2.1.12, )"
