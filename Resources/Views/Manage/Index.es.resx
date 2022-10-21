@@ -120,4 +120,7 @@
   <data name="Profile" xml:space="preserve">
     <value>Perfil</value>
   </data>
+  <data name="Save" xml:space="preserve">
+    <value>Ahorrar</value>
+  </data>
 </root>

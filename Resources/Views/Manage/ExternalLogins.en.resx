@@ -117,16 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="en" xml:space="preserve">
-    <value>Anglais</value>
+  <data name="Add another service to log in." xml:space="preserve">
+    <value>Add another service to log in....</value>
   </data>
-  <data name="es" xml:space="preserve">
-    <value>Espagnol</value>
+  <data name="Google" xml:space="preserve">
+    <value>Gooooooooogle</value>
   </data>
-  <data name="fr" xml:space="preserve">
-    <value>Français</value>
+  <data name="Log in using your Google account" xml:space="preserve">
+    <value>Log in using your Google accounttttt</value>
   </data>
-  <data name="uk" xml:space="preserve">
-    <value>Ukrainien</value>
+  <data name="Manage your external logins" xml:space="preserve">
+    <value>Manage your external loginssss</value>
+  </data>
+  <data name="Registered Logins" xml:space="preserve">
+    <value>Registered Loginssss</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Removeeee</value>
+  </data>
+  <data name="Remove this Google login from your account" xml:space="preserve">
+    <value>Remove this Gooooooooogle login from your accountttt</value>
   </data>
 </root>

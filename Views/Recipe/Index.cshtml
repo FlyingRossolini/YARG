@@ -9,7 +9,7 @@
     @Html.AntiForgeryToken()
 }
 
-<html lang="en">
+<html>
 <body>
     <div class="row">
         <div class="col-10">
@@ -323,7 +323,8 @@
                                                                     string strres_ph_lclId = step.ID.ToString() + "-res-ph-lcl-textbox";
 
                                                                     <td class="text-center res-ph-lcl-limitvalue" data-is-res_ph_lcl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-res_ph_lcl-previous-value="@steplimit.Value.ToString("0.0")">
-                                                                        <small><input id="@strres_ph_lclId" type="number" value="@steplimit.Value.ToString("0.0")" max="7" min="4" step="0.1" disabled style="text-align: center" /></small>
+                                                                        @*<small><input id="@strres_ph_lclId" type="number" value="@steplimit.Value.ToString("0.0")" max="7" min="4" step="0.1" disabled style="text-align: center" /></small>*@
+                                                                        <small><input id="@strres_ph_lclId" type="text" value="@steplimit.Value.ToString("N1")" pattern="[0-9]+([,][0-9]{1,2})?" lang="fr"  max="7" min="4" step="0.1" disabled style="text-align: center" /></small>
                                                                     </td>
                                                                 }
                                                                 @foreach (var steplimit in (step.RecipeStepLimits)

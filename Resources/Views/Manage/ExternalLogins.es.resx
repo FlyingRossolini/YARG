@@ -117,16 +117,25 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="en" xml:space="preserve">
-    <value>Anglais</value>
+  <data name="Add another service to log in." xml:space="preserve">
+    <value>Agregue otro servicio para iniciar sesión.</value>
   </data>
-  <data name="es" xml:space="preserve">
-    <value>Espagnol</value>
+  <data name="Google" xml:space="preserve">
+    <value>Google</value>
   </data>
-  <data name="fr" xml:space="preserve">
-    <value>Français</value>
+  <data name="Log in using your Google account" xml:space="preserve">
+    <value>Inicie sesión con su cuenta de Google</value>
   </data>
-  <data name="uk" xml:space="preserve">
-    <value>Ukrainien</value>
+  <data name="Manage your external logins" xml:space="preserve">
+    <value>Administre sus inicios de sesión externos</value>
+  </data>
+  <data name="Registered Logins" xml:space="preserve">
+    <value>Inicios de Sesión Registrados</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Elimina</value>
+  </data>
+  <data name="Remove this Google login from your account" xml:space="preserve">
+    <value>Eliminar este inicio de sesión de Google de su cuenta</value>
   </data>
 </root>
