@@ -1,0 +1,65 @@
+﻿@model YARG.Models.Chemical
+
+@{
+    ViewData["Title"] = "New Chemical";
+}
+
+<h1>@ViewData["Title"] </h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" autocomplete="off">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Manufacturer" class="control-label"></label>
+                <input asp-for="Manufacturer" class="form-control" />
+                <span asp-validation-for="Manufacturer" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="col-2">
+                    <div>
+                        <small>
+                            <label asp-for="ChemicalTypeName"></label>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-5">
+                    @Html.DropDownListFor(m => m.ChemicalTypeID, ViewBag.ddChemicalType as List<SelectListItem>, "-- please select --", new { @class = "form-control" })
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label asp-for="PricePerL" class="control-label"></label>
+                <input asp-for="PricePerL" class="form-control" />
+                <span asp-validation-for="PricePerL" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="InStockAmount" class="control-label"></label>
+                <input asp-for="InStockAmount" class="form-control" />
+                <span asp-validation-for="InStockAmount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MinReorderPoint" class="control-label"></label>
+                <input asp-for="MinReorderPoint" class="form-control" />
+                <span asp-validation-for="MinReorderPoint" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

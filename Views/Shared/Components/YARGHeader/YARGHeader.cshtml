@@ -1,0 +1,11 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model YARG.Data.Models.BusinessObjects.PageHeader
+    
+
+        <span class="navbar-text" style="padding-right: 50px;">
+            @Model.GrowName
+        </span>
+        <span class="navbar-text">
+                @localizer["Day"] @Model.GrowDay (@localizer["Week"] @Model.GrowWeek) &nbsp;
+                <i class="fa-solid fa-calendar-day text-info"></i>
+        </span>

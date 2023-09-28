@@ -1,0 +1,9 @@
+﻿[Unit]
+Description=Run YARG Monitor Python Script 30 seconds after boot
+
+[Timer]
+OnBootSec=30s
+Unit=yarg_monitor.service
+
+[Install]
+WantedBy=timers.target

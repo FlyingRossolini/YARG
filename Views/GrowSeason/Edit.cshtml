@@ -1,0 +1,216 @@
+﻿@model YARG.Models.GrowSeason
+
+@{
+    ViewData["Title"] = "Edit Grow Season - " + Model.Name;
+}
+
+<html>
+<body>
+    <div class="row">
+        <div class="col-10">
+            <div class="heading_left" style="padding-left:0;">
+                <h2><i class="fa-solid fa-wheat-awn text-warning"></i>@ViewData["Title"] </h2>
+            </div>
+        </div>
+
+    </div>
+    <br />
+
+    <form asp-action="Edit" autocomplete="off">
+        <div class="row">
+            <div class="col-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title"><i class="fa-solid fa-circle-info text-info"></i>Details</h4>
+                        <br />
+                        <p class="card-text">
+                            <div class="row">
+                                <div class="col-2">
+                                    <div>
+                                        <small><label asp-for="Name"></label></small>
+                                    </div>
+                                </div>
+                                <div class="col-10 divvv">
+                                    <div><input asp-for="Name" class="form-control" /></div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row">
+                                @*<div class="col-2">
+                                        <div>
+                                            <small>
+                                                <label asp-for="LightCycleName"></label>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="col-5">
+                                        @Html.DropDownListFor(m => m.LightCycleID, ViewBag.ddLightCycle as List<SelectListItem>, new { @class = "form-control" })
+                                    </div>*@
+                                <div class="col-2">
+                                    <div>
+                                        <small>
+                                            <label asp-for="SunriseTime"></label>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <small><input asp-for="SunriseTime" class="form-control" /></small>
+
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-2">
+                                    <div>
+                                        <small>
+                                            <label asp-for="CropName"></label>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    @Html.DropDownListFor(m => m.CropID, ViewBag.ddCrop as List<SelectListItem>, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-2">
+                                    <div class="center2">
+                                        <small>
+                                            <label asp-for="IsComplete"></label>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-1">
+                                    <div class="center2">
+                                        <input class="form-check-input" asp-for="IsComplete" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-2">
+                                    <div class="center2">
+                                        <small>
+                                            <label asp-for="IsActive"></label>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-1">
+                                    <div class="center2">
+                                        @if (ViewBag.flgCanEditIsActive)
+                                        {
+                                            <input class="form-check-input" type="checkbox" asp-for="IsActive" />
+                                        }
+                                        else
+                                        {
+                                            <input class="form-check-input" asp-for="IsActive" disabled="disabled" />
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </p>
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                        <span asp-validation-for="SunriseTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title"><i class="fa-solid fa-calendar-days text-secondary"></i>Dates</h4>
+                        <br />
+                        <p class="card-text">
+                            <div class="row">
+                                <div class="col-3 formpad">
+                                    <div>
+                                        <small>
+                                            <label asp-for="StartDate" class="control-label"></label>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-9 formpad">
+                                    <div>
+                                        <input asp-for="StartDate" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-3 formpad">
+                                    <div>
+                                        <small>
+                                            <label asp-for="EndDate" class="control-label"></label>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-9 formpad">
+                                    <div><input asp-for="EndDate" class="form-control" /></div>
+                                </div>
+                            </div>
+                        </p>
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                        <span asp-validation-for="EndDate" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br />
+        @*<div class="row">
+            <div class="col-7">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title"><i class="fa-solid fa-faucet-drip text-primary"></i>Watering</h4>
+                        <p class="card-text">
+                            <div class="row">
+                                <div class="col-2"></div>
+                                <div class="col-2"></div>
+                                <div class="col-4">
+                                    <small>
+                                        <label asp-for="FlgAddMorningSplash" style="justify-content:center"></label>
+                                    </small>
+                                </div>
+                                <div class="col-4">
+                                    <small>
+                                        <label asp-for="FlgAddEveningSplash" style="justify-content:center"></label>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-2">
+                                    <div>
+                                        <small><label asp-for="EFEventsPerDay"></label></small>
+                                    </div>
+                                </div>
+                                <div class="col-2">
+                                    <input asp-for="EFEventsPerDay" class="form-control" />
+                                </div>
+                                <div class="col-4 center">
+                                    <small>
+                                        <input class="form-check-input" asp-for="FlgAddMorningSplash" />
+                                    </small>
+                                </div>
+                                <div class="col-4 center">
+                                    <small>
+                                        <input class="form-check-input" asp-for="FlgAddEveningSplash" />
+                                    </small>
+                                </div>
+                            </div>
+                        </p>
+                    </div>
+                    <span asp-validation-for="EFEventsPerDay" class="text-danger"></span>
+
+                </div>
+            </div>
+        </div>*@
+        <br />
+        <div class="form-group">
+            <input type="submit" value="Save" class="btn btn-primary" />
+        </div>
+
+    </form>
+
+    <div>
+        <a asp-action="Index">Back to List</a>
+    </div>
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }
+</body>
+</html>

@@ -1,0 +1,75 @@
+﻿@model YARG.Models.RemoteProbe
+
+@{
+    ViewData["Title"] = "New Remote Probe";
+}
+
+<h2><i class="fa-solid fa-seedling text-success"></i>@ViewData["Title"] </h2>
+<br />
+
+<form asp-action="Create" autocomplete="off">
+    <div class="row">
+        <div class="col-7">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title"><i class="fa-solid fa-circle-info text-info"></i>Details</h4>
+                    <br />
+                    <p class="card-text">
+                        <div class="row">
+                            <div class="col-2">
+                                <div>
+                                    <small><label asp-for="RemoteProbeAddress"></label></small>
+                                </div>
+                            </div>
+                            <div class="col-10 divvv">
+                                <div><input asp-for="RemoteProbeAddress" class="form-control" /></div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div class="col-2">
+                                <div>
+                                    <small>
+                                        <label asp-for="MeasurementTypeName"></label>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-5">
+                                @Html.DropDownListFor(m => m.MeasurementTypeID, ViewBag.ddMeasurementType as List<SelectListItem>, "-- please select --", new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-2">
+                                <div>
+                                    <small>
+                                        <label asp-for="LocationName"></label>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-5">
+                                @Html.DropDownListFor(m => m.LocationID, ViewBag.ddLocation as List<SelectListItem>, "-- please select --", new { @class = "form-control" })
+                            </div>
+                        </div>
+                    </p>
+                    <span asp-validation-for="RemoteProbeAddress" class="text-danger"></span>
+                    <span asp-validation-for="MeasurementTypeID" class="text-danger"></span>
+                    <span asp-validation-for="LocationID" class="text-danger"></span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <br />
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

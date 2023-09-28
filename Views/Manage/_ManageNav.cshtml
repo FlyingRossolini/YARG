@@ -1,0 +1,24 @@
+﻿@using YARG.Views.Manage
+@inject Microsoft.AspNetCore.Identity.SignInManager<ApplicationUser> SignInManager
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+
+@{ var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any(); }
+
+<nav class="navbar navbar-light">
+    <ul mr-auto navbar-nav>
+
+        <li class="nav-item @ManageNavPages.IndexNavClass(ViewContext)">
+            <a class="nav-link" asp-action="Index">@localizer["Profile"]</a>
+        </li>
+        <li class="nav-item @ManageNavPages.ChangePasswordNavClass(ViewContext)">
+            <a class="nav-link" asp-action="ChangePassword">@localizer["Password"]</a>
+        </li>
+        @if (hasExternalLogins)
+        {
+            <li class="nav-item @ManageNavPages.ExternalLoginsNavClass(ViewContext)">
+                <a class="nav-link" asp-action="ExternalLogins">@localizer["External logins"]</a>
+            </li> 
+         } 
+    </ul>
+</nav>
+

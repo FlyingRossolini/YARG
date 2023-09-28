@@ -1,0 +1,859 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model YARG.Models.HomeViewModel
+@{
+    ViewData["Title"] = "System Health";
+    string nonce = ViewBag.Nonce as string; // Retrieve the nonce from ViewBag
+}
+
+<!DOCTYPE html>
+<script nonce="@nonce">
+    var time = new Date().getTime();
+    $(document.body).bind("mousemove keypress", function (e) {
+        time = new Date().getTime();
+    });
+
+    function refresh() {
+        if (new Date().getTime() - time >= 60000)
+            window.location.reload(true);
+        else
+            setTimeout(refresh, 10000);
+    }
+
+    setTimeout(refresh, 10000);
+
+    function doDefault() {
+        document.body.style.cursor = 'default';
+        setCursor("default");
+    };
+
+    function doHourglass() {
+        document.body.style.cursor = 'wait';
+        setCursor("wait");
+    };
+    function setCursor(cursor) {
+        var x = document.querySelectorAll("*");
+
+        for (var i = 0; i < x.length; i++) {
+            x[i].style.cursor = cursor;
+        }
+    }
+</script>
+
+<script nonce="@nonce">
+    $(document).ready(function () {
+        $("body").tooltip({
+            selector: '[data-toggle=tooltip]',
+            animation: true,
+            html: true
+        });
+
+    });
+</script>
+
+@{
+    string weatherIconClass = "";
+    string weatherIconColor = "";
+
+    switch (Model.WeatherText)
+    {
+        case "Sunny":
+            weatherIconClass = "fa-solid fa-sun";
+            weatherIconColor = "color: #fddf1c;";
+            break;
+        case "Chance of showers":
+            weatherIconClass = "fa-solid fa-cloud-showers-heavy";
+            weatherIconColor = "color: #6c757d;";
+            break;
+        case "Flooding":
+            weatherIconClass = "fa-solid fa-water";
+            weatherIconColor = "color: #007bff;";
+            break;
+        case "Cloudy":
+            weatherIconClass = "fa-solid fa-cloud";
+            weatherIconColor = "color: #808793;";
+            break;
+        case "Nighttime":
+            weatherIconClass = "fa-solid fa-bed";
+            weatherIconColor = "color: #000000;";
+            break;
+        // Add more cases for other weather conditions
+        default:
+            // Default icon and color for unknown conditions
+            weatherIconClass = "fa-2x";
+            weatherIconColor = "";
+            break;
+    }
+}
+<html>
+<body>
+    @*<div class="row">
+            <div class="col-4">
+                <div class="heading_left" style="padding-left:0;">
+                    <h4><i class="fa-solid fa-heart-pulse text-danger fa-lg"></i>@localizer["SystemHealth"]</h4>
+                </div>
+            </div>
+            <div class="col-4">
+                <h4 style="text-align:center;">@Model.growName</h4>
+            </div>
+            <div class="col-4">
+                <div class="heading_right" style="padding-right: 0;">
+                    <h4>
+                        @localizer["Day"] @Model.Day (@localizer["Week"] @Model.Week)
+                        <i class="fa-solid fa-calendar-day text-info fa-lg"></i>
+                    </h4>
+                </div>
+            </div>
+        </div>*@
+    <div class="row">
+        <div class="col-3">
+            <div class="card-header">
+                <small><strong>@localizer["Stats"]</strong></small>
+            </div>
+            <div class="card">
+                <div class="card-text">
+                    <div class="container">
+                        <div class="row" style="padding-top:10px;">
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>@localizer["Sunrise"]</small>
+                            </div>
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Html.DisplayFor(model => model.Sunrise)
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>@localizer["Sunset"]</small>
+                            </div>
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Html.DisplayFor(model => model.Sunset)
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>@localizer["Crop"]</small>
+                            </div>
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Html.DisplayFor(model => model.CropName)
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>@localizer["Recipe"]</small>
+                            </div>
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Html.DisplayFor(model => model.RecipeName)
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>@localizer["Start Date"]</small>
+                            </div>
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Html.DisplayFor(model => model.StartDate)
+                                </small>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>@localizer["Daylight"]</small>
+                            </div>
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Html.DisplayFor(model => model.DaylightHours) hours
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>@localizer["Soak / Day"]</small>
+                            </div>
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Html.DisplayFor(model => model.FertEvents)
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>@localizer["Minutes / Soak"]</small>
+                            </div>
+                            <div class="col d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Html.DisplayFor(model => model.MinsPerFert)
+                                </small>
+                            </div>
+                        </div>
+                        <br />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-2">
+            <div class="card-header">
+                <small><strong>@localizer["Grow Room"]</strong></small>
+            </div>
+            <div class="card">
+                <div class="card-text">
+                    <div class="container">
+                        <div class="row" style="padding-top:10px;">
+                            <div class="col-4 d-flex align-items-center justify-content-center">
+                                <i class="fa @weatherIconClass" style="@weatherIconColor"></i>
+                            </div>
+                            <div class="col-8 d-flex align-items-center justify-content-center">
+                                <small>
+                                    @localizer[Model.WeatherText]
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4 d-flex align-items-center justify-content-center">
+                                <i class="fa-solid fa-temperature-half text-info"
+                                   data-toggle="modal" data-target="#habTempHistModal"></i>
+                            </div>
+                            <div class="col-8 d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Model.GrowRoomTemp&deg;
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4 d-flex align-items-center justify-content-center">
+                                <i class="fa-solid fa-droplet text-primary"
+                                   data-toggle="modal"
+                                   data-target="#habHumidHistModal"
+                                   title="Click for history"></i>
+                            </div>
+                            <div class="col-8 d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Model.GrowRoomHumidity%
+                                </small>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <br />
+            </div>
+            <div class="card-header">
+                <small><strong>@localizer["ReservoirConditions"]</strong></small>
+            </div>
+            <div class="card">
+                <div class="card-text">
+                    <div class="container">
+                        <div class="row" style="padding-top:10px;">
+                            <div class="col-4 d-flex align-items-center justify-content-center">
+                                <i class="fa-solid fa-weight-scale text-dark"></i>
+                            </div>
+                            <div class="col-8 d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Model.ReservoirVolume L
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-4 d-flex align-items-center justify-content-center">
+                                <i class="fa-solid fa-temperature-half text-info"></i>
+                            </div>
+                            <div class="col-8 d-flex align-items-center justify-content-center">
+                                <small>
+                                    @Model.ReservoirTemp&deg;
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+            </div>
+
+        </div>
+
+        <div class="col-7">
+            <div class="card-header">
+                <small><strong>@localizer["Probes"]</strong></small>
+            </div>
+
+            <div class="card">
+                <div class="card-text">
+                    <div class="row">
+                        <div class="container">
+                            <div id="phDiv"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="card-header">
+                <small><strong>@localizer["Irrigation Schedule"]</strong></small>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <p class="card-text">
+                        <div id="plotly-div"></div>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <script nonce="@nonce" src="~/lib/moment.js/moment.js"></script>
+    <script nonce="@nonce">
+
+            // Replaced with 'Google Charts Color' array found at:
+            // https://gist.github.com/mikebmou/1323655
+
+            const D3Colors = [
+                "#3366cc",
+                "#dc3912",
+                "#ff9900",
+                "#109618",
+                "#990099",
+                "#0099c6",
+                "#dd4477",
+                "#66aa00",
+                "#b82e2e",
+                "#316395",
+                "#3366cc",
+                "#994499",
+                "#22aa99",
+                "#aaaa11",
+                "#6633cc",
+                "#e67300",
+                "#8b0707",
+                "#651067",
+                "#329262",
+                "#5574a6",
+                "#3b3eac",
+                "#b77322",
+                "#16d620",
+                "#b91383",
+                "#f4359e",
+                "#9c5935",
+                "#a9c413",
+                "#2a778d",
+                "#668d1c",
+                "#bea413",
+                "#0c5922",
+                "#743411"
+            ];
+
+            var ws = @Html.Raw(Json.Serialize(Model.WateringSchedules));
+            var p = @Html.Raw(Json.Serialize(Model.Pots));
+            var potCount = @Html.Raw(Json.Serialize(Model.PotCount));
+            var sunr = @Html.Raw(Json.Serialize(Model.Sunrise));
+            var suns = @Html.Raw(Json.Serialize(Model.Sunset));
+            var flgMorning = @Html.Raw(Json.Serialize(Model.FlgMorningDrink));
+            var flgEvening = @Html.Raw(Json.Serialize(Model.FlgEveningDrink));
+
+
+            var traces = [];
+            var myshapes = [];
+            var myticktexts = [];
+            var mytickvals = [];
+            var myrange = [];
+
+            myrange.push(-1);
+            myrange.push(potCount + 1);
+
+            myticktexts.push('@localizer["Reservoir"]');
+            mytickvals.push(0);
+
+
+            for (var i = 0; i < ws.length; i++) {
+                var xtrace = [];
+                var ytrace = [];
+
+                // add res plot to morning if not splashing awake
+                if (i === 0 && flgMorning == false) {
+                    xtrace.push(sunr);
+                    xtrace.push(ws[i].efStartTime);
+                    ytrace.push(0);
+                    ytrace.push(0);
+
+                    var sunrisetrace = {
+                        name: '',
+                        x: xtrace,
+                        y: ytrace,
+                        hoverinfo: '',
+                        marker: { color: 'white' }
+                    }
+
+                    traces.push(sunrisetrace);
+
+                    var sunriseshape = {
+                        x0: sunr,
+                        x1: ws[i].efStartTime,
+                        y0: -0.35,
+                        y1: 0.35,
+                        line: { width: 0 },
+                        type: 'rect',
+                        xref: 'x',
+                        yref: 'y',
+
+                        opacity: 1,
+                        fillcolor: D3Colors[0]
+                    }
+
+                    myshapes.push(sunriseshape);
+                }
+                // add res plots (the end of the previous -> start of the current)
+                if (i != ws.length - 1) {
+                    xtrace.push(ws[i].efEndTime);
+                    xtrace.push(ws[i+1].efStartTime);
+                    ytrace.push(0);
+                    ytrace.push(0);
+
+                    var restrace = {
+                        name: '',
+                        x: xtrace,
+                        y: ytrace,
+                        marker: { color: 'white' }
+                    }
+
+                    traces.push(restrace);
+
+                    var resshape = {
+                        x0: ws[i].efEndTime,
+                        x1: ws[i + 1].efStartTime,
+                        y0: -0.35,
+                        y1: 0.35,
+                        line: { width: 0 },
+                        type: 'rect',
+                        xref: 'x',
+                        yref: 'y',
+                        opacity: 1,
+                        fillcolor: D3Colors[0]
+                    }
+
+                    myshapes.push(resshape);
+
+                }
+                //add res plot to evening if not splashing asleep
+                if (i === ws.length - 1 && flgEvening == false) {
+                    xtrace.push(ws[i].efEndTime);
+                    xtrace.push(suns);
+                    ytrace.push(0);
+                    ytrace.push(0);
+
+                    var restrace = {
+                        name: '',
+                        x: xtrace,
+                        y: ytrace,
+                        marker: { color: 'white' }
+                    }
+
+                    traces.push(restrace);
+
+                    var resshape = {
+                        x0: ws[i].efEndTime,
+                        x1: suns,
+                        y0: -0.35,
+                        y1: 0.35,
+                        line: { width: 0 },
+                        type: 'rect',
+                        xref: 'x',
+                        yref: 'y',
+                        opacity: 1,
+                        fillcolor: D3Colors[0]
+                    }
+
+                    myshapes.push(resshape);
+
+                }
+
+                // add normal water schedule plots
+                xtrace.push(ws[i].efStartTime);
+                xtrace.push(ws[i].efEndTime);
+                ytrace.push(ws[i].potQueuePosition);
+                ytrace.push(ws[i].potQueuePosition);
+
+                var basetrace = {
+                    name: '',
+                    x: xtrace,
+                    y: ytrace,
+                    hoverinfo: "x",
+                    marker: { color: 'white' }
+                };
+
+                traces.push(basetrace);
+
+                var shape = {
+                    x0: ws[i].efStartTime,
+                    x1: ws[i].efEndTime,
+                    y0: ws[i].potQueuePosition - 0.35,
+                    y1: ws[i].potQueuePosition + 0.35,
+                    line: { width: 0 },
+                    type: 'rect',
+                    xref: 'x',
+                    yref: 'y',
+                    opacity: 1,
+                    fillcolor: D3Colors[ws[i].potQueuePosition]
+                };
+
+                myshapes.push(shape);
+
+            }
+
+            //add 'right now' indicator
+            var datetime = moment().format('YYYY-MM-DD HH:mm:00');
+            var datetime2 = moment(datetime).add(-1, 'minutes').format('YYYY-MM-DD HH:mm:00');
+
+            if (moment().isAfter(sunr) && moment().isBefore(suns)) {
+                var todayshape = {
+                    type: 'rect',
+                    x0: datetime2,
+                    x1: datetime,
+                    y0: 0.05,
+                    y1: 1,
+                    line: { width: 0 },
+                    xref: 'x',
+                    yref: 'paper',
+                    opacity: 0.9,
+                    fillcolor: D3Colors[D3Colors.length - 1]
+                };
+
+                myshapes.push(todayshape);
+
+            }
+
+
+            // add sunrise indicator
+            var sunriseind = moment(sunr).add(-1, 'minutes').format('YYYY-MM-DD HH:mm:00');
+            var sunriseindshape = {
+                type: 'rect',
+                x0: sunriseind,
+                x1: sunr,
+                y0: 0.1,
+                y1: 1,
+                line: { width: 0 },
+                xref: 'x',
+                yref: 'paper',
+                opacity: 0.9,
+                fillcolor: D3Colors[D3Colors.length - 1]
+            };
+
+            myshapes.push(sunriseindshape);
+
+            // add sunset indicator
+            var sunsetind = moment(suns).add(-1, 'minutes').format('YYYY-MM-DD HH:mm:00');
+            var sunsetindshape = {
+                type: 'rect',
+                x0: sunsetind,
+                x1: suns,
+                y0: 0.1,
+                y1: 1,
+                line: { width: 0 },
+                xref: 'x',
+                yref: 'paper',
+                opacity: 0.9,
+                fillcolor: D3Colors[D3Colors.length - 1]
+            };
+
+            myshapes.push(sunsetindshape);
+            if (moment().isAfter(sunr) && moment().isBefore(suns)) {
+                var srsstext = {
+                    x: [sunr, datetime,
+                        suns],
+                    y: [-0.9, -0.9, -0.9],
+                    mode: 'text',
+                    text: ['@localizer["Sunrise"]', '@localizer["Now"]', '@localizer["Sunset"]'],
+                    hoverinfo: ["x", "x", "x"],
+                    showlegend: false
+                };
+            } else {
+                var srsstext = {
+                    x: [sunr, suns],
+                    y: [-0.9, -0.9],
+                    mode: 'text',
+                    text: ['@localizer["Sunrise"]', '@localizer["Sunset"]'],
+                    hoverinfo: ["x", "x"],
+                    showlegend: false
+                };
+            }
+
+            traces.push(srsstext);
+
+            for (var j = 0; j < p.length; j++) {
+                myticktexts.push(p[j].name);
+                mytickvals.push(p[j].queuePosition);
+            };
+
+            data = traces,
+            layout = {
+                xaxis: {
+                    type: 'date',
+                    showgrid: false,
+                    zeroline: true,
+                  // tickformat: '%-I:%M %p'
+                    tickformat: '@localizer["tickformat"]' //'%-d-%b %-I:%M %p'
+                },
+                font: {
+                    family: 'Open Sans',
+                    color: '#7f7f7f'
+                },
+                yaxis: {
+                    range: myrange,
+                    showgrid: true,
+                    ticktext: myticktexts,
+                    tickvals: mytickvals,
+                    zeroline: false,
+                    autorange: false
+                },
+                height: 320,
+                shapes: myshapes,
+                hovermode: 'closest',
+                showlegend: false,
+                margin: {
+                    l: 60,
+                    r: 0,
+                    b: 30,
+                    t: 8,
+                    pad: 1
+                },
+                hoverlabel: {
+                    bgcolor: 'black',
+                    font: { color: 'white', family: 'Open Sans'}
+
+                }
+
+                };
+
+            var defaultPlotlyConfiguration = {
+                modeBarButtonsToRemove: ['toggleSpikelines', 'resetScale2d', 'sendDataToCloud', 'pan2d', 'zoomIn2d', 'editInChartStudio', 'zoomOut2d', 'autoScale2d', 'zoom2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d'], displaylogo: false, showTips: true, responsive: true
+            };
+
+
+            Plotly.newPlot('plotly-div',  data, layout, defaultPlotlyConfiguration);
+    </script>
+
+    <script nonce="@nonce">
+        const phTrace = {
+            type: "indicator",
+            mode: "number+gauge+delta",
+            value: 5.7,
+            number: { "font": { "size": 21 } },
+            delta: { reference: 5.6 },
+            domain: { x: [0.10, 1], y: [0.85, 0.95] },
+            title: {
+                text: "pH",
+                font: {
+                    family: 'Open Sans',
+                    color: '#7f7f7f',
+                    size: 15
+                },
+            },
+            gauge: {
+                shape: "bullet",
+                axis: {
+                    range: [null, 14],
+                    tickfont: {
+                        family: 'Open Sans',
+                        color: '#7f7f7f'
+                    }
+                },
+                steps: [
+                    { range: [0, 2.8], color: "#dc3912" },
+                    { range: [2.8, 5.6], color: "#d9fd07" },
+                    { range: [5.6, 8.4], color: "#109618" },
+                    { range: [8.4, 11.2], color: "#3366cc" },
+                    { range: [11.2, 14], color: "#990099" }
+                ],
+                bar: { color: "black" }
+            }
+        };
+        const ecTrace = {
+            type: "indicator",
+            mode: "number+gauge+delta",
+            value: 1015,
+            number: { "font": { "size": 21 } },
+            delta: { reference: 1066 },
+            domain: { x: [0.10, 1], y: [0.60, 0.70] },
+            title: {
+                text: "EC",
+                font: {
+                    family: 'Open Sans',
+                    color: '#7f7f7f',
+                    size: 15
+                },
+            },
+            gauge: {
+                shape: "bullet",
+                axis: {
+                    range: [null, 1500],
+                    tickfont: {
+                        family: 'Open Sans',
+                        color: '#7f7f7f'
+                    }
+                },
+                steps: [
+                    /*{ range: [0, 950], color: "#dc3912" },*/
+                    { range: [950, 1200], color: "#109618" },
+                    /*{ range: [1250, 1500], color: "#dc3912" }*/
+                ],
+                bar: { color: "black" }
+            }
+        };
+        const orpTrace = {
+            type: "indicator",
+            mode: "number+gauge+delta",
+            value: 373,
+            number: { "font": { "size": 21 } },
+            delta: { reference: 387 },
+            domain: { x: [0.10, 1], y: [0.1, 0.2] },
+            title: {
+                text: "ORP",
+                font: {
+                    family: 'Open Sans',
+                    color: '#7f7f7f',
+                    size: 15
+                },
+            },
+            gauge: {
+                shape: "bullet",
+                axis: {
+                    range: [-200, 600],
+                    tickfont: {
+                        family: 'Open Sans',
+                        color: '#7f7f7f'
+                    }
+                },
+                steps: [
+                    /*{ range: [0, 950], color: "#dc3912" },*/
+                    { range: [250, 400], color: "#109618" },
+                    /*{ range: [1250, 1500], color: "#dc3912" }*/
+                ],
+                bar: { color: "black" }
+            }
+        };
+        const doTrace = {
+            type: "indicator",
+            mode: "number+gauge+delta",
+            value: 7.3,
+            number: { "font": { "size": 21 } },
+            delta: { reference: 7.3 },
+            domain: { x: [0.10, 1], y: [0.35, 0.45] },
+            title: {
+                text: "DO",
+                font: {
+                    family: 'Open Sans',
+                    color: '#7f7f7f',
+                    size: 15
+                },
+            },
+            gauge: {
+                shape: "bullet",
+                axis: {
+                    range: [null, 20],
+                    tickfont: {
+                        family: 'Open Sans',
+                        color: '#7f7f7f'
+                    }
+                },
+                steps: [
+                    /*{ range: [0, 950], color: "#dc3912" },*/
+                    { range: [6, 8], color: "#109618" },
+                    /*{ range: [1250, 1500], color: "#dc3912" }*/
+                ],
+                bar: { color: "black" }
+            },
+            hoverformat: '.2f XYZ',
+        };
+
+        const data = [phTrace, ecTrace, doTrace, orpTrace];
+        const layout = {
+            height: 230,
+            margin: { t: 10, r: 0, l: 0, b: 10 },
+            grid: { rows: 4, columns: 1 },
+        };
+
+
+        //var layout = { width: 600, height: 450, margin: { t: 0, b: 0 } };
+        //       var layout = { margin: { t: 10, r: 25, l: 25, b: 10 } };
+        var defaultPlotlyConfiguration = {
+            modeBarButtonsToRemove: ['toggleSpikelines', 'resetScale2d', 'sendDataToCloud', 'pan2d', 'zoomIn2d', 'editInChartStudio', 'zoomOut2d', 'autoScale2d', 'zoom2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'lasso2d', 'select2d'], displaylogo: false, showTips: true, responsive: true
+        };
+
+        Plotly.newPlot('phDiv', data, layout, defaultPlotlyConfiguration);
+    </script>
+    <div class="modal fade" id="habTempHistModal" tabindex="-1" role="dialog" aria-labelledby="habTempHistLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalLabel"><i class="fa-solid fa-temperature-half text-info"></i>Habitat Temperature History</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="HabTempHistPlot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="habHumidHistModal" tabindex="-1" role="dialog" aria-labelledby="habHumidHistLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="exampleModalLabel"><i class="fa-solid fa-droplet text-primary"></i>Habitat Humidity History</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="HabHumidHistPlot"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script nonce="@nonce">
+        var trace1 = {
+            x: [1, 2, 3, 4],
+            y: [10, 15, 13, 17],
+            type: 'scatter'
+        };
+
+        var trace2 = {
+            x: [1, 2, 3, 4],
+            y: [16, 5, 11, 9],
+            type: 'scatter'
+        };
+
+        var data2 = [trace1, trace2];
+
+        Plotly.newPlot('HabTempHistPlot', data2);
+    </script>
+    <script nonce="@nonce">
+        var trace1 = {
+            x: [1, 2, 3, 4],
+            y: [10, 15, 13, 17],
+            type: 'scatter'
+        };
+
+        var trace2 = {
+            x: [1, 2, 3, 4],
+            y: [16, 5, 11, 9],
+            type: 'scatter'
+        };
+
+        var data3 = [trace1, trace2];
+
+        Plotly.newPlot('HabHumidHistPlot', data3);
+    </script>
+</body>
+</html>
+
+

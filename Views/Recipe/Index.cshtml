@@ -1,0 +1,1606 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model YARG.Models.RecipeViewModel
+
+@{
+    ViewData["Title"] = "Recipe Book";
+}
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "__AjaxAntiForgeryForm" }))
+{
+    @Html.AntiForgeryToken()
+}
+
+<html>
+<body>
+    <div class="row">
+        <div class="col-10">
+            <div class="heading_left" style="padding-left:0;">
+                <h2><i class="fa-solid fa-book" style="color:saddlebrown;"></i>@localizer["RecipeBook"] </h2>
+            </div>
+        </div>
+
+    </div>
+    <br />
+    <hr />
+    <br />
+    <p>
+        <button id="btn-add-recipe" type="button" class="btn btn-primary pull-right">@localizer["AddRecipe"] </button>
+    </p>
+    <br />
+
+    <div class="col">
+        <ul class="nav nav-tabs" id="myTab">
+            @{
+                int i = 0;
+
+                foreach (var recipe in Model.recipes)
+                {
+                    string s = "#m" + recipe.ID.ToString();
+                    string str_li = "li_" + recipe.ID.ToString();
+                    string strClass = "nav-link active";
+
+                    if (i > 0)
+                    {
+                        strClass = "nav-link";
+                    }
+
+                    <li class="nav-item" id="@str_li">
+                        <a href="@s" class="@strClass" data-bs-toggle="tab" data-recipeid="@recipe.ID.ToString()">
+                            <span>
+                                @*<span class="recipeID" style="display: none;">@recipe.ID.ToString()</span>*@
+                                <span class="recipeName">@recipe.Name</span>&nbsp;&nbsp;
+                                <i class="fa-solid fa-pen editRecipeName"></i>
+                            </span>
+                        </a>
+                    </li>
+
+                    i++;
+                }
+            }
+
+        </ul>
+
+
+        <div class="card" style="border-top:none;">
+            <div class="card-text">
+                <br />
+                <div class="row center" style="padding: 1%">
+                    <div class="col-12">
+                        <div class="tab-content" id="myTabContent">
+                            @{
+                                int j = 0;
+
+                                foreach (var recipe in Model.recipes)
+                                {
+                                    string a = "m" + recipe.ID.ToString();
+                                    string strClass = "tab-pane fade show active";
+
+                                    if (j > 0)
+                                    {
+                                        strClass = "tab-pane fade";
+                                    }
+
+                                    <div class="@strClass" id="@a" data-recipeid="@recipe.ID.ToString()">
+                                        <div class="col">
+                                            @{
+                                                string strTblName = "tbl" + recipe.ID.ToString();
+                                                string btnId = "btn-add-week_" + recipe.ID.ToString();
+                                            }
+                                            <table id="@strTblName" class="table-sm table-striped tblRecipe" style="border:none; width:100%">
+                                                <thead class="thead-light">
+                                                    <tr>
+                                                        <th class="table-header-blank" style="text-align:center;">
+                                                            <button id="btn-add-week" type="button" class="btn btn-outline-success btn-sm btn-add-week" data-toggle="tooltip" data-placement="left" title="@localizer["AddWeekToolTip"]" data-recipe="@recipe.ID.ToString()">
+                                                                <span class="fa-solid fa-plus"></span>
+                                                            </button>
+
+                                                        </th>
+                                                        <th class="table-header-blank">
+                                                        </th>
+                                                        @{
+                                                            // this code is redundant as it will be always be 2 locations (Habitat and Reservoir)
+                                                            // Design changes, decided to make Hab and Res limits static and not
+                                                            // dynamic like Chems
+                                                            @*string cls = "";
+                                                            string clspn = "";
+
+                                                            foreach (var location in Model.locations)
+                                                            {
+                                                                cls = "table-header-" + (location.Sorting + 2).ToString();
+                                                                clspn = (8 + (location.Sorting * (-2))).ToString();
+
+                                                                <th colspan="@clspn" class="@cls">
+                                                                    @location.Name
+                                                                </th>
+
+                                                            }*@
+                                                        }
+                                                        <th colspan="6" class="table-header-3">
+                                                            @localizer["Habitat"]
+                                                        </th>
+                                                        <th colspan="4" class="table-header-4">
+                                                            @localizer["Reservoir"]
+                                                        </th>
+                                                        <th colspan="@recipe.RecipeChems.Count()" class="table-header-5 ">
+                                                            @localizer["Chemicals"]
+                                                        </th>
+                                                        <th colspan="3" class="table-header-blank">
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th rowspan="2" class="table-header-1">
+                                                            @localizer["Wk #"]
+                                                        </th>
+                                                        <th rowspan="2" class="table-header-2">
+                                                            @localizer["Daylight"]
+                                                        </th>
+                                                        <th colspan="2" class="table-header-3" style="border-top-left-radius: 0px;">
+                                                            <small><strong>@localizer["Day Temp"]</strong></small>
+                                                        </th>
+                                                        <th colspan="2" class="table-header-3" style="border-top-left-radius: 0px;">
+                                                            <small><strong>@localizer["Night Temp"]</strong></small>
+                                                        </th>
+                                                        <th colspan="2" class="table-header-3" style="border-top-left-radius: 0px;">
+                                                            <small><strong>@localizer["Humidity"]</strong></small>
+                                                        </th>
+                                                        <th colspan="2" class="table-header-4">
+                                                            <small><strong>@localizer["pH"]</strong></small>
+                                                        </th>
+                                                        <th colspan="2" class="table-header-4">
+                                                            <small><strong>@localizer["PPM"]</strong></small>
+                                                        </th>
+                                                        @{
+                                                            int cntHead = 5;
+                                                            string strHead = "";
+
+                                                            foreach (var chemType in Model.recipeChemListViewModels.Where(x => x.RecipeID.ToString() == recipe.ID.ToString())
+                                                                .GroupBy(p => p.ChemicalTypeID)
+                                                                .Select(g => g.First())
+                                                                )
+                                                            {
+                                                                var s = Model.recipeChemListViewModels.Where(x => x.RecipeID.ToString() == recipe.ID.ToString())
+                                                                                                            .Where(y => y.ChemicalTypeID.ToString() == chemType.ChemicalTypeID.ToString())
+                                                                                                        .GroupBy(p => p.ChemicalID).Count();
+
+                                                                cntHead++;
+                                                                strHead = "table-header-" + cntHead.ToString();
+
+                                                                <th colspan="@s" class="@strHead">
+                                                                    <small><strong>@localizer[@chemType.ChemicalTypeName]</strong></small>
+                                                                </th>
+                                                            }
+                                                        }
+                                                        <th colspan="4" class="table-header-8"><strong>@localizer["Irrigation"]</strong></th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
+                                                            @localizer["LCL"]
+                                                        </th>
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
+                                                            @localizer["UCL"]
+                                                        </th>
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
+                                                            @localizer["LCL"]
+                                                        </th>
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
+                                                            @localizer["UCL"]
+                                                        </th>
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
+                                                            @localizer["LCL"]
+                                                        </th>
+                                                        <th class="table-header-3" style="font-size: x-small; border-top-left-radius: 0px;">
+                                                            @localizer["UCL"]
+                                                        </th>
+                                                        <th class="table-header-4" style="font-size: x-small">
+                                                            @localizer["LCL"]
+                                                        </th>
+                                                        <th class="table-header-4" style="font-size: x-small">
+                                                            @localizer["UCL"]
+                                                        </th>
+                                                        <th class="table-header-4" style="font-size: x-small">
+                                                            @localizer["LCL"]
+                                                        </th>
+                                                        <th class="table-header-4" style="font-size: x-small">
+                                                            @localizer["UCL"]
+                                                        </th>
+                                                        @{
+                                                            foreach (var chemType in Model.recipeChemListViewModels.Where(x => x.RecipeID.ToString() == recipe.ID.ToString())
+                                                                          .Where(p => p.ChemicalTypeName == "Nutrients"))
+                                                            {
+                                                                <th class="table-header-6" style="font-size: x-small">
+                                                                    @chemType.ChemicalName
+                                                                </th>
+                                                            }
+
+                                                            foreach (var chemType in Model.recipeChemListViewModels.Where(x => x.RecipeID.ToString() == recipe.ID.ToString())
+                                                                .Where(p => p.ChemicalTypeName == "Supplements"))
+                                                            {
+                                                                <th class="table-header-7" style="font-size: x-small">
+                                                                    @chemType.ChemicalName
+                                                                </th>
+                                                            }
+
+                                                        }
+                                                        <th class="table-header-8" style="font-size: x-small; border-top-right-radius: 0px;">
+                                                            @localizer["Events / Day"]
+                                                        </th>
+                                                        <th class="table-header-8" style="font-size: x-small; border-top-right-radius: 0px; ">
+                                                            @localizer["Soak Time"]
+                                                        </th>
+                                                        <th class="table-header-8" style="font-size: x-small; border-top-right-radius: 0px; ">
+                                                            @localizer["Morning Sip"]
+                                                        </th>
+                                                        <th class="table-header-8" style="font-size: x-small; border-top-right-radius: 0px; ">
+                                                           @localizer["Evening Sip"]
+                                                        </th>
+                                                        <th class="table-header-blank"></th>
+                                                        <th class="table-header-blank"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{
+                                                        foreach (var step in recipe.RecipeSteps)
+                                                        {
+                                                            <tr data-stepid="@step.ID.ToString()">
+                                                                <td class="text-center">
+                                                                    <strong>@step.WeekNumber</strong>
+                                                                </td>
+                                                                <td class="text-center" data-is-light="true" data-stepid="@step.ID.ToString()" data-light-previous-value="@step.LightCycleID.ToString()">
+                                                                    @{
+                                                                        string strlightid = step.ID.ToString() + "-light";
+
+                                                                        @Html.DropDownListFor(s => step.LightCycleID, ViewBag.ddDaylight as List<SelectListItem>, new { @disabled = "disabled", @class = "lightdropdown", @id = strlightid })
+                                                                    }
+                                                                </td>
+                                                                @foreach (var steplimit in (step.RecipeStepLimits)
+                                                              .Where(op => op.LocationID == Guid.Parse("3a030487-3e43-0455-fe56-125537762d27"))
+                                                              .Where(o => o.MeasurementTypeID == Guid.Parse("3a03ad68-02a1-3c15-aaae-e2fa08e24c8d"))
+                                                              .Where(o => o.LimitTypeID == Guid.Parse("3a03a0f5-27e6-d4a6-a3e7-ef1f0877283f")))
+                                                                {
+                                                                    string strhabitat_daytemp_lclId = step.ID.ToString() + "-habitat-daytemp-lcl-textbox";
+
+                                                                    <td class="text-center habitat-daytemp-lcl-limitvalue" data-is-habitat_daytemp_lcl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-habitat_daytemp_lcl-previous-value="@steplimit.Value.ToString("0")">
+                                                                        <small><input id="@strhabitat_daytemp_lclId" type="number" value="@steplimit.Value.ToString("0")" max="30" min="15" disabled style="text-align: center" /></small>
+                                                                    </td>
+
+                                                                }
+                                                                @foreach (var steplimit in (step.RecipeStepLimits)
+                                                                  .Where(op => op.LocationID == Guid.Parse("3a030487-3e43-0455-fe56-125537762d27"))
+                                                                  .Where(o => o.MeasurementTypeID == Guid.Parse("3a03ad68-02a1-3c15-aaae-e2fa08e24c8d"))
+                                                                  .Where(o => o.LimitTypeID == Guid.Parse("3a03a0f4-fe17-340e-a311-f553d5cef030")))
+                                                                {
+                                                                    string strhabitat_daytemp_uclId = step.ID.ToString() + "-habitat-daytemp-ucl-textbox";
+
+                                                                    <td class="text-center habitat-daytemp-ucl-limitvalue" data-is-habitat_daytemp_ucl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-habitat_daytemp_ucl-previous-value="@steplimit.Value.ToString("0")">
+                                                                        <small><input id="@strhabitat_daytemp_uclId" type="number" value="@steplimit.Value.ToString("0")" max="30" min="15" disabled style="text-align: center" /></small>
+                                                                    </td>
+
+                                                                }
+
+                                                                @foreach (var steplimit in (step.RecipeStepLimits)
+                                                                  .Where(op => op.LocationID == Guid.Parse("3a030487-3e43-0455-fe56-125537762d27"))
+                                                                  .Where(o => o.MeasurementTypeID == Guid.Parse("3a03ad68-2b58-1a34-f4ef-f7e4bfc57587"))
+                                                                  .Where(o => o.LimitTypeID == Guid.Parse("3a03a0f5-27e6-d4a6-a3e7-ef1f0877283f")))
+                                                                {
+                                                                    string strhabitat_nighttemp_lclId = step.ID.ToString() + "-habitat-nighttemp-lcl-textbox";
+
+                                                                    <td class="text-center habitat-nighttemp-lcl-limitvalue" data-is-habitat_nighttemp_lcl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-habitat_nighttemp_lcl-previous-value="@steplimit.Value.ToString("0")">
+                                                                        <small><input id="@strhabitat_nighttemp_lclId" type="number" value="@steplimit.Value.ToString("0")" max="30" min="15" disabled style="text-align: center" /></small>
+                                                                    </td>
+                                                                }
+                                                                @foreach (var steplimit in (step.RecipeStepLimits)
+                                                                  .Where(op => op.LocationID == Guid.Parse("3a030487-3e43-0455-fe56-125537762d27"))
+                                                                  .Where(o => o.MeasurementTypeID == Guid.Parse("3a03ad68-2b58-1a34-f4ef-f7e4bfc57587"))
+                                                                  .Where(o => o.LimitTypeID == Guid.Parse("3a03a0f4-fe17-340e-a311-f553d5cef030")))
+                                                                {
+                                                                    string strhabitat_nighttemp_uclId = step.ID.ToString() + "-habitat-nighttemp-ucl-textbox";
+
+                                                                    <td class="text-center habitat-nighttemp-ucl-limitvalue" data-is-habitat_nighttemp_ucl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-habitat_nighttemp_ucl-previous-value="@steplimit.Value.ToString("0")">
+                                                                        <small><input id="@strhabitat_nighttemp_uclId" type="number" value="@steplimit.Value.ToString("0")" max="30" min="15" disabled style="text-align: center" /></small>
+                                                                    </td>
+
+                                                                }
+                                                                @foreach (var steplimit in (step.RecipeStepLimits)
+                                                                  .Where(op => op.LocationID == Guid.Parse("3a030487-3e43-0455-fe56-125537762d27"))
+                                                                  .Where(o => o.MeasurementTypeID == Guid.Parse("3a030472-0d80-2519-8007-5a74813c8bba"))
+                                                                  .Where(o => o.LimitTypeID == Guid.Parse("3a03a0f5-27e6-d4a6-a3e7-ef1f0877283f")))
+                                                                {
+                                                                    string strhabitat_humid_lclId = step.ID.ToString() + "-habitat-humid-lcl-textbox";
+
+                                                                    <td class="text-center habitat-humid-lcl-limitvalue" data-is-habitat_humid_lcl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-habitat_humid_lcl-previous-value="@steplimit.Value.ToString("0")">
+                                                                        <small><input id="@strhabitat_humid_lclId" type="number" value="@steplimit.Value.ToString("0")" max="90" min="20" step="5" disabled style="text-align: center" /></small>
+                                                                    </td>
+                                                                }
+                                                                @foreach (var steplimit in (step.RecipeStepLimits)
+                                                                  .Where(op => op.LocationID == Guid.Parse("3a030487-3e43-0455-fe56-125537762d27"))
+                                                                  .Where(o => o.MeasurementTypeID == Guid.Parse("3a030472-0d80-2519-8007-5a74813c8bba"))
+                                                                  .Where(o => o.LimitTypeID == Guid.Parse("3a03a0f4-fe17-340e-a311-f553d5cef030")))
+                                                                {
+                                                                    string strhabitat_humid_uclId = step.ID.ToString() + "-habitat-humid-ucl-textbox";
+
+                                                                    <td class="text-center habitat-humid-ucl-limitvalue" data-is-habitat_humid_ucl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-habitat_humid_ucl-previous-value="@steplimit.Value.ToString("0")">
+                                                                        <small><input id="@strhabitat_humid_uclId" type="number" value="@steplimit.Value.ToString("0")" max="90" min="20" step="5" disabled style="text-align: center" /></small>
+                                                                    </td>
+                                                                }
+                                                                @foreach (var steplimit in (step.RecipeStepLimits)
+                                                                  .Where(op => op.LocationID == Guid.Parse("3a030486-4c6e-174a-5cda-f6eb18dbb247"))
+                                                                  .Where(o => o.MeasurementTypeID == Guid.Parse("3a0307d4-48b7-9a1d-b283-855ddb37b3d3"))
+                                                                  .Where(o => o.LimitTypeID == Guid.Parse("3a03a0f5-27e6-d4a6-a3e7-ef1f0877283f")))
+                                                                {
+                                                                    string strres_ph_lclId = step.ID.ToString() + "-res-ph-lcl-textbox";
+
+                                                                    <td class="text-center res-ph-lcl-limitvalue" data-is-res_ph_lcl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-res_ph_lcl-previous-value="@steplimit.Value.ToString("0.0")">
+                                                                        @*<small><input id="@strres_ph_lclId" type="number" value="@steplimit.Value.ToString("0.0")" max="7" min="4" step="0.1" disabled style="text-align: center" /></small>*@
+                                                                        <small><input id="@strres_ph_lclId" type="text" value="@steplimit.Value.ToString("N1")" pattern="[0-9]+([,][0-9]{1,2})?" lang="fr" max="7" min="4" step="0.1" disabled style="text-align: center" /></small>
+                                                                    </td>
+                                                                }
+                                                                @foreach (var steplimit in (step.RecipeStepLimits)
+                                                                  .Where(op => op.LocationID == Guid.Parse("3a030486-4c6e-174a-5cda-f6eb18dbb247"))
+                                                                  .Where(o => o.MeasurementTypeID == Guid.Parse("3a0307d4-48b7-9a1d-b283-855ddb37b3d3"))
+                                                                  .Where(o => o.LimitTypeID == Guid.Parse("3a03a0f4-fe17-340e-a311-f553d5cef030")))
+                                                                {
+                                                                    string strres_ph_uclId = step.ID.ToString() + "-res-ph-ucl-textbox";
+
+                                                                    <td class="text-center res-ph-ucl-limitvalue" data-is-res_ph_ucl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-res_ph_ucl-previous-value="@steplimit.Value.ToString("0.0")">
+                                                                        <small><input id="@strres_ph_uclId" type="number" value="@steplimit.Value.ToString("0.0")" max="7" min="4" step="0.1" disabled style="text-align: center" /></small>
+                                                                    </td>
+                                                                }
+                                                                @foreach (var steplimit in (step.RecipeStepLimits)
+                                                                  .Where(op => op.LocationID == Guid.Parse("3a030486-4c6e-174a-5cda-f6eb18dbb247"))
+                                                                  .Where(o => o.MeasurementTypeID == Guid.Parse("3a0307d4-7913-8e12-b823-4aa5ccc8d100"))
+                                                                  .Where(o => o.LimitTypeName == "LCL"))
+                                                                {
+                                                                    string strres_ppm_lclId = step.ID.ToString() + "-res-ppm-lcl-textbox";
+
+                                                                    <td class="text-center res-ppm-lcl-limitvalue" data-is-res_ppm_lcl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-res_ppm_lcl-previous-value="@steplimit.Value.ToString("0")">
+                                                                        <small><input id="@strres_ppm_lclId" type="number" value="@steplimit.Value.ToString("0")" max="1500" min="0" step="50" disabled style="text-align: center" /></small>
+                                                                    </td>
+
+                                                                }
+                                                                @foreach (var steplimit in (step.RecipeStepLimits)
+                                                              .Where(op => op.LocationID == Guid.Parse("3a030486-4c6e-174a-5cda-f6eb18dbb247"))
+                                                              .Where(o => o.MeasurementTypeID == Guid.Parse("3a0307d4-7913-8e12-b823-4aa5ccc8d100"))
+                                                              .Where(o => o.LimitTypeName == "UCL"))
+                                                                {
+                                                                    string strres_ppm_uclId = step.ID.ToString() + "-res-ppm-ucl-textbox";
+
+                                                                    <td class="text-center res-ppm-ucl-limitvalue" data-is-res_ppm_ucl="true" data-stepid="@step.ID.ToString()" data-steplimitid="@steplimit.ID.ToString()" data-res_ppm_ucl-previous-value="@steplimit.Value.ToString("0")">
+                                                                        <small><input id="@strres_ppm_uclId" type="number" value="@steplimit.Value.ToString("0")" max="1500" min="0" step="50" disabled style="text-align: center" /></small>
+                                                                    </td>
+
+                                                                }
+                                                                @{
+                                                                    foreach (var stepamount in (step.RecipeStepAmounts)
+                                                                        .Where(a => a.ChemicalTypeID == Guid.Parse("3a031e60-3574-b192-2593-a2caaefa5c06"))
+                                                                        .OrderBy(q => q.ChemicalName))
+                                                                    {
+                                                                        string clsheader1 = "text-center " + stepamount.ID.ToString() + "-value";
+                                                                        string id1 = stepamount.ID.ToString() + "-textbox";
+
+                                                                        <td class="@clsheader1" data-is-stepamount="true" data-stepamount-id="@stepamount.ID.ToString()" data-stepamount-previous-value="@stepamount.Amount.ToString("0.0")">
+                                                                            <small><input id="@id1" type="number" value="@stepamount.Amount.ToString("0.0")" max="10" min="0" step="0.1" disabled style="text-align:center" /></small>
+                                                                        </td>
+
+                                                                    }
+
+                                                                    foreach (var stepamount in (step.RecipeStepAmounts)
+                                                                        .Where(a => a.ChemicalTypeID == Guid.Parse("3a031e60-610e-0f43-73e3-550c031f9571"))
+                                                                        .OrderBy(q => q.ChemicalName))
+                                                                    {
+                                                                        string clsheader1 = "text-center " + stepamount.ID.ToString() + "-value";
+                                                                        string id1 = stepamount.ID.ToString() + "-textbox";
+
+                                                                        <td class="@clsheader1" data-is-stepamount="true" data-stepamount-id="@stepamount.ID.ToString()" data-stepamount-previous-value="@stepamount.Amount.ToString("0.0")">
+                                                                            <small><input id="@id1" type="number" value="@stepamount.Amount.ToString("0.0")" max="10" min="0" step="0.1" disabled style="text-align:center" /></small>
+                                                                        </td>
+                                                                    }
+
+                                                                    string strirrigationId = step.ID.ToString() + "-irrigations-textbox";
+
+                                                                    <td class="text-center irrigations-value" data-is-irrigation="true" data-stepid="@step.ID.ToString()" data-irrigation-previous-value="@step.IrrigationEventsPerDay">
+                                                                        <small><input id="@strirrigationId" type="number" value="@step.IrrigationEventsPerDay" max="10" min="1" disabled style="text-align:center" /></small>
+                                                                    </td>
+
+                                                                    string strsoaktime = step.ID.ToString() + "-soaktime-textbox";
+
+                                                                    <td class="text-center soaktime-value" data-is-soaktime="true" data-stepid="@step.ID.ToString()" data-soaktime-previous-value="@step.SoakTime">
+                                                                        <small><input id="@strsoaktime" type="number" value="@step.SoakTime" max="13" min="1" disabled style="text-align:center" /></small>
+                                                                    </td>
+
+                                                                    string strMorning = step.ID.ToString() + "-morningdrink";
+
+                                                                    <td class="text-center" style="font-size: large" data-is-morning="true" data-stepid="@step.ID.ToString()" data-previous-morning="@step.IsMorningSip.ToString().ToLower()">
+                                                                        <input class="irrigation_check" id="@strMorning" @( step.IsMorningSip == true ? "checked" : "" ) disabled type="checkbox" style="text-align:center" />
+                                                                    </td>
+
+                                                                    string strEvening = step.ID.ToString() + "-eveningdrink";
+
+                                                                    <td class="text-center" style="font-size: large" data-is-evening="true" data-stepid="@step.ID.ToString()" data-previous-evening="@step.IsEveningSip.ToString().ToLower()">
+                                                                        <input class="irrigation_check" id="@strEvening" @( step.IsEveningSip == true ? "checked" : "" ) disabled type="checkbox" style="text-align:center" />
+                                                                    </td>
+
+                                                                }
+                                                                <td class="text-center" style="border-right: none;">
+                                                                    <a class="Edit" href="javascript:;">
+                                                                        <span class="fa-solid fa-pencil text-primary"></span>
+                                                                    </a>
+                                                                    <a class="Update" href="javascript:;" style="display:none">
+                                                                        <span class="fa fa-save text-success"></span>
+                                                                    </a>
+                                                                </td>
+                                                                <td class="text-center" style="border-right: 1px solid #ddd; border-left: none;">
+                                                                    <a class="Cancel" href="javascript:;" style="display:none">
+                                                                        <span class="fa fa-times text-secondary"></span>
+                                                                    </a>
+                                                                    <a class="Delete" href="javascript:;">
+                                                                        <span class="fa-solid fa-trash-can text-danger"></span>
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+
+                                                        }
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    j++;
+                                }
+
+
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer" style="padding-top: 2%">
+                @if (j > 1)
+                {
+                    <button id="btn-delete-recipe" type="button" class="btn btn-danger btn-sm">@localizer["Delete"]</button>
+                }
+                else
+                {
+                    <button id="btn-delete-recipe" type="button" class="btn btn-danger btn-sm" disabled>@localizer["Delete"]</button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <br />
+
+</body>
+</html>
+<script>
+    $(document).ready(function () {
+
+        var form = $('#__AjaxAntiForgeryForm');
+        var token = $('input[name="__RequestVerificationToken"]', form).val();
+
+        $("#myTab a").click(function (e) {
+            e.preventDefault();
+            $(this).tab("show");
+        });
+
+        $("span").keypress(function (e) {
+            if (e.keyCode == 13) {
+                e.preventDefault();
+            };
+        });
+
+        $("span").bind("paste", function (e) {
+            e.preventDefault();
+        });
+
+        $("body").on("click", ".tblRecipe #btn-add-week", function (e) {
+            var recipeID = $(this).attr("data-recipe");
+            var form = $('#__AjaxAntiForgeryForm');
+            var token = $('input[name="__RequestVerificationToken"]', form).val();
+
+            //Add week here
+            var recipeStepObject = {
+                'RecipeID': recipeID
+            };
+
+            $('body').addClass('waiting');
+
+            $.ajax({
+                url: '/Recipe/AddWeek',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                data: {
+                    __RequestVerificationToken: token,
+                    RecipeStep: recipeStepObject
+                },
+                success: function (data) {
+                    if (data) {
+                        var tblName = "tbl" + recipeID;
+                        var table = document.getElementById(tblName);
+                        var row = table.insertRow(-1);
+
+                        // Week Number
+                        var cell1 = row.insertCell(0);
+                        cell1.setAttribute("class", "text-center");
+                        cell1.innerHTML = "<td><strong>" + data.weekNumber + "</strong></td>";
+                        // Hab Daylight select
+                        var cell2 = row.insertCell(1);
+                        var selectList = document.createElement("select");
+                        selectList.setAttribute("id", data.id + "-light");
+                        selectList.setAttribute("class", "lightdropdown");
+                        selectList.setAttribute("data-val", "true");
+                        selectList.setAttribute("data-val-required", "The LightCycleID field is required.");
+                        selectList.setAttribute("disabled", "disabled");
+                        selectList.setAttribute("name", "step.LightCycleID");
+
+                        $.ajax({
+                            url: '/LightCycle/GetLightCycleList',
+                            type: 'GET',
+                            contentType: 'application/json; charset=utf-8',
+                            dataType: "json",
+                            success: function (lightcycledata) {
+                                if (lightcycledata) {
+                                    for (let i = 0; i < lightcycledata.length; i++) {
+                                        var option = document.createElement("option");
+                                        option.setAttribute("value", lightcycledata[i].id);
+                                        if (data.lightCycleID == lightcycledata[i].id) {
+                                            option.setAttribute("selected", "selected");
+                                        }
+                                        option.text = lightcycledata[i].name;
+                                        selectList.appendChild(option);
+
+                                    }
+                                }
+                            }
+                        });
+
+                        cell2.setAttribute("class", "text-center");
+                        cell2.setAttribute("data-is-light", "true");
+                        cell2.setAttribute("data-stepid", data.id);
+                        cell2.setAttribute("data-light-previous-value", data.lightCycleID);
+
+                        cell2.appendChild(selectList);
+                        // Hab DayTemp LCL
+                        var cell3 = row.insertCell(2);
+                        var input_habitat_daytemp_lcl = document.createElement("input");
+                        input_habitat_daytemp_lcl.setAttribute("id", data.id + "-habitat-daytemp-lcl-textbox");
+                        input_habitat_daytemp_lcl.setAttribute("type", "number");
+                        input_habitat_daytemp_lcl.setAttribute("max", "30");
+                        input_habitat_daytemp_lcl.setAttribute("min", "15");
+                        input_habitat_daytemp_lcl.setAttribute("disabled", "disabled");
+                        input_habitat_daytemp_lcl.setAttribute("style", "text-align: center");
+                        input_habitat_daytemp_lcl.setAttribute("value", data.recipeStepLimits[0].value);
+
+                        cell3.setAttribute("class", "text-center habitat-daytemp-lcl-limitvalue");
+                        cell3.setAttribute("data-is-habitat_daytemp_lcl", "true");
+                        cell3.setAttribute("data-stepid", data.id);
+                        cell3.setAttribute("data-steplimitid", data.recipeStepLimits[0].id);
+                        cell3.setAttribute("data-habitat_daytemp_lcl-previous-value", data.recipeStepLimits[0].value);
+
+                        var small_input_habitat_daytemp_lcl = document.createElement("small");
+                        small_input_habitat_daytemp_lcl.appendChild(input_habitat_daytemp_lcl);
+
+                        cell3.appendChild(small_input_habitat_daytemp_lcl);
+                        // Hab DayTemp UCL
+                        var cell4 = row.insertCell(3);
+                        var input_habitat_daytemp_ucl = document.createElement("input");
+                        input_habitat_daytemp_ucl.setAttribute("id", data.id + "-habitat-daytemp-ucl-textbox");
+                        input_habitat_daytemp_ucl.setAttribute("type", "number");
+                        input_habitat_daytemp_ucl.setAttribute("max", "30");
+                        input_habitat_daytemp_ucl.setAttribute("min", "15");
+                        input_habitat_daytemp_ucl.setAttribute("disabled", "disabled");
+                        input_habitat_daytemp_ucl.setAttribute("style", "text-align: center");
+                        input_habitat_daytemp_ucl.setAttribute("value", data.recipeStepLimits[1].value);
+
+                        cell4.setAttribute("class", "text-center habitat-daytemp-ucl-limitvalue");
+                        cell4.setAttribute("data-is-habitat_daytemp_ucl", "true");
+                        cell4.setAttribute("data-stepid", data.id);
+                        cell4.setAttribute("data-steplimitid", data.recipeStepLimits[1].id);
+                        cell4.setAttribute("data-habitat_daytemp_ucl-previous-value", data.recipeStepLimits[1].value);
+
+                        var small_input_habitat_daytemp_ucl = document.createElement("small");
+                        small_input_habitat_daytemp_ucl.appendChild(input_habitat_daytemp_ucl);
+
+                        cell4.appendChild(small_input_habitat_daytemp_ucl);
+                        // Hab NightTemp LCL
+                        var cell5 = row.insertCell(4);
+                        var input_habitat_nighttemp_lcl = document.createElement("input");
+                        input_habitat_nighttemp_lcl.setAttribute("id", data.id + "-habitat-nighttemp-lcl-textbox");
+                        input_habitat_nighttemp_lcl.setAttribute("type", "number");
+                        input_habitat_nighttemp_lcl.setAttribute("max", "30");
+                        input_habitat_nighttemp_lcl.setAttribute("min", "15");
+                        input_habitat_nighttemp_lcl.setAttribute("disabled", "disabled");
+                        input_habitat_nighttemp_lcl.setAttribute("style", "text-align: center");
+                        input_habitat_nighttemp_lcl.setAttribute("value", data.recipeStepLimits[2].value);
+
+                        cell5.setAttribute("class", "text-center habitat-nighttemp-lcl-limitvalue");
+                        cell5.setAttribute("data-is-habitat_nighttemp_lcl", "true");
+                        cell5.setAttribute("data-stepid", data.id);
+                        cell5.setAttribute("data-steplimitid", data.recipeStepLimits[2].id);
+                        cell5.setAttribute("data-habitat_nighttemp_lcl-previous-value", data.recipeStepLimits[2].value);
+
+                        var small_input_habitat_nighttemp_lcl = document.createElement("small");
+                        small_input_habitat_nighttemp_lcl.appendChild(input_habitat_nighttemp_lcl);
+
+                        cell5.appendChild(small_input_habitat_nighttemp_lcl);
+                        // Hab NightTemp UCL
+                        var cell6 = row.insertCell(5);
+                        var input_habitat_nighttemp_ucl = document.createElement("input");
+                        input_habitat_nighttemp_ucl.setAttribute("id", data.id + "-habitat-nighttemp-ucl-textbox");
+                        input_habitat_nighttemp_ucl.setAttribute("type", "number");
+                        input_habitat_nighttemp_ucl.setAttribute("max", "30");
+                        input_habitat_nighttemp_ucl.setAttribute("min", "15");
+                        input_habitat_nighttemp_ucl.setAttribute("disabled", "disabled");
+                        input_habitat_nighttemp_ucl.setAttribute("style", "text-align: center");
+                        input_habitat_nighttemp_ucl.setAttribute("value", data.recipeStepLimits[3].value);
+
+                        cell6.setAttribute("class", "text-center habitat-nighttemp-ucl-limitvalue");
+                        cell6.setAttribute("data-is-habitat_nighttemp_ucl", "true");
+                        cell6.setAttribute("data-stepid", data.id);
+                        cell6.setAttribute("data-steplimitid", data.recipeStepLimits[3].id);
+                        cell6.setAttribute("data-habitat_nighttemp_ucl-previous-value", data.recipeStepLimits[3].value);
+
+                        var small_input_habitat_nighttemp_ucl = document.createElement("small");
+                        small_input_habitat_nighttemp_ucl.appendChild(input_habitat_nighttemp_ucl);
+
+                        cell6.appendChild(small_input_habitat_nighttemp_ucl);
+
+
+                        // Hab Humid LCL input
+                        var cell7 = row.insertCell(6);
+                        var input_habitat_humid_lcl = document.createElement("input");
+                        input_habitat_humid_lcl.setAttribute("id", data.id + "-habitat-humid-lcl-textbox");
+                        input_habitat_humid_lcl.setAttribute("type", "number");
+                        input_habitat_humid_lcl.setAttribute("max", "90");
+                        input_habitat_humid_lcl.setAttribute("min", "20");
+                        input_habitat_humid_lcl.setAttribute("step", "5");
+                        input_habitat_humid_lcl.setAttribute("disabled", "disabled");
+                        input_habitat_humid_lcl.setAttribute("style", "text-align: center");
+                        input_habitat_humid_lcl.setAttribute("value", data.recipeStepLimits[4].value);
+
+                        cell7.setAttribute("class", "text-center habitat-humid-lcl-limitvalue");
+                        cell7.setAttribute("data-is-habitat_humid_lcl", "true");
+                        cell7.setAttribute("data-stepid", data.id);
+                        cell7.setAttribute("data-steplimitid", data.recipeStepLimits[4].id);
+                        cell7.setAttribute("data-habitat_humid_lcl-previous-value", data.recipeStepLimits[4].value);
+
+                        var small_input_habitat_humid_lcl = document.createElement("small");
+                        small_input_habitat_humid_lcl.appendChild(input_habitat_humid_lcl);
+
+                        cell7.appendChild(small_input_habitat_humid_lcl);
+
+                        // Hab Humid UCL
+                        var cell8 = row.insertCell(7);
+                        var input_habitat_humid_ucl = document.createElement("input");
+                        input_habitat_humid_ucl.setAttribute("id", data.id + "-habitat-humid-ucl-textbox");
+                        input_habitat_humid_ucl.setAttribute("type", "number");
+                        input_habitat_humid_ucl.setAttribute("max", "90");
+                        input_habitat_humid_ucl.setAttribute("min", "20");
+                        input_habitat_humid_ucl.setAttribute("step", "5");
+                        input_habitat_humid_ucl.setAttribute("disabled", "disabled");
+                        input_habitat_humid_ucl.setAttribute("style", "text-align: center");
+                        input_habitat_humid_ucl.setAttribute("value", data.recipeStepLimits[5].value);
+
+                        cell8.setAttribute("class", "text-center habitat-humid-ucl-limitvalue");
+                        cell8.setAttribute("data-is-habitat_humid_ucl", "true");
+                        cell8.setAttribute("data-stepid", data.id);
+                        cell8.setAttribute("data-steplimitid", data.recipeStepLimits[5].id);
+                        cell8.setAttribute("data-habitat_humid_ucl-previous-value", data.recipeStepLimits[5].value);
+
+                        var small_input_habitat_humid_ucl = document.createElement("small");
+                        small_input_habitat_humid_ucl.appendChild(input_habitat_humid_ucl);
+
+                        cell8.appendChild(small_input_habitat_humid_ucl);
+                        // Res pH LCL
+                        var cell9 = row.insertCell(8);
+                        var input_res_ph_lcl = document.createElement("input");
+                        input_res_ph_lcl.setAttribute("id", data.id + "-res-ph-lcl-textbox");
+                        input_res_ph_lcl.setAttribute("type", "number");
+                        input_res_ph_lcl.setAttribute("max", "7");
+                        input_res_ph_lcl.setAttribute("min", "4");
+                        input_res_ph_lcl.setAttribute("step", "0.1");
+                        input_res_ph_lcl.setAttribute("disabled", "disabled");
+                        input_res_ph_lcl.setAttribute("style", "text-align: center");
+                        input_res_ph_lcl.setAttribute("value", data.recipeStepLimits[6].value);
+
+                        cell9.setAttribute("class", "text-center res-ph-lcl-limitvalue");
+                        cell9.setAttribute("data-is-res_ph_lcl", "true");
+                        cell9.setAttribute("data-stepid", data.id);
+                        cell9.setAttribute("data-steplimitid", data.recipeStepLimits[6].id);
+                        cell9.setAttribute("data-res_ph_lcl-previous-value", data.recipeStepLimits[6].value);
+
+                        var small_input_res_ph_lcl = document.createElement("small");
+                        small_input_res_ph_lcl.appendChild(input_res_ph_lcl);
+
+                        cell9.appendChild(small_input_res_ph_lcl);
+                        // Res pH UCU
+                        var cell10 = row.insertCell(9);
+                        var input_res_ph_ucl = document.createElement("input");
+                        input_res_ph_ucl.setAttribute("id", data.id + "-res-ph-ucl-textbox");
+                        input_res_ph_ucl.setAttribute("type", "number");
+                        input_res_ph_ucl.setAttribute("max", "7");
+                        input_res_ph_ucl.setAttribute("min", "4");
+                        input_res_ph_ucl.setAttribute("step", "0.1");
+                        input_res_ph_ucl.setAttribute("disabled", "disabled");
+                        input_res_ph_ucl.setAttribute("style", "text-align: center");
+                        input_res_ph_ucl.setAttribute("value", data.recipeStepLimits[7].value);
+
+                        cell10.setAttribute("class", "text-center res-ph-ucl-limitvalue");
+                        cell10.setAttribute("data-is-res_ph_ucl", "true");
+                        cell10.setAttribute("data-stepid", data.id);
+                        cell10.setAttribute("data-steplimitid", data.recipeStepLimits[7].id);
+                        cell10.setAttribute("data-res_ph_ucl-previous-value", data.recipeStepLimits[7].value);
+
+                        var small_input_res_ph_ucl = document.createElement("small");
+                        small_input_res_ph_ucl.appendChild(input_res_ph_ucl);
+
+                        cell10.appendChild(small_input_res_ph_ucl);
+
+                        // Res PPM LCL
+                        var cell11 = row.insertCell(10);
+                        var input_res_ppm_lcl = document.createElement("input");
+                        input_res_ppm_lcl.setAttribute("id", data.id + "-res-ppm-lcl-textbox");
+                        input_res_ppm_lcl.setAttribute("type", "number");
+                        input_res_ppm_lcl.setAttribute("max", "2400");
+                        input_res_ppm_lcl.setAttribute("min", "0");
+                        input_res_ppm_lcl.setAttribute("step", "100");
+                        input_res_ppm_lcl.setAttribute("disabled", "disabled");
+                        input_res_ppm_lcl.setAttribute("style", "text-align: center");
+                        input_res_ppm_lcl.setAttribute("value", data.recipeStepLimits[8].value);
+
+                        cell11.setAttribute("class", "text-center res-ppm-lcl-limitvalue");
+                        cell11.setAttribute("data-is-res_ppm_lcl", "true");
+                        cell11.setAttribute("data-stepid", data.id);
+                        cell11.setAttribute("data-steplimitid", data.recipeStepLimits[8].id);
+                        cell11.setAttribute("data-res_ppm_lcl-previous-value", data.recipeStepLimits[8].value);
+
+                        var small_input_res_ppm_lcl = document.createElement("small");
+                        small_input_res_ppm_lcl.appendChild(input_res_ppm_lcl);
+
+                        cell11.appendChild(small_input_res_ppm_lcl);
+
+                        // Res PPM UCL
+                        var cell12 = row.insertCell(11);
+                        var input_res_ppm_ucl = document.createElement("input");
+                        input_res_ppm_ucl.setAttribute("id", data.id + "-res-ppm-ucl-textbox");
+                        input_res_ppm_ucl.setAttribute("type", "number");
+                        input_res_ppm_ucl.setAttribute("max", "2400");
+                        input_res_ppm_ucl.setAttribute("min", "0");
+                        input_res_ppm_ucl.setAttribute("step", "100");
+                        input_res_ppm_ucl.setAttribute("disabled", "disabled");
+                        input_res_ppm_ucl.setAttribute("style", "text-align: center");
+                        input_res_ppm_ucl.setAttribute("value", data.recipeStepLimits[9].value);
+
+                        cell12.setAttribute("class", "text-center res-ppm-ucl-limitvalue");
+                        cell12.setAttribute("data-is-res_ppm_ucl", "true");
+                        cell12.setAttribute("data-stepid", data.id);
+                        cell12.setAttribute("data-steplimitid", data.recipeStepLimits[9].id);
+                        cell12.setAttribute("data-res_ppm_ucl-previous-value", data.recipeStepLimits[9].value);
+
+                        var small_input_res_ppm_ucl = document.createElement("small");
+                        small_input_res_ppm_ucl.appendChild(input_res_ppm_ucl);
+
+                        cell12.appendChild(small_input_res_ppm_ucl);
+
+                        // Chemical Amount input (dynamic list)
+                        for (let i = 0; i < data.recipeStepAmounts.length; i++) {
+                            var cell = row.insertCell(12 + i);
+                            var input = document.createElement("input");
+                            input.setAttribute("id", data.recipeStepAmounts[i].id + "-textbox");
+                            input.setAttribute("type", "number");
+                            input.setAttribute("max", "10");
+                            input.setAttribute("min", "0");
+                            input.setAttribute("step", "0.1");
+                            input.setAttribute("disabled", "disabled");
+                            input.setAttribute("style", "text-align: center");
+                            input.setAttribute("value", data.recipeStepAmounts[i].amount);
+
+                            cell.setAttribute("class", "text-center " + data.recipeStepAmounts[i].id);
+                            cell.setAttribute("data-is-stepamount", "true");
+                            cell.setAttribute("data-stepid", data.id);
+                            cell.setAttribute("data-stepamount-id", data.recipeStepAmounts[i].id);
+                            cell.setAttribute("data-stepamount-previous-value", data.recipeStepAmounts[i].amount);
+
+                            var small = document.createElement("small");
+                            small.appendChild(input);
+
+                            cell.appendChild(small);
+                        }
+
+                        // Irrigation Events Per Day input
+                        var cell13 = row.insertCell(12 + data.recipeStepAmounts.length);
+                        var input_irrigation = document.createElement("input");
+                        input_irrigation.setAttribute("id", data.id + "-irrigations-textbox");
+                        input_irrigation.setAttribute("type", "number");
+                        input_irrigation.setAttribute("max", "10");
+                        input_irrigation.setAttribute("min", "1");
+                        input_irrigation.setAttribute("step", "1");
+                        input_irrigation.setAttribute("disabled", "disabled");
+                        input_irrigation.setAttribute("style", "text-align: center");
+                        input_irrigation.setAttribute("value", data.irrigationEventsPerDay);
+
+                        cell13.setAttribute("class", "text-center irrigations-value");
+                        cell13.setAttribute("data-is-irrigation", "true");
+                        cell13.setAttribute("data-stepid", data.id);
+                        cell13.setAttribute("data-irrigation-previous-value", data.irrigationEventsPerDay);
+
+                        var small_irrigation = document.createElement("small");
+                        small_irrigation.appendChild(input_irrigation);
+
+                        cell13.appendChild(small_irrigation);
+
+                        // Soak Time input
+                        var cell14 = row.insertCell(13 + data.recipeStepAmounts.length);
+                        var input_soaktime = document.createElement("input");
+                        input_soaktime.setAttribute("id", data.id + "-soaktime-textbox");
+                        input_soaktime.setAttribute("type", "number");
+                        input_soaktime.setAttribute("max", "10");
+                        input_soaktime.setAttribute("min", "1");
+                        input_soaktime.setAttribute("step", "1");
+                        input_soaktime.setAttribute("disabled", "disabled");
+                        input_soaktime.setAttribute("style", "text-align: center");
+                        input_soaktime.setAttribute("value", data.soakTime);
+
+                        cell14.setAttribute("class", "text-center soaktime-value");
+                        cell14.setAttribute("data-is-soaktime", "true");
+                        cell14.setAttribute("data-stepid", data.id);
+                        cell14.setAttribute("data-soaktime-previous-value", data.soakTime);
+
+                        var small_soaktime = document.createElement("small");
+                        small_soaktime.appendChild(input_soaktime);
+
+                        cell14.appendChild(small_soaktime);
+
+                        // Morning Sip checkbox
+                        var cell15 = row.insertCell(14 + data.recipeStepAmounts.length);
+                        var input_morning = document.createElement("input");
+                        input_morning.setAttribute("id", data.id + "-morningdrink");
+                        input_morning.setAttribute("type", "checkbox");
+                        input_morning.setAttribute("disabled", "disabled");
+                        input_morning.setAttribute("style", "text-align: center");
+                        if (data.isMorningSip == true) {
+                            input_morning.setAttribute("checked", "checked");
+                        }
+
+                        cell15.setAttribute("class", "text-center");
+                        cell15.setAttribute("style", "font-size: large");
+                        cell15.setAttribute("data-is-morning", "true");
+                        cell15.setAttribute("data-stepid", data.id);
+                        cell15.setAttribute("data-previous-morning", data.isMorningSip);
+                        cell15.appendChild(input_morning);
+
+                        // Evening Sip checkbox
+                        var cell16 = row.insertCell(15 + data.recipeStepAmounts.length);
+                        var input_evening = document.createElement("input");
+                        input_evening.setAttribute("id", data.id + "-eveningdrink");
+                        input_evening.setAttribute("type", "checkbox");
+                        input_evening.setAttribute("disabled", "disabled");
+                        input_evening.setAttribute("style", "text-align: center");
+                        if (data.isEveningSip == true) {
+                            input_evening.setAttribute("checked", "checked");
+                        }
+
+                        cell16.setAttribute("class", "text-center");
+                        cell16.setAttribute("style", "font-size: large");
+                        cell16.setAttribute("data-is-evening", "true");
+                        cell16.setAttribute("data-stepid", data.id);
+                        cell16.setAttribute("data-previous-evening", data.isEveningSip);
+                        cell16.appendChild(input_evening);
+
+                        // Save|Edit|Cancel|Update button logic
+                        var cell17 = row.insertCell(16 + data.recipeStepAmounts.length);
+                        var morn = document.createElement("span");
+                        morn.setAttribute("class", "fa-solid fa-pencil text-primary");
+                        var morn2 = document.createElement("span");
+                        morn2.setAttribute("class", "fa fa-save text-success");
+
+                        var morn_a = document.createElement("a");
+                        morn_a.setAttribute("class", "Edit");
+                        morn_a.setAttribute("href", "javascript:;")
+                        morn_a.appendChild(morn);
+
+                        var morn_aa = document.createElement("a");
+                        morn_aa.setAttribute("class", "Update");
+                        morn_aa.setAttribute("href", "javascript:;");
+                        morn_aa.setAttribute("style", "display: none;");
+                        morn_aa.appendChild(morn2);
+
+                        var morn_td = document.createElement("td");
+                        morn_td.setAttribute("class", "text-center");
+                        morn_td.appendChild(morn_a);
+                        morn_td.appendChild(morn_aa);
+                        cell17.appendChild(morn_td);
+
+                        cell18 = row.insertCell(17 + data.recipeStepAmounts.length);
+                        var delspan = document.createElement("span")
+                        delspan.setAttribute("class", "fa-solid fa-trash-can text-danger")
+                        delspan.addEventListener('click', function () {
+                            if (confirm("Are you sure you want to delete this row?")) {
+                                var row = $(this).closest("tr");
+
+                                $.ajax({
+                                    url: '/Recipe/DeleteRecipeStep',
+                                    type: 'POST',
+                                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                                    data: {
+                                        __RequestVerificationToken: token,
+                                        StepID: data.id
+                                    },
+                                    success: function (response) {
+                                        if ($("tblRecipe tr").length > 2) {
+                                            row.remove();
+                                        } else {
+                                            row.find(".Edit").hide();
+                                            row.find(".Delete").hide();
+                                            row.find("span").html('&nbsp;');
+                                        }
+                                    }
+                                });
+
+                                row.remove();
+
+                            }
+                        });
+
+                        var canspan = document.createElement("span")
+                        canspan.setAttribute("class", "fa fa-times text-secondary");
+
+                        var del_a = document.createElement("a");
+                        del_a.setAttribute("class", "Cancel");
+                        del_a.setAttribute("href", "javascript:;");
+                        del_a.appendChild(delspan);
+
+                        var del_aa = document.createElement("a");
+                        del_aa.setAttribute("class", "@localizer["Delete"]");
+                        del_aa.setAttribute("href", "javascript:;");
+                        del_aa.setAttribute("style", "display: none");
+
+                        del_aa.appendChild(canspan);
+
+                        var del_td = document.createElement("td");
+                        del_td.setAttribute("class", "text-center");
+                        del_td.appendChild(del_a);
+                        del_td.appendChild(del_aa);
+                        cell18.appendChild(del_td);
+
+                        $('body').removeClass('waiting');
+                    }
+                },
+                failure: function (response) {
+                    $('body').removeClass('waiting');
+                    alert(response);
+
+                }
+            });
+        });
+
+        $('#btn-add-recipe').click(function () {
+            $.ajax({
+                url: '/Recipe/AddRecipe',
+                type: 'GET',
+                contentType: 'application/json; charset=utf-8',
+                dataType: "json",
+                success: function (data) {
+                    if (data) {
+                        $('<li class="nav-item" id="li_' + data.id + '"><a href="#m' + data.id + '" class="nav-link" data-toggle="tab" data-recipeid="' + data.id + '"><span><span class="recipeName">' + data.name + '</span>&nbsp;&nbsp;<i class="fa-solid fa-pen editRecipeName"></i></span></a></li>').appendTo('#myTab');
+                        $('<div class="tab-pane fade" id="m' + data.id + '" data-recipeid="' + data.id + '"><p> Donec vel placerat quam, ut euismod risus.Sed a mi suscipit, elementum sem a, hendrerit velit.Donec at erat magna.Sed dignissim orci nec eleifend egestas.Donec eget mi consequat massa vestibulum laoreet.Mauris et ultrices nulla, malesuada volutpat ante.Fusce ut orci lorem.Donec molestie libero in tempus imperdiet.Cum sociis natoque penatibus et magnis.</p></div>').appendTo('.tab-content');
+                        $("#myTab a:last").tab("show");
+                        $(".editRecipeName").click(editRecipeNameHandler);
+                    }
+                },
+                failure: function (response) {
+                    alert(response);
+                }
+
+            });
+
+
+        });
+
+        $('#btn-delete-recipe').click(function () {
+            if (confirm("Are you sure you want to delete this recipe?")) {
+                var recipeID = document.getElementsByClassName('tab-pane fade active show')[0].getAttribute('data-recipeid');
+                $('body').addClass('waiting');
+
+                $.ajax({
+                    url: '/Recipe/DeleteRecipe',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    data: {
+                        __RequestVerificationToken: token,
+                        RecipeID: recipeID
+                    },
+                    success: function (response) {
+                        document.getElementsByClassName('tab-pane fade active show')[0].remove();
+                        document.getElementsByClassName('nav-link active')[0].remove();
+
+                        var tabFirst = $('#myTab a:first');
+                        tabFirst.tab('show');
+
+                        if (document.getElementById("myTabContent").childElementCount == 1) {
+                            $("#btn-delete-recipe").prop('disabled', true);
+                        };
+
+                        $('body').removeClass('waiting');
+
+                    },
+                    failure: function (response) {
+                        $('body').removeClass('waiting');
+                        alert(response);
+                    }
+                });
+
+            };
+        });
+
+        var editRecipeNameHandler = function () {
+            var t = $(this);
+            t.css("visibility", "hidden");
+            $(this).prev().attr("contenteditable", "true").focusout(function () {
+                $(this).removeAttr("contenteditable").off("focusout");
+                t.css("visibility", "visible");
+
+                var recipeName = $(this).closest('a').find('.recipeName').text();
+                var recipeID = $(this).closest('a').attr("data-recipeid");
+
+                var recipeObject = {
+                    'ID': recipeID,
+                    'Name': recipeName
+                };
+
+                $.ajax({
+                    url: '/Recipe/UpdateRecipeName',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    data: {
+                        __RequestVerificationToken: token,
+                        Recipe: recipeObject
+                    },
+                    failure: function (response) {
+                        alert(response);
+                    },
+                });
+
+            });
+
+        };
+
+        $(".editRecipeName").click(editRecipeNameHandler);
+
+        function updateStepLimit(recipesteplimit, limitvalue) {
+            var recipeStepLimitObject = {
+                'ID': recipesteplimit,
+                'value': limitvalue
+            };
+
+            $.ajax({
+                url: '/Recipe/UpdateRecipeStepLimit',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                data: {
+                    __RequestVerificationToken: token,
+                    RecipeStepLimit: recipeStepLimitObject
+                },
+            });
+
+        }
+        function updateStepAmount(recipestepamount, amountvalue) {
+            var recipeStepAmountObject = {
+                'ID': recipestepamount,
+                'amount': amountvalue
+            };
+
+            $.ajax({
+                url: '/Recipe/UpdateRecipeStepAmount',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                data: {
+                    __RequestVerificationToken: token,
+                    RecipeStepAmount: recipeStepAmountObject
+                },
+                failure: function (response) {
+                    alert(response);
+                }
+            });
+
+        }
+        function updateIrrigation(recipestepid, value) {
+            var recipeStepObject = {
+                'ID': recipestepid,
+                'irrigationEventsPerDay': value
+            };
+
+            $.ajax({
+                url: '/Recipe/UpdateRecipeStepIrrigation',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                data: {
+                    __RequestVerificationToken: token,
+                    RecipeStep: recipeStepObject
+                },
+                failure: function (response) {
+                    alert(response);
+                }
+            });
+        }
+        function updateSoakTime(recipestepid, value) {
+            var recipeStepObject = {
+                'ID': recipestepid,
+                'soakTime': value
+            };
+
+            $.ajax({
+                url: '/Recipe/UpdateRecipeStepSoaktime',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                data: {
+                    __RequestVerificationToken: token,
+                    RecipeStep: recipeStepObject
+                },
+                failure: function (response) {
+                    alert(response);
+                }
+            });
+        }
+        function updateMorningSip(recipestepid, value) {
+            var recipeStepObject = {
+                'ID': recipestepid,
+                'isMorningSip': value
+            };
+
+            $.ajax({
+                url: '/Recipe/UpdateRecipeStepMorningSip',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                data: {
+                    __RequestVerificationToken: token,
+                    RecipeStep: recipeStepObject
+                },
+                failure: function (response) {
+                    alert(response);
+                }
+            });
+        }
+        function updateEveningSip(recipestepid, value) {
+            var recipeStepObject = {
+                'ID': recipestepid,
+                'isEveningSip': value
+            };
+
+            $.ajax({
+                url: '/Recipe/UpdateRecipeStepEveningSip',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                data: {
+                    __RequestVerificationToken: token,
+                    RecipeStep: recipeStepObject
+                },
+                failure: function (response) {
+                    alert(response);
+                }
+            });
+        }
+        function updateLightCycle(recipestepid, value) {
+            var recipeStepObject = {
+                'ID': recipestepid,
+                'lightCycleID': value
+            };
+
+            $.ajax({
+                url: '/Recipe/UpdateRecipeStepLightCycle',
+                type: 'POST',
+                contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                data: {
+                    __RequestVerificationToken: token,
+                    RecipeStep: recipeStepObject
+                },
+                failure: function (response) {
+                    alert(response);
+                }
+            });
+        }
+
+        $("body").on("click", ".tblRecipe .Edit", function () {
+            var row = $(this).closest("tr");
+            $("td", row).each(function () {
+                if ($(this).find("input").length > 0) {
+                    var input = $(this).find("input");
+                    input.prop('disabled', false);
+                }
+                var sel = $(this).find("select");
+                sel.prop('disabled', false);
+
+            });
+            row.find(".Update").show();
+            row.find(".Cancel").show();
+            row.find(".Delete").hide();
+
+            $(this).hide();
+        });
+
+        $("body").on("click", ".tblRecipe .Cancel", function () {
+            var row = $(this).closest("tr");
+            $("td", row).each(function () {
+                if ($(this).find("input").length > 0) {
+                    var input = $(this).find("input");
+                    input.prop('disabled', true);
+                }
+                var sel = $(this).find("select");
+                sel.prop('disabled', true);
+
+            });
+            row.find(".Edit").show();
+            row.find(".Delete").show();
+            row.find(".Update").hide();
+
+            $(this).hide();
+        });
+
+        $("body").on("click", ".tblRecipe .Update", function () {
+            var row = $(this).closest("tr");
+            var habitat_daytemp_lclCurrentValue;
+            var habitat_daytemp_lclPreviousValue;
+            var habitat_daytemp_lclInputID;
+            var habitat_daytemp_lclStepLimitId;
+
+            var habitat_daytemp_uclCurrentValue;
+            var habitat_daytemp_uclPreviousValue;
+            var habitat_daytemp_uclInputID;
+            var habitat_daytemp_uclStepLimitId;
+
+            $("td", row).each(function () {
+                if ($(this).find("input").length > 0) {
+                    var input = $(this).find("input");
+                    input.prop('disabled', true);
+
+                }
+                var sel = $(this).find("select");
+                sel.prop('disabled', true);
+
+                var isAmount = $(this).data('is-stepamount');
+                if (isAmount == true) {
+
+                    var stepamountId = $(this).data('stepamount-id');
+                    var stepamountPreviousValue = $(this).data('stepamount-previous-value');
+
+                    var currentInputID = stepamountId + "-textbox";
+                    var stepamountCurrentValue = document.getElementById(currentInputID).value;
+
+                    if (stepamountPreviousValue != stepamountCurrentValue) {
+                        updateStepAmount(stepamountId, stepamountCurrentValue);
+                        $(this).attr('data-stepamount-previous-value', stepamountCurrentValue);
+                    }
+                };
+
+                var isLight = $(this).data('is-light');
+                if (isLight == true) {
+                    var lightStepId = $(this).data('stepid');
+                    var lightPreviousValue = $(this).attr('data-light-previous-value');
+
+                    var lightInputID = lightStepId + "-light";
+
+                    var lightCurrentValue = document.getElementById(lightInputID).value;
+
+                    if (lightPreviousValue != lightCurrentValue) {
+                        updateLightCycle(lightStepId, lightCurrentValue);
+                        $(this).attr("data-light-previous-value", lightCurrentValue);
+                    }
+                }
+
+                var isIrrigation = $(this).data('is-irrigation');
+                if (isIrrigation == true) {
+                    var irrigationStepId = $(this).data('stepid');
+                    var irrigationPreviousValue = $(this).data('irrigation-previous-value');
+
+                    var irrigationInputID = irrigationStepId + "-irrigations-textbox";
+                    var irrigationCurrentValue = document.getElementById(irrigationInputID).value;
+
+                    if (irrigationPreviousValue != irrigationCurrentValue) {
+                        updateIrrigation(irrigationStepId, irrigationCurrentValue);
+                        $(this).attr('data-irrigation-previous-value', irrigationCurrentValue);
+                    }
+                }
+
+                var isSoakTime = $(this).data('is-soaktime');
+                if (isSoakTime == true) {
+                    var soaktimeStepId = $(this).data('stepid');
+                    var soaktimePreviousValue = $(this).data('soaktime-previous-value');
+
+                    var soaktimeInputID = soaktimeStepId + "-soaktime-textbox";
+                    var soaktimeCurrentValue = document.getElementById(soaktimeInputID).value;
+
+                    if (soaktimePreviousValue != soaktimeCurrentValue) {
+                        updateSoakTime(soaktimeStepId, soaktimeCurrentValue);
+                        $(this).attr('data-soaktime-previous-value', soaktimeCurrentValue);
+                    }
+                }
+
+                var isMorning = $(this).data('is-morning');
+                if (isMorning == true) {
+                    var morningStepId = $(this).data('stepid');
+                    var morningPreviousValue = $(this).attr('data-previous-morning');
+
+                    var morningInputID = morningStepId + "-morningdrink";
+
+                    var morningCurrentValue = document.getElementById(morningInputID).checked;
+
+                    if (morningPreviousValue != morningCurrentValue) {
+                        updateMorningSip(morningStepId, morningCurrentValue);
+                        $(this).attr("data-previous-morning", morningCurrentValue);
+                    }
+                }
+
+                var isEvening = $(this).data('is-evening');
+                if (isEvening == true) {
+                    var eveningStepId = $(this).data('stepid');
+                    var eveningPreviousValue = $(this).attr('data-previous-evening');
+
+                    var eveningInputID = eveningStepId + "-eveningdrink";
+
+                    var eveningCurrentValue = document.getElementById(eveningInputID).checked;
+
+                    if (eveningPreviousValue != eveningCurrentValue) {
+                        updateEveningSip(eveningStepId, eveningCurrentValue);
+                        $(this).attr("data-previous-evening", eveningCurrentValue);
+                    }
+                }
+
+                var isHabDayLCL = $(this).data('is-habitat_daytemp_lcl');
+                if (isHabDayLCL == true) {
+                    var stepID = $(this).data('stepid');
+                    habitat_daytemp_lclPreviousValue = $(this).data('previous-habitat_daytemp_lcl');
+
+                    habitat_daytemp_lclInputID = stepID + "-habitat-daytemp-lcl-textbox";
+
+                    habitat_daytemp_lclCurrentValue = document.getElementById(habitat_daytemp_lclInputID).value;
+                    habitat_daytemp_lclStepLimitId = $(this).data('steplimitid');
+                }
+
+                var isHabDayUCL = $(this).data('is-habitat_daytemp_ucl');
+                if (isHabDayUCL == true) {
+                    var stepID = $(this).data('stepid');
+                    habitat_daytemp_uclPreviousValue = $(this).attr('data-previous-habitat_daytemp_ucl');
+
+                    habitat_daytemp_uclInputID = stepID + "-habitat-daytemp-ucl-textbox";
+
+                    habitat_daytemp_uclCurrentValue = document.getElementById(habitat_daytemp_uclInputID).value;
+                    habitat_daytemp_uclStepLimitId = $(this).data('steplimitid');
+                }
+
+                var isHabNightLCL = $(this).data('is-habitat_nighttemp_lcl');
+                if (isHabNightLCL == true) {
+                    var stepID = $(this).data('stepid');
+                    habitat_nighttemp_lclPreviousValue = $(this).data('previous-habitat_nighttemp_lcl');
+
+                    habitat_nighttemp_lclInputID = stepID + "-habitat-nighttemp-lcl-textbox";
+
+                    habitat_nighttemp_lclCurrentValue = document.getElementById(habitat_nighttemp_lclInputID).value;
+                    habitat_nighttemp_lclStepLimitId = $(this).data('steplimitid');
+                }
+
+                var isHabNightUCL = $(this).data('is-habitat_nighttemp_ucl');
+                if (isHabNightUCL == true) {
+                    var stepID = $(this).data('stepid');
+                    habitat_nighttemp_uclPreviousValue = $(this).attr('data-previous-habitat_nighttemp_ucl');
+
+                    habitat_nighttemp_uclInputID = stepID + "-habitat-nighttemp-ucl-textbox";
+
+                    habitat_nighttemp_uclCurrentValue = document.getElementById(habitat_nighttemp_uclInputID).value;
+                    habitat_nighttemp_uclStepLimitId = $(this).data('steplimitid');
+                }
+
+                var isHabHumidLCL = $(this).data('is-habitat_humid_lcl');
+                if (isHabHumidLCL == true) {
+                    var stepID = $(this).data('stepid');
+                    habitat_humid_lclPreviousValue = $(this).data('previous-habitat_humid_lcl');
+
+                    habitat_humid_lclInputID = stepID + "-habitat-humid-lcl-textbox";
+
+                    habitat_humid_lclCurrentValue = document.getElementById(habitat_humid_lclInputID).value;
+                    habitat_humid_lclStepLimitId = $(this).data('steplimitid');
+                }
+
+                var isHabHumidUCL = $(this).data('is-habitat_humid_ucl');
+                if (isHabHumidUCL == true) {
+                    var stepID = $(this).data('stepid');
+                    habitat_humid_uclPreviousValue = $(this).attr('data-previous-habitat_humid_ucl');
+
+                    habitat_humid_uclInputID = stepID + "-habitat-humid-ucl-textbox";
+
+                    habitat_humid_uclCurrentValue = document.getElementById(habitat_humid_uclInputID).value;
+                    habitat_humid_uclStepLimitId = $(this).data('steplimitid');
+                }
+
+                var isResPhLCL = $(this).data('is-res_ph_lcl');
+                if (isResPhLCL == true) {
+                    var stepID = $(this).data('stepid');
+                    res_ph_lclPreviousValue = $(this).data('previous-res_ph_lcl');
+
+                    res_ph_lclInputID = stepID + "-res-ph-lcl-textbox";
+
+                    res_ph_lclCurrentValue = document.getElementById(res_ph_lclInputID).value;
+                    res_ph_lclStepLimitId = $(this).data('steplimitid');
+                }
+
+                var isResPhUCL = $(this).data('is-res_ph_ucl');
+                if (isResPhUCL == true) {
+                    var stepID = $(this).data('stepid');
+                    res_ph_uclPreviousValue = $(this).attr('data-previous-res_ph_ucl');
+
+                    res_ph_uclInputID = stepID + "-res-ph-ucl-textbox";
+
+                    res_ph_uclCurrentValue = document.getElementById(res_ph_uclInputID).value;
+                    res_ph_uclStepLimitId = $(this).data('steplimitid');
+                }
+
+                var isResPPMLCL = $(this).data('is-res_ppm_lcl');
+                if (isResPPMLCL == true) {
+                    var stepID = $(this).data('stepid');
+                    res_ppm_lclPreviousValue = $(this).data('previous-res_ppm_lcl');
+
+                    res_ppm_lclInputID = stepID + "-res-ppm-lcl-textbox";
+
+                    res_ppm_lclCurrentValue = document.getElementById(res_ppm_lclInputID).value;
+                    res_ppm_lclStepLimitId = $(this).data('steplimitid');
+                }
+
+                var isResPPMUCL = $(this).data('is-res_ppm_ucl');
+                if (isResPPMUCL == true) {
+                    var stepID = $(this).data('stepid');
+                    res_ppm_uclPreviousValue = $(this).attr('data-previous-res_ppm_ucl');
+
+                    res_ppm_uclInputID = stepID + "-res-ppm-ucl-textbox";
+
+                    res_ppm_uclCurrentValue = document.getElementById(res_ppm_uclInputID).value;
+                    res_ppm_uclStepLimitId = $(this).data('steplimitid');
+                }
+            });
+
+            row.find(".Edit").show();
+            row.find(".Delete").show();
+            row.find(".Cancel").hide();
+            row.find(".Update").hide();
+
+            $(this).hide();
+
+            //Habitat Day Temp Limits
+            if (Math.floor(habitat_daytemp_lclCurrentValue) > Math.floor(habitat_daytemp_uclCurrentValue)) {
+                //swap ucl and lcl
+                document.getElementById(habitat_daytemp_uclInputID).value = habitat_daytemp_lclCurrentValue;
+                document.getElementById(habitat_daytemp_lclInputID).value = habitat_daytemp_uclCurrentValue
+
+                habitat_daytemp_uclCurrentValue = document.getElementById(habitat_daytemp_uclInputID).value;
+                habitat_daytemp_lclCurrentValue = document.getElementById(habitat_daytemp_lclInputID).value;
+            }
+
+            if (habitat_daytemp_lclCurrentValue != habitat_daytemp_lclPreviousValue) {
+                updateStepLimit(habitat_daytemp_lclStepLimitId, habitat_daytemp_lclCurrentValue);
+                document.getElementById(habitat_daytemp_lclInputID).setAttribute('data-habitat_daytemp_lcl-previous-value', habitat_daytemp_lclCurrentValue);
+
+            }
+
+            if (habitat_daytemp_uclCurrentValue != habitat_daytemp_uclPreviousValue) {
+                updateStepLimit(habitat_daytemp_uclStepLimitId, habitat_daytemp_uclCurrentValue);
+                document.getElementById(habitat_daytemp_uclInputID).setAttribute('data-habitat_daytemp_ucl-previous-value', habitat_daytemp_uclCurrentValue);
+            }
+            //Habitat Night Temp Limits
+            if (Math.floor(habitat_nighttemp_lclCurrentValue) > Math.floor(habitat_nighttemp_uclCurrentValue)) {
+                //swap ucl and lcl
+                document.getElementById(habitat_nighttemp_uclInputID).value = habitat_nighttemp_lclCurrentValue;
+                document.getElementById(habitat_nighttemp_lclInputID).value = habitat_nighttemp_uclCurrentValue
+
+                habitat_nighttemp_uclCurrentValue = document.getElementById(habitat_nighttemp_uclInputID).value;
+                habitat_nighttemp_lclCurrentValue = document.getElementById(habitat_nighttemp_lclInputID).value;
+            }
+
+            if (habitat_nighttemp_lclCurrentValue != habitat_nighttemp_lclPreviousValue) {
+                updateStepLimit(habitat_nighttemp_lclStepLimitId, habitat_nighttemp_lclCurrentValue);
+                document.getElementById(habitat_nighttemp_lclInputID).setAttribute('data-habitat_nighttemp_lcl-previous-value', habitat_nighttemp_lclCurrentValue);
+
+            }
+
+            if (habitat_nighttemp_uclCurrentValue != habitat_nighttemp_uclPreviousValue) {
+                updateStepLimit(habitat_nighttemp_uclStepLimitId, habitat_nighttemp_uclCurrentValue);
+                document.getElementById(habitat_nighttemp_uclInputID).setAttribute('data-habitat_nighttemp_ucl-previous-value', habitat_nighttemp_uclCurrentValue);
+            }
+
+            //Habitat Humidity Limits
+            if ((habitat_humid_lclCurrentValue) > (habitat_humid_uclCurrentValue)) {
+                //swap ucl and lcl
+                document.getElementById(habitat_humid_uclInputID).value = habitat_humid_lclCurrentValue;
+                document.getElementById(habitat_humid_lclInputID).value = habitat_humid_uclCurrentValue
+
+                habitat_humid_uclCurrentValue = document.getElementById(habitat_humid_uclInputID).value;
+                habitat_humid_lclCurrentValue = document.getElementById(habitat_humid_lclInputID).value;
+            }
+
+            if (habitat_humid_lclCurrentValue != habitat_humid_lclPreviousValue) {
+                updateStepLimit(habitat_humid_lclStepLimitId, habitat_humid_lclCurrentValue);
+                document.getElementById(habitat_humid_lclInputID).setAttribute('data-habitat_humid_lcl-previous-value', habitat_humid_lclCurrentValue);
+
+            }
+
+            if (habitat_humid_uclCurrentValue != habitat_humid_uclPreviousValue) {
+                updateStepLimit(habitat_humid_uclStepLimitId, habitat_humid_uclCurrentValue);
+                document.getElementById(habitat_humid_uclInputID).setAttribute('data-habitat_humid_ucl-previous-value', habitat_humid_uclCurrentValue);
+            }
+            //Reservoir pH Limits
+            if ((res_ph_lclCurrentValue) > (res_ph_uclCurrentValue)) {
+                //swap ucl and lcl
+                document.getElementById(res_ph_uclInputID).value = res_ph_lclCurrentValue;
+                document.getElementById(res_ph_lclInputID).value = res_ph_uclCurrentValue
+
+                res_ph_uclCurrentValue = document.getElementById(res_ph_uclInputID).value;
+                res_ph_lclCurrentValue = document.getElementById(res_ph_lclInputID).value;
+            }
+
+            if (res_ph_lclCurrentValue != res_ph_lclPreviousValue) {
+                updateStepLimit(res_ph_lclStepLimitId, res_ph_lclCurrentValue);
+                document.getElementById(res_ph_lclInputID).setAttribute('data-res_ph_lcl-previous-value', res_ph_lclCurrentValue);
+
+            }
+
+            if (res_ph_uclCurrentValue != res_ph_uclPreviousValue) {
+                updateStepLimit(res_ph_uclStepLimitId, res_ph_uclCurrentValue);
+                document.getElementById(res_ph_uclInputID).setAttribute('data-res_ph_ucl-previous-value', res_ph_uclCurrentValue);
+            }
+            //Reservoir PPM Limits
+            if ((res_ppm_lclCurrentValue) > (res_ppm_uclCurrentValue)) {
+                //swap ucl and lcl
+                document.getElementById(res_ppm_uclInputID).value = res_ppm_lclCurrentValue;
+                document.getElementById(res_ppm_lclInputID).value = res_ppm_uclCurrentValue
+
+                res_ppm_uclCurrentValue = document.getElementById(res_ppm_uclInputID).value;
+                res_ppm_lclCurrentValue = document.getElementById(res_ppm_lclInputID).value;
+            }
+
+            if (res_ppm_lclCurrentValue != res_ppm_lclPreviousValue) {
+                updateStepLimit(res_ppm_lclStepLimitId, res_ppm_lclCurrentValue);
+                document.getElementById(res_ppm_lclInputID).setAttribute('data-res_ppm_lcl-previous-value', res_ppm_lclCurrentValue);
+
+            }
+
+            if (res_ppm_uclCurrentValue != res_ppm_uclPreviousValue) {
+                updateStepLimit(res_ppm_uclStepLimitId, res_ppm_uclCurrentValue);
+                document.getElementById(res_ppm_uclInputID).setAttribute('data-res_ppm_ucl-previous-value', res_ppm_uclCurrentValue);
+            }
+
+        });
+
+        $('.tblRecipe .Delete').unbind('click').bind('click', function (e) {
+            e.preventDefault();
+
+            if (confirm("Are you sure you want to delete this row?")) {
+                var row = $(this).closest("tr");
+                var stepID = row.data('stepid');
+
+                $.ajax({
+                    url: '/Recipe/DeleteRecipeStep',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+                    data: {
+                        __RequestVerificationToken: token,
+                        StepID: stepID
+                    },
+                    success: function (response) {
+                        if ($("tblRecipe tr").length > 2) {
+                            row.remove();
+                        } else {
+                            row.find(".Edit").hide();
+                            row.find(".Delete").hide();
+                            row.find("span").html('&nbsp;');
+                        }
+                    },
+                    failure: function (response) {
+                        alert(response);
+                    }
+                });
+
+                row.remove();
+
+            }
+        });
+
+        $('[data-toggle="tooltip"]').tooltip();
+
+    });
+</script>

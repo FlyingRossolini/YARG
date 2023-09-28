@@ -1,0 +1,88 @@
+﻿@model IEnumerable<Pot>
+
+@{
+    ViewData["Title"] = "Bucket List";
+}
+<div class="jumbotron">
+    <h2>@ViewData["Title"]</h2>
+</div>
+
+@if (ViewBag.flgCanAddNew)
+{
+    <a asp-action="Create">
+        <i class="fa fa-plus text-success" aria-hidden="true"></i> Create New
+    </a>
+
+}
+<br />
+
+<br />
+
+<table class="table table-bordered">
+    <thead class="thead-light">
+        <tr>
+            <th>
+                Name
+            </th>
+            <th class="text-center">
+                Soak Duration (Minutes)
+            </th>
+            <th class="text-center">
+                Capacity (Liters)
+            </th>
+            <th class="text-center">
+                Ebb Speed
+            </th>
+            <th class="text-center">
+                Flow Speed
+            </th>
+            <th class="text-center">
+                Active?
+            </th>
+            <th>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Pot pvm in Model)
+        {
+            <tr>
+                <td>
+                    @pvm.Name
+                </td>
+                <td class="text-center">
+                    @pvm.EFDuration
+                </td>
+                <td class="text-center">
+                    @String.Format("{0:0.#}", pvm.EFAmount)
+                </td>
+                <td class="text-center">
+                    @pvm.EbbSpeed
+                </td>
+                <td class="text-center">
+                    @pvm.FlowSpeed
+                </td>
+                @if (pvm.IsActive)
+                {
+                    <td class="text-center"><span class="fa fa-check text-success"></span></td>
+
+                }
+                else
+                {
+                    <td class="text-center"></td>
+                }
+
+                <td class="text-center">
+                    <a asp-action="Edit" asp-route-id="@pvm.ID">
+                        <i class="center fa fa-lg fa-pencil text-primary" aria-hidden="true"></i>
+                    </a> &nbsp;
+                    <a asp-action="Delete" asp-route-id="@pvm.ID">
+                        <i class="center fa fa-lg fa-x text-danger" aria-hidden="true"></i>
+                    </a>
+
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

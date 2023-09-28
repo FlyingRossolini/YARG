@@ -1,0 +1,13 @@
+﻿@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer localizer
+@model YARG.Data.Models.BusinessObjects.Footer
+
+<footer class="border-top footer text-muted">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            @localizer["YARG"] - <small>@localizer["Yet Another Robotic Garden"]</small>
+        </div>
+        <div>
+            <small>@Model.Status</small>
+        </div>
+    </div>
+</footer>

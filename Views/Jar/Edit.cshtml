@@ -1,0 +1,76 @@
+﻿@model YARG.Models.Jar
+
+@{
+    ViewData["Title"] = "Edit Jar - " + Model.ChemicalName ;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" autocomplete="off">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="ID" />
+            <div class="form-group">
+                <label asp-for="MixFanPosition" class="control-label"></label>
+                <input asp-for="MixFanPosition" class="form-control" />
+                <span asp-validation-for="MixFanPosition" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="col-2">
+                    <div>
+                        <small>
+                            <label asp-for="ChemicalName"></label>
+                        </small>
+                    </div>
+                </div>
+                <div class="col-5">
+                    @Html.DropDownListFor(m => m.ChemicalID, ViewBag.ddChemical as List<SelectListItem>, new { @class = "form-control" })
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label asp-for="MixTimesPerDay" class="control-label"></label>
+                <input asp-for="MixTimesPerDay" class="form-control" />
+                <span asp-validation-for="MixTimesPerDay" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Duration" class="control-label"></label>
+                <input asp-for="Duration" class="form-control" />
+                <span asp-validation-for="Duration" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Capacity" class="control-label"></label>
+                <input asp-for="Capacity" class="form-control" />
+                <span asp-validation-for="Capacity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CurrentAmount" class="control-label"></label>
+                <input asp-for="CurrentAmount" class="form-control" />
+                <span asp-validation-for="CurrentAmount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MixFanOverSpeed" class="control-label"></label>
+                <input asp-for="MixFanOverSpeed" class="form-control" />
+                <span asp-validation-for="MixFanOverSpeed" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
+                </label>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

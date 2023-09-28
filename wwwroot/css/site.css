@@ -1,0 +1,539 @@
+﻿/* open-sans-300 - latin */
+
+@font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 300;
+    src: url('../fonts/open-sans-v29-latin-300.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-300.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-300.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-300.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-300.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-300.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-regular - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/open-sans-v29-latin-regular.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-regular.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-regular.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-500 - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 500;
+    src: url('../fonts/open-sans-v29-latin-500.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-500.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-500.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-500.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-500.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-500.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-600 - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 600;
+    src: url('../fonts/open-sans-v29-latin-600.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-600.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-600.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-600.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-600.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-600.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-700 - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 700;
+    src: url('../fonts/open-sans-v29-latin-700.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-700.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-700.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-700.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-700.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-700.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-800 - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: normal;
+    font-weight: 800;
+    src: url('../fonts/open-sans-v29-latin-800.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-800.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-800.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-800.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-800.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-800.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-300italic - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 300;
+    src: url('../fonts/open-sans-v29-latin-300italic.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-300italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-300italic.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-300italic.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-300italic.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-300italic.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-italic - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 400;
+    src: url('../fonts/open-sans-v29-latin-italic.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-italic.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-italic.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-italic.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-italic.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-600italic - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 600;
+    src: url('../fonts/open-sans-v29-latin-600italic.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-600italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-600italic.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-600italic.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-600italic.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-600italic.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-700italic - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 700;
+    src: url('../fonts/open-sans-v29-latin-700italic.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-700italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-700italic.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-700italic.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-700italic.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-700italic.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-500italic - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 500;
+    src: url('../fonts/open-sans-v29-latin-500italic.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-500italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-500italic.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-500italic.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-500italic.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-500italic.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+
+/* open-sans-800italic - latin */ @font-face {
+    font-family: 'Open Sans';
+    font-style: italic;
+    font-weight: 800;
+    src: url('../fonts/open-sans-v29-latin-800italic.eot'); /* IE9 Compat Modes */
+    src: local(''), url('../fonts/open-sans-v29-latin-800italic.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */ url('../fonts/open-sans-v29-latin-800italic.woff2') format('woff2'), /* Super Modern Browsers */ url('../fonts/open-sans-v29-latin-800italic.woff') format('woff'), /* Modern Browsers */ url('../fonts/open-sans-v29-latin-800italic.ttf') format('truetype'), /* Safari, Android, iOS */ url('../fonts/open-sans-v29-latin-800italic.svg#OpenSans') format('svg'); /* Legacy iOS */
+}
+                                  
+Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
+for details on configuring this project to bundle and minify static web assets. */
+html, body, address, blockquote, div,
+form, fieldset, caption,
+h1, h2, h3, h4, h5, h6,
+hr, ul, li, ol, ul,
+table, tr, td, th, p, img {
+    margin: 0;
+    padding: 0;
+}
+    body.waiting * {
+        cursor: progress !important;
+    }
+
+img, fieldset {
+    border: none;
+}
+.tabs .tab a {
+    color: rgba(38, 166, 154, 0.7);
+    /*Custom Text Color*/
+}
+
+.tabs .tab a:hover {
+    color: #26a69a;
+    /*Custom Color On Hover*/
+}
+
+.tabs .tab a:focus.active {
+    color: #26a69a;
+    /*Custom Text Color While Active*/
+    background-color: rgba(38, 166, 154, 0.2);
+    /*Custom Background Color While Active*/
+}
+
+.tabs .indicator {
+    background-color: #26a69a;
+    /*Custom Color Of Indicator*/
+}
+a.navbar-brand {
+  white-space: normal;
+  text-align: center;
+  word-break: break-all;
+}
+
+
+
+.btn-primary {
+  color: #fff;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+  color: #53565A;
+  background-color: #1b6ec2;
+  border-color: #1861ac;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  font-size: 14px;
+}
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.border-top {
+  border-top: 1px solid #e5e5e5;
+}
+.border-bottom {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow {
+  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+/* Sticky footer styles
+-------------------------------------------------- */
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background: #fafafa;
+}
+a{
+    color:black;
+    text-decoration:none;
+}
+a:hover{
+    text-decoration:none;
+}
+/*.footer {
+  position: absolute;
+  bottom: 0;
+  width: 98vw;
+  margin-left: 1vw;
+  white-space: nowrap;
+  line-height: 60px;*/ /* Vertically center the text there */
+  /*margin-top: 5vw;
+}*/
+.footer {
+    width: 96vw;
+    margin-left: 1vw;
+    white-space: nowrap;
+    line-height: 55px;
+    bottom: 0;
+}
+
+.main-content {
+    width: 98vw;
+    padding-left: 23px;
+    padding-right: 23px;
+    padding-bottom: 23px;
+    padding-top: -10px;
+/*    height: 2000px;
+*/}
+
+/*.wrapper {
+    display: flex;
+    width: 100%;
+}
+*/
+
+
+.wrapper .sidebar {
+    width: 13vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 999;
+    background: #53565A;
+    color: #53565A;
+    transition: all 0.3s;
+}
+
+.wrapper .sidebar h1{
+    color:antiquewhite;
+    text-align:center;
+    line-height:85px;
+    height: 10%;
+}
+.wrapper .sidebar h6 {
+    color: antiquewhite;
+    text-align: center;
+    margin-bottom: 9px;
+}
+
+.wrapper .sidebar ul li {
+    list-style: none;
+    padding:5px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+.wrapper .sidebar a{
+     text-decoration:none;
+ }
+.wrapper .sidebar a:hover, a:link, a:visited{
+    text-decoration:none;
+}
+/*.wrapper .main-content {*/
+/*    width: 75vw;
+    margin-left: 13vw;
+    padding: 23px;
+*//*}*/
+i{
+    margin-right:8px;
+}
+
+formpad {
+    margin: 15px 15px;
+}
+label {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    height: 100%;
+    padding-top: 0.6rem;
+}
+.center-block {
+    margin: auto;
+    display: block;
+}
+.center {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    padding-left: 4%;
+    margin-top: 0.6rem;
+}
+.left {
+    display: flex;
+    justify-content: left;
+    align-content: center;
+    padding-left: 4%;
+    padding-top: 5px;
+    margin-top: 0.6rem;
+}
+.heading_left {
+    display: flex;
+    justify-content: left;
+    align-content: center;
+    padding-left: 4%;
+    margin-top: 0.6rem;
+}
+.right {
+    display: flex;
+    justify-content: right;
+    align-content: center;
+    padding-left: 4%;
+    padding-top: 5px;
+    margin-top: 0.6rem;
+}
+.heading_right {
+    display: flex;
+    justify-content: right;
+    align-content: center;
+    padding-right: 4%;
+    margin-top: 0.6rem;
+}
+.center2 {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    height: 40px;
+    padding-top:0.2rem;
+}
+.status-icon {
+    display: flex;
+    font-size: 40px;
+    line-height: 50px;
+    background-color: black;
+    color: white;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    vertical-align: bottom;
+}
+.table_center {
+    text-align: center;
+    vertical-align: middle;
+}
+.card-header {
+    background-color: transparent;
+    padding-bottom: 0;
+    padding-left:0;
+}
+[contenteditable] {
+    border: solid 1px lightgreen;
+    padding: 5px;
+    border-radius: 3px;
+}
+th {
+    padding:4px;
+}
+select {
+    font-size: small;
+}
+
+.table-header-blank {
+    border: none;
+    background-color: white;
+}
+.table-header-1 {
+    text-align: center;
+    background-color: rgb(255, 255, 190);
+    border-top-left-radius: 10px;
+    border-top: 1px solid #ddd;
+}
+
+.table-header-2 {
+    text-align: center;
+    background-color: rgb(255, 231, 190);
+    border-top: 1px solid #ddd;
+}
+.table-header-3 {
+    text-align: center;
+    border-bottom: none;
+    background-color: rgb(246, 219, 198);
+    border-top-left-radius: 10px;
+/*    border-top: 1px solid #ddd;
+*/}
+.table-header-4 {
+    text-align: center;
+    border-bottom: none;
+/*    border-top: 1px solid #ddd;
+*/    background-color: rgb(255, 190, 190);
+}
+.table-header-5 {
+    text-align: center;
+    border-bottom: none;
+    background-color: rgb(255, 179, 191);
+    border-top-right-radius: 10px;
+    border-top: 1px solid #ddd;
+}
+.table-header-6 {
+    text-align: center;
+    border-bottom: none;
+    border-top: none;
+    background-color: rgb(255, 194, 255);
+}
+.table-header-7 {
+    text-align: center;
+    border-bottom: none;
+    border-top: none;
+    background-color: rgb(225, 201, 248);
+}
+.table-header-8 {
+    text-align: center;
+    border-bottom: none;
+    border-top-right-radius: 10px;
+    border-top: none;
+    background-color: rgb(194, 194, 255);
+}
+table {
+    border: 1px solid #ddd;
+    border-collapse: separate;
+    border-left: 0;
+    border-radius: 4px;
+    border-spacing: 0px;
+}
+
+thead {
+    display: table-header-group;
+    vertical-align: middle;
+    border-color: inherit;
+    border-collapse: separate;
+}
+
+tr {
+    display: table-row;
+    vertical-align: inherit;
+    border-color: inherit;
+}
+
+th, td {
+    text-align: left;
+    vertical-align: top;
+    border-left: 1px solid #ddd;
+}
+
+td {
+    border-top: 1px solid #ddd;
+}
+
+thead:first-child tr:first-child th:first-child, tbody:first-child tr:first-child td:first-child {
+    border-radius: 4px 0 0 0;
+}
+
+thead:last-child tr:last-child th:first-child, tbody:last-child tr:last-child td:first-child {
+    border-radius: 0 0 0 4px;
+}
+#login-dp {
+    min-width: 250px;
+    padding: 14px 14px 0;
+    overflow: hidden;
+    background-color: rgba(255,255,255,.8);
+}
+
+    #login-dp .help-block {
+        font-size: 12px
+    }
+
+    #login-dp .bottom {
+        background-color: rgba(255,255,255,.8);
+        border-top: 1px solid #ddd;
+        clear: both;
+        padding: 14px;
+    }
+
+    #login-dp .social-buttons {
+        margin: 12px 0
+    }
+
+        #login-dp .social-buttons a {
+            width: 49%;
+        }
+
+    #login-dp .form-group {
+        margin-bottom: 10px;
+    }
+
+.btn-fb {
+    color: #fff;
+    background-color: #3b5998;
+}
+
+    .btn-fb:hover {
+        color: #fff;
+        background-color: #496ebc
+    }
+
+.btn-tw {
+    color: #fff;
+    background-color: #55acee;
+}
+
+    .btn-tw:hover {
+        color: #fff;
+        background-color: #59b5fa;
+    }
+
+.navbar-nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Ensure the <ul> takes up the full height of its container */
+}
+.navbar {
+    padding: 0;
+}
+
+.nav-link {
+    padding: 0;
+}
+
+@media(max-width:768px) {
+    #login-dp {
+        background-color: inherit;
+        color: #fff;
+    }
+
+    #login-dp .bottom {
+        background-color: inherit;
+        border-top: 0 none;
+    }
+}
+
