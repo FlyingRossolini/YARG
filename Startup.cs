@@ -150,7 +150,7 @@ namespace YARG
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseBrowserLink();
+                //app.UseBrowserLink();
             }
             else
             {
@@ -164,10 +164,7 @@ namespace YARG
             app.UseStaticFiles();
             app.Use(async (context, next) =>
             {
-                string nonce = context.Request.Headers["X-Content-Security-Policy-Nonce"]; // Retrieve the nonce from the request
-                // TODO - Home/Index page needs work if this is to be implemented
-
- //               context.Response.Headers.Add("Content-Security-Policy", $"default-src 'self'; script-src 'self' https://ajax.googleapis.com 'nonce-{nonce}'");
+                context.Response.Headers.Add("Content-Security-Policy", $"default-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'");
                 context.Response.Headers.Add("X-Content-Type-Options", "nosniff");
                 context.Response.Headers.Add("X-Frame-Options", "DENY");
                 context.Response.Headers.Add("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
