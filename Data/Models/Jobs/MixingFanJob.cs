@@ -29,7 +29,7 @@ namespace YARG.Models
             {
                 try
                 {
-                    Console.WriteLine("Searching for mixing fan event(s) for " + DateTime.Now);
+                    //Console.WriteLine("Searching for mixing fan event(s) for " + DateTime.Now);
                     IEnumerable<MixingFanScheduleCommand> mixingFanScheduleCommands = await _mixingFanScheduleDAL.AreWeThereYetAsync();
 
                     //Do whatever stuff you want
@@ -39,7 +39,7 @@ namespace YARG.Models
                         {
                             StringBuilder sb = new();
                             string MQTT_Topic_Suffix = "MF" + mfsc.FanNumber.ToString();
-                            Console.WriteLine("Found mixing fan event for " + MQTT_Topic_Suffix);
+                            //Console.WriteLine("Found mixing fan event for " + MQTT_Topic_Suffix);
 
                             sb.Append(mfsc.PumpSpeed);
                             sb.Append(':');
@@ -53,7 +53,7 @@ namespace YARG.Models
                             {
                                 // Use MqttMessagePublisher to publish the message
                                 await _mqttPublisherService.PublishMessageAsync("mixingFan/" + MQTT_Topic_Suffix, sb.ToString());
-                                Console.WriteLine("Broadcasting MQTT " + sb.ToString() + " for mixingFan/" + MQTT_Topic_Suffix);
+                                //Console.WriteLine("Broadcasting MQTT " + sb.ToString() + " for mixingFan/" + MQTT_Topic_Suffix);
                             }
                             catch (Exception ex)
                             {

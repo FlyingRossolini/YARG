@@ -98,11 +98,12 @@ namespace YARG
             {
                 q.UseMicrosoftDependencyInjectionJobFactory();
                 q.ScheduleJob<MixingFanJob>(trigger => trigger
-                    .WithIdentity("1 minute Trigger")
+                    .WithIdentity("1 minute Mixing Fan Trigger")
                     .WithCronSchedule("0 0/1 * 1/1 * ? *")
                     .WithDescription("At second :00, every minute starting at minute :00, every hour, every day starting on the 1st, every month")
                     );
             });
+
             services.AddQuartz(q =>
             {
                 q.UseMicrosoftDependencyInjectionJobFactory();
@@ -110,6 +111,16 @@ namespace YARG
                     .WithIdentity("5 minute Trigger")
                     .WithCronSchedule("0 0/5 * 1/1 * ? *")
                     .WithDescription("At second :00, every 5 minutes starting at minute :00, every hour, every day starting on the 1st, every month")
+                    );
+            });
+
+            services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionJobFactory();
+                q.ScheduleJob<FertigationJob>(trigger => trigger
+                    .WithIdentity("1 minute Fertigation Trigger")
+                    .WithCronSchedule("0 0/1 * 1/1 * ? *")
+                    .WithDescription("At second :00, every minute starting at minute :00, every hour, every day starting on the 1st, every month")
                     );
             });
 

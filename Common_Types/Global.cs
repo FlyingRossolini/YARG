@@ -109,12 +109,12 @@ namespace YARG.Common_Types
                 .Build());
 
             await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
-                .WithTopic("yargbot/FE_ebbFlowMeter_ACK")
+                .WithTopic("yargbot/FE_ebbFlowmeter_ACK")
                 .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
                 .Build());
 
             await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
-                .WithTopic("yargbot/FE_flowFlowMeter_ACK")
+                .WithTopic("yargbot/FE_flowFlowmeter_ACK")
                 .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
                 .Build());
 
@@ -144,34 +144,40 @@ namespace YARG.Common_Types
               .Build());
 
             await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
-                .WithTopic("yargbot/FE_ebbFlowMeter_DN")
-                .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
-                .Build());
-
-            await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
-                .WithTopic("yargbot/FE_flowFlowMeter_DN")
-                .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
-                .Build());
-
-            await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
-              .WithTopic("yargbot/FE_ebbPump_DN")
+              .WithTopic("yargbot/FE_ebbPump_RUN")
               .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
               .Build());
 
             await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
-              .WithTopic("yargbot/FE_flowPump_DN")
+              .WithTopic("yargbot/FE_ebbPump_DONE")
               .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
               .Build());
 
-            await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
-              .WithTopic("yargbot/FE_ebbSolenoids_DN")
-              .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
-              .Build());
+            //await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+            //    .WithTopic("yargbot/FE_ebbFlowmeter_DN")
+            //    .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+            //    .Build());
 
-            await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
-              .WithTopic("yargbot/FE_flowSolenoids_DN")
-              .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
-              .Build());
+            //await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+            //    .WithTopic("yargbot/FE_flowFlowmeter_DN")
+            //    .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+            //    .Build());
+
+
+            //await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+            //  .WithTopic("yargbot/FE_flowPump_DN")
+            //  .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+            //  .Build());
+
+            //await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+            //  .WithTopic("yargbot/FE_ebbSolenoids_DN")
+            //  .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+            //  .Build());
+
+            //await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+            //  .WithTopic("yargbot/FE_flowSolenoids_DN")
+            //  .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+            //  .Build());
 
             await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
               .WithTopic("yargbot/pumpWorklog")
@@ -191,6 +197,7 @@ namespace YARG.Common_Types
         }
 
     }
+
 
     public class Constants
     {

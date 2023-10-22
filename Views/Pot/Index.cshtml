@@ -50,18 +50,6 @@
                 <td>
                     @pvm.Name
                 </td>
-                <td class="text-center">
-                    @pvm.EFDuration
-                </td>
-                <td class="text-center">
-                    @String.Format("{0:0.#}", pvm.EFAmount)
-                </td>
-                <td class="text-center">
-                    @pvm.EbbSpeed
-                </td>
-                <td class="text-center">
-                    @pvm.FlowSpeed
-                </td>
                 @if (pvm.IsActive)
                 {
                     <td class="text-center"><span class="fa fa-check text-success"></span></td>

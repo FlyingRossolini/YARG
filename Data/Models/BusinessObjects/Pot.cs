@@ -13,30 +13,49 @@ namespace YARG.Models
         public Guid ID { get; set; }
 
         [Required]
-        [MaxLength(255)]
+        [MaxLength(100)]
         public string Name { get; set; }
 
-        public short QueuePosition { get; set; }
+        public byte QueuePosition { get; set; }
 
-        [Required]
-        [Range(2, 13)]
-        [Display(Name = "Soak Duration (Mins)")]
-        public short EFDuration { get; set; }
+        public decimal TotalCapacity { get; set; }
 
-        [Required]
-        [Range(2, 20)]
-        [Display(Name = "Capacity (Liters)")]
-        public decimal EFAmount { get; set; }
+        public byte Speed { get; set; }
 
-        [Required]
-        [Range(50, 100)]
-        [Display(Name = "Ebb speed")]
-        public short EbbSpeed { get; set; }
+        public decimal CurrentCapacity { get; set; }
 
-        [Required]
-        [Range(50, 100)]
-        [Display(Name = "Flow speed")]
-        public short FlowSpeed { get; set; }
+        public short AntiShockRamp { get; set; }
+
+        public decimal ExpectedFlowRate { get; set; }
+
+        public byte PumpFlowErrorThreshold { get; set; }
+
+        public short PulsesPerLiter { get; set; }
+
+        public bool IsReservoir { get; set; }
+
+
+        //public decimal 
+
+        //[Required]
+        //[Range(2, 13)]
+        //[Display(Name = "Soak Duration (Mins)")]
+        //public short EFDuration { get; set; }
+
+        //[Required]
+        //[Range(2, 20)]
+        //[Display(Name = "Capacity (Liters)")]
+        //public decimal EFAmount { get; set; }
+
+        //[Required]
+        //[Range(50, 100)]
+        //[Display(Name = "Ebb speed")]
+        //public short EbbSpeed { get; set; }
+
+        //[Required]
+        //[Range(50, 100)]
+        //[Display(Name = "Flow speed")]
+        //public short FlowSpeed { get; set; }
 
         public string CreatedBy { get; set; }
 

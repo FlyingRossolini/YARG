@@ -13,6 +13,7 @@ using MQTTnet.Protocol;
 using Newtonsoft.Json;
 using YARG.Common_Types;
 using YARG.DAL;
+using YARG.Data.Models.BusinessObjects;
 using YARG.Data.Models.MqttTopics;
 using YARG.Data.Models.ViewModels;
 using YARG.Models;
@@ -30,11 +31,8 @@ namespace YARG.Data.Services
         private readonly PumpWorklogDAL _pumpWorklogDAL;
         private readonly MqttPublisherService _mqttPublisherService;
 
-   
-
-        private FertigationEventAcknowledged _fertigationEventAcknowledged;
-        private FertigationEventDone _fertigationEventDone;
-
+        private readonly FertigationEventRecord _fertigationEventRecord;
+  
         public MqttSubscriberService(IMqttClient mqttClient,IServiceProvider serviceProvider, RemoteHostDBService remoteHostDBService, IConfiguration configuration, MqttPublisherService mqttMessagePublisher)
         {
             _mqttClient = serviceProvider.GetRequiredService<IMqttClient>();
@@ -45,8 +43,8 @@ namespace YARG.Data.Services
             _wateringScheduleDAL = new(configuration);
             _pumpWorklogDAL = new(configuration);
             _mqttPublisherService = mqttMessagePublisher;
-            _fertigationEventAcknowledged = new();
-            _fertigationEventDone = new();        
+            //_fertigationEventAcknowledged = new();
+            _fertigationEventRecord = new();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -173,63 +171,73 @@ namespace YARG.Data.Services
                     Console.WriteLine(ex.ToString() + " " + ex.Message);
                 }
             }
-            if (topic == "yargbot/FE_ebbFlowMeter_ACK")
+            if (topic == "yargbot/FE_ebbFlowmeter_ACK")
             {
-                CommandTopic commandTopic = JsonConvert.DeserializeObject<CommandTopic>(payload);
-                _fertigationEventAcknowledged.FlgFE_ebbFlowMeter_ACK = true;
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
 
-                await CheckForFE_Acknowledgement(commandTopic);
-            }
-            if (topic == "yargbot/FE_flowFlowMeter_ACK")
-            {
-                CommandTopic commandTopic = JsonConvert.DeserializeObject<CommandTopic>(payload);
-                _fertigationEventAcknowledged.FlgFE_flowFlowMeter_ACK = true;
-
-                await CheckForFE_Acknowledgement(commandTopic);
+                FertigationEventAcknowledged.CommandID = x.CommandID;
+                FertigationEventAcknowledged.FlgFE_ebbFlowmeter_ACK = true;
+                await CheckForFE_Acknowledgement();
             }
             if (topic == "yargbot/FE_ebbPump_ACK")
             {
-                CommandTopic commandTopic = JsonConvert.DeserializeObject<CommandTopic>(payload);
-                _fertigationEventAcknowledged.FlgFE_ebbPump_ACK = true;
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
 
-                await CheckForFE_Acknowledgement(commandTopic);
-            }
-            if (topic == "yargbot/FE_flowPump_ACK")
-            {
-                CommandTopic commandTopic = JsonConvert.DeserializeObject<CommandTopic>(payload);
-                _fertigationEventAcknowledged.FlgFE_flowPump_ACK = true;
-
-                await CheckForFE_Acknowledgement(commandTopic);
-            }
-            if (topic == "yargbot/FE_potOverflow_ACK")
-            {
-                CommandTopic commandTopic = JsonConvert.DeserializeObject<CommandTopic>(payload);
-                _fertigationEventAcknowledged.FlgFE_potOverflow_ACK = true;
-
-                await CheckForFE_Acknowledgement(commandTopic);
+                FertigationEventAcknowledged.CommandID = x.CommandID;
+                FertigationEventAcknowledged.FlgFE_ebbPump_ACK = true;
+                await CheckForFE_Acknowledgement();
             }
             if (topic == "yargbot/FE_ebbSolenoids_ACK")
             {
-                CommandTopic commandTopic = JsonConvert.DeserializeObject<CommandTopic>(payload);
-                _fertigationEventAcknowledged.FlgFE_ebbSolenoids_ACK = true;
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
 
-                await CheckForFE_Acknowledgement(commandTopic);
+                FertigationEventAcknowledged.CommandID = x.CommandID;
+                FertigationEventAcknowledged.FlgFE_ebbSolenoids_ACK = true;
+                await CheckForFE_Acknowledgement();
+            }
+            if (topic == "yargbot/FE_flowFlowmeter_ACK")
+            {
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventAcknowledged.CommandID = x.CommandID;
+                FertigationEventAcknowledged.FlgFE_flowFlowmeter_ACK = true;
+                await CheckForFE_Acknowledgement();
+            }
+            if (topic == "yargbot/FE_flowPump_ACK")
+            {
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventAcknowledged.CommandID = x.CommandID;
+                FertigationEventAcknowledged.FlgFE_flowPump_ACK = true;
+                await CheckForFE_Acknowledgement();
             }
             if (topic == "yargbot/FE_flowSolenoids_ACK")
             {
-                CommandTopic commandTopic = JsonConvert.DeserializeObject<CommandTopic>(payload);
-                _fertigationEventAcknowledged.FlgFE_flowSolenoids_ACK = true;
-
-                await CheckForFE_Acknowledgement(commandTopic);
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventAcknowledged.CommandID = x.CommandID;
+                FertigationEventAcknowledged.FlgFE_flowSolenoids_ACK = true;
+                await CheckForFE_Acknowledgement();
             }
-            if (topic == "yargbot/FE_ebbFlowMeter_DN")
+            if (topic == "yargbot/FE_potOverflow_ACK")
             {
-                CommandTopic commandTopic = JsonConvert.DeserializeObject<CommandTopic>(payload);
-                _fertigationEventDone.FlgFE_ebbFlowMeter_DN = true;
-
-                await CheckForFE_Done(commandTopic);
-
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventAcknowledged.CommandID = x.CommandID;
+                FertigationEventAcknowledged.FlgFE_potOverflow_ACK = true;
+                await CheckForFE_Acknowledgement();
             }
+            if (topic == "yargbot/FE_ebbPump_RUN")
+            {
+                Guid commandID = JsonConvert.DeserializeObject<Guid>(payload);
+                _fertigationEventRecord.CommandID = commandID;
+                _fertigationEventRecord.EbbPump_RunDate = DateTime.Now;
+                await _wateringScheduleDAL.UpdateFertigationEventRecord(_fertigationEventRecord);
+            }
+            if (topic == "yargbot/FE_ebbPump_DONE")
+            {
+                Guid commandID = JsonConvert.DeserializeObject<Guid>(payload);
+                _fertigationEventRecord.CommandID = commandID;
+                _fertigationEventRecord.EbbPump_DoneDate = DateTime.Now;
+                await _wateringScheduleDAL.UpdateFertigationEventRecord(_fertigationEventRecord);
+            }
+
             if (topic == "yargbot/pumpWorklog")
             {
                 PumpWorklogTopic pumpWorklogTopic = JsonConvert.DeserializeObject<PumpWorklogTopic>(payload);
@@ -241,16 +249,16 @@ namespace YARG.Data.Services
 
                 Console.WriteLine($"Pump worklog written to db.");
             }
-            if (topic == "yargbot/ESTOP")
-            {
-                Console.WriteLine($"Bot offline detected!");
-                ESTOPTopic eSTOPTopic = JsonConvert.DeserializeObject<ESTOPTopic>(payload);
-                eSTOPTopic.ExpiryDate = DateTime.Now;
-                eSTOPTopic.ChangeDate = DateTime.Now;
+            //if (topic == "yargbot/ESTOP")
+            //{
+            //    Console.WriteLine($"Bot offline detected!");
+            //    ESTOPTopic eSTOPTopic = JsonConvert.DeserializeObject<ESTOPTopic>(payload);
+            //    eSTOPTopic.ExpiryDate = DateTime.Now;
+            //    eSTOPTopic.ChangeDate = DateTime.Now;
 
-                await _remoteHostDBService.GoodbyeBot(eSTOPTopic);
+            //    await _remoteHostDBService.GoodbyeBot(eSTOPTopic);
 
-            }
+            //}
             if (topic == "yargRPI/ESTOP")
             {
                 // Precious little that can be done at this point if any RPI is down at this point
@@ -267,27 +275,83 @@ namespace YARG.Data.Services
 
         }
 
-        private async Task CheckForFE_Acknowledgement(CommandTopic yargBot)
+        private async Task CheckForFE_Acknowledgement()
         {
-            if (_fertigationEventAcknowledged.FlgAllAcknowledged)
-            {
-                await _wateringScheduleDAL.AcknowledgeWateringSchedule(yargBot);
-                Console.WriteLine($"Fertigation event fully acknowledged, written to db.");
+            Console.WriteLine($"Checking for all FE ACKs.");
 
-                await _mqttPublisherService.PublishMessageAsync("CAFE", "");
+            if (FertigationEventAcknowledged.FlgAllAcknowledged)
+            {
+                //_fertigationEventRecord.CommandID = FertigationEventAcknowledged.CommandID;
+                //_fertigationEventRecord.CAFEDate = DateTime.Now;
+
+                Guid x = FertigationEventAcknowledged.CommandID;
+                
+                await _wateringScheduleDAL.UpdateCAFEDateFertigationEventRecord(x);
+                Console.WriteLine($"Fertigation event record; CAFE date updated.");
+
+                await _mqttPublisherService.PublishMessageAsync("fertigationEvent/CAFE", FertigationEventAcknowledged.CommandID.ToString());
                 Console.WriteLine($"Broadcasting CAFE message.");
 
-            }
 
-        }
-        private async Task CheckForFE_Done(CommandTopic yargBot)
-        {
-            if (_fertigationEventDone.FlgAllDone)
-            {
-                await _wateringScheduleDAL.CompleteWateringSchedule(yargBot);
-                Console.WriteLine($"Fertigation event done, written to db.");
+                FertigationEventAcknowledged.ResetFlags();
 
             }
+
         }
     }
+
+    public static class FertigationEventAcknowledged
+    {
+        [JsonProperty("CommandID")]
+        public static Guid CommandID { get; set; }
+
+        [JsonProperty("FE_ebbFlowmeter_ACK")]
+        public static bool FlgFE_ebbFlowmeter_ACK { get; set; }
+
+        [JsonProperty("FE_ebbPump_ACK")]
+        public static bool FlgFE_ebbPump_ACK { get; set; }
+
+        [JsonProperty("FE_flowFlowmeter_ACK")]
+        public static bool FlgFE_flowFlowmeter_ACK { get; set; }
+
+        [JsonProperty("FE_flowPump_ACK")]
+        public static bool FlgFE_flowPump_ACK { get; set; }
+
+        [JsonProperty("FE_potOverflow_ACK")]
+        public static bool FlgFE_potOverflow_ACK { get; set; }
+
+        [JsonProperty("FE_ebbSolenoids_ACK")]
+        public static bool FlgFE_ebbSolenoids_ACK { get; set; }
+
+        [JsonProperty("FE_flowSolenoids_ACK")]
+        public static bool FlgFE_flowSolenoids_ACK { get; set; }
+
+
+        public static bool FlgAllAcknowledged
+        {
+            get
+            {
+                return FlgFE_ebbFlowmeter_ACK &&
+                       FlgFE_ebbPump_ACK &&
+                       FlgFE_flowFlowmeter_ACK &&
+                       FlgFE_flowPump_ACK &&
+                       FlgFE_potOverflow_ACK &&
+                       FlgFE_ebbSolenoids_ACK &&
+                       FlgFE_flowSolenoids_ACK;
+            }
+        }
+
+        public static void ResetFlags()
+        {
+            CommandID = Guid.Empty;
+            FlgFE_ebbFlowmeter_ACK = false;
+            FlgFE_ebbPump_ACK = false;
+            FlgFE_flowFlowmeter_ACK = false;
+            FlgFE_flowPump_ACK = false;
+            FlgFE_potOverflow_ACK = false;
+            FlgFE_ebbSolenoids_ACK = false;
+            FlgFE_flowSolenoids_ACK = false;
+        }
+    }
+
 }

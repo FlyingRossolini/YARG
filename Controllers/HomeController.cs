@@ -35,11 +35,6 @@ namespace YARG.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
-            string nonce = Guid.NewGuid().ToString("N"); // Generate a random nonce
-
-            // Pass the nonce to the view using ViewBag
-            ViewBag.Nonce = nonce;
-
             HomeViewModel homeViewModel = new();
             homeViewModel.WateringSchedules = await _wateringScheduleDAL.GetWateringSchedulesAsync();
             homeViewModel.Pots = await _potDAL.GetActivePotsAsync();

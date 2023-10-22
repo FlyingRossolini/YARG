@@ -54,7 +54,7 @@ namespace YARG.Controllers
                 string user = Environment.UserName;
 
                 pot.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
-                pot.QueuePosition = await _potDAL.GetNextQueuePositionAsync();
+               // pot.QueuePosition = await _potDAL.GetNextQueuePositionAsync();
                 pot.CreatedBy = user;
                 pot.CreateDate = DateTime.Now;
                 pot.ChangedBy = user;

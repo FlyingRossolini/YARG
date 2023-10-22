@@ -12,7 +12,7 @@
 #define BUILTIN_LED 2
 #define NUM_ELEMENTS(x) (sizeof(x) / sizeof((x)[0]))
 
-// This bot is a Fertigation Event tester - it will mock the ebbFlowMeter job
+// This bot is a Fertigation Event tester - it will mock the Ebb Pump
 
 #define EbbFlowSENSOR  27 //real world pin 27 to signal of post-res flow meter.
 
@@ -46,23 +46,27 @@ const unsigned int keepAliveInterval = 1;
 const char* MQTT_TOPIC_HELLO = "yargbot/hello";
 const char* MQTT_TOPIC_ERR = "yargbot/error";
 const char* MQTT_TOPIC_HRTBT = "yargbot/heartbeat";
+const char* MQTT_TOPIC_ESTOP = "yargbot/ESTOP"; 
 
-const char* MQTT_TOPIC_FE_EFM_ACK = "yargbot/FE_ebbFlowMeter_ACK"; //ebb flowmeter acknowledge fertigationEvent
-const char* MQTT_TOPIC_FE_EFM_DN = "yargbot/FE_ebbFlowMeter_DN"; //ebb flowmeter command done
-const char* MQTT_TOPIC_FE_EP_STOP = "yargbot/FE_ebbPump_STOP"; // command to stop ebb pump
-const char* MQTT_TOPIC_FE_OVER = "yargbot/FE_potOverflow_ACK"; //ebb flowmeter acknowledges overflow condition (used in part to reset moisture sensor overflow logic)
-const char* MQTT_TOPIC_ESTOP = "yargbot/ESTOP"; // not used in this bot? (so far)
+const char* MQTT_TOPIC_FE_EP_ACK = "yargbot/FE_ebbPump_ACK"; //ebb pump acknowledge fertigationEvent
+const char* MQTT_TOPIC_FE_EP_RUN = "yargbot/FE_ebbPump_RUN"; //ebb pump ramped up and running
+const char* MQTT_TOPIC_FE_EP_DONE = "yargbot/FE_ebbPump_DONE"; // ebb pump ramped down and stopped
 
 struct FertigationEventMessage {
-	char CommandID[12];
-	uint8_t EbbSpeed;
-	uint16_t EbbAmount;
-	uint16_t AntiShockRamp;
-	uint32_t SoakDuration;
-	uint8_t FlowSpeed;
-	float ExpectedEbbFlowRate;
-	float ExpectedFlowFlowRate;
-	float PumpErrorThreshold;
+    char CommandID[37];  
+    char PotID[37];      
+    int16_t EbbSpeed;
+    double EbbAmount;
+    int16_t EbbAntiShockRamp;
+    double EbbExpectedFlowRate;
+    uint8_t EbbPumpErrorThreshold;
+    int16_t EbbPulsesPerLiter;
+    int32_t SoakDuration;
+    int16_t FlowSpeed;
+    int16_t FlowAntiShockRamp;
+    double FlowExpectedFlowRate;
+    int16_t FlowPumpErrorThreshold;
+    int16_t FlowPulsesPerLiter;
 	// above are populated by parsing the fertigationEvent payload
 	uint32_t EbbStartMillis;
 	bool IsEbbCounting;
@@ -249,17 +253,37 @@ void callback(char* topic, byte* payload, unsigned int length){
 	char message[length + 1];
 	memcpy(message, payload, length);
 	message[length] = '\0';
-
-	// fertigationEvent {CommandID}:{EbbSpeed}:{EbbAmount}:{AntiShockRamp}:{SoakDuration}:{FlowSpeed}:{ExpectedEbbFlowRate}:{ExpectedFlowFlowRate}:{PumpErrorThreshold}
 	
-    if (strcmp(topic, "fertigationEvent") == 0) {
-		// On your mark - Call from YARG server with fertigationEvent information
+	// This is the ebb pump (reservoir) and will be involved in every fertigation event regardless of the 
+	// destination.
+
+    if (strcmp(topic, "fertigationEvent/FE1") == 0) {
 		parseFertigationEvent(message, &thisFertigationEvent);
 		client.publish(MQTT_TOPIC_FE_EFM_ACK, "");
     }
 	
-	if (strcmp(topic, "fertigationEvent/Authorized") == 0) {
-		// Starting gun - Authorization from YARG app that everyone ACK'd the fertigationEvent call. 
+    if (strcmp(topic, "fertigationEvent/FE2") == 0) {
+		parseFertigationEvent(message, &thisFertigationEvent);
+		client.publish(MQTT_TOPIC_FE_EFM_ACK, "");
+    }
+
+    if (strcmp(topic, "fertigationEvent/FE3") == 0) {
+		parseFertigationEvent(message, &thisFertigationEvent);
+		client.publish(MQTT_TOPIC_FE_EFM_ACK, "");
+    }
+
+    if (strcmp(topic, "fertigationEvent/FE4") == 0) {
+		parseFertigationEvent(message, &thisFertigationEvent);
+		client.publish(MQTT_TOPIC_FE_EFM_ACK, "");
+    }
+
+	if (strcmp(topic, "fertigationEvent/CAFE") == 0) {
+		
+	}
+
+
+	if (strcmp(topic, "fertigationEvent/CAFE") == 0) {
+		// Starting gun - Authorization from YARG app that all devices ACK'd the fertigationEvent message. 
 		thisFertigationEvent.IsEbbCounting = true;
 		thisFertigationEvent.EbbStartMillis = millis();
 	}
@@ -304,43 +328,54 @@ void callback(char* topic, byte* payload, unsigned int length){
 }
 
 void parseFertigationEvent(const char* message, struct FertigationEventMessage* event) {
-    char copy[256];  // A temporary buffer to hold a copy of the message
+	size_t messageLength = strlen(message);
+    char copy[messageLength + 1]; 
     strcpy(copy, message);
 
     char* strtokIndx;
     strtokIndx = strtok(copy, ":");
     
-    // Assuming the format of the message is as expected
     strcpy(event->CommandID, strtokIndx);
+    strcpy(event->PotID, strtok(NULL, ":"));  
     event->EbbSpeed = atoi(strtok(NULL, ":"));
-    event->EbbAmount = atoi(strtok(NULL, ":"));
-    event->AntiShockRamp = atoi(strtok(NULL, ":"));
+    event->EbbAmount = atof(strtok(NULL, ":"));  
+    event->EbbAntiShockRamp = atoi(strtok(NULL, ":"));
+    event->EbbExpectedFlowRate = atof(strtok(NULL, ":"));
+    event->EbbPumpErrorThreshold = atoi(strtok(NULL, ":"));
+    event->EbbPulsesPerLiter = atoi(strtok(NULL, ":"));  
     event->SoakDuration = atoi(strtok(NULL, ":"));
     event->FlowSpeed = atoi(strtok(NULL, ":"));
-    event->ExpectedEbbFlowRate = atof(strtok(NULL, ":"));
-    event->ExpectedFlowFlowRate = atof(strtok(NULL, ":"));
-    event->PumpErrorThreshold = atof(strtok(NULL, ":"));
+    event->FlowAntiShockRamp = atoi(strtok(NULL, ":"));
+    event->FlowExpectedFlowRate = atof(strtok(NULL, ":"));
+    event->FlowPumpErrorThreshold = atoi(strtok(NULL, ":"));
+    event->FlowPulsesPerLiter = atoi(strtok(NULL, ":"));  
 }
 
 void clearFertigationEvent(struct FertigationEventMessage* event) {
     memset(event, 0, sizeof(struct FertigationEventMessage));
-	// Initialize the struct members
-	strcpy(thisFertigationEvent.CommandID, "");
-	thisFertigationEvent.EbbSpeed = 0;
-	thisFertigationEvent.EbbAmount = 0;
-	thisFertigationEvent.AntiShockRamp = 0;
-	thisFertigationEvent.SoakDuration = 0;
-	thisFertigationEvent.FlowSpeed = 0;
-	thisFertigationEvent.ExpectedEbbFlowRate = 0.0;
-	thisFertigationEvent.ExpectedFlowFlowRate = 0.0;
-	thisFertigationEvent.PumpErrorThreshold = 0.0;
-	thisFertigationEvent.EbbStartMillis = 0;
-	thisFertigationEvent.IsEbbCounting = false;
-	thisFertigationEvent.IsEbbOverflow = false;
-	thisFertigationEvent.IsCalculatingFlowRate = false;
-	thisFertigationEvent.IsStopSent = false;
-	thisFertigationEvent.EbbCurrentAmount = 0;
+
+    strcpy(event->CommandID, "");
+    strcpy(event->PotID, "");  
+    event->EbbSpeed = 0;
+    event->EbbAmount = 0.0;  
+    event->EbbAntiShockRamp = 0;
+    event->EbbExpectedFlowRate = 0.0;
+    event->EbbPumpErrorThreshold = 0;
+    event->EbbPulsesPerLiter = 0;  
+    event->SoakDuration = 0;
+    event->FlowSpeed = 0;
+    event->FlowAntiShockRamp = 0;
+    event->FlowExpectedFlowRate = 0.0;
+    event->FlowPumpErrorThreshold = 0;
+    event->FlowPulsesPerLiter = 0;  
+    // Initialize other boolean fields
+    event->IsEbbCounting = false;
+    event->IsEbbOverflow = false;
+    event->IsCalculatingFlowRate = false;
+    event->IsStopSent = false;
+    event->EbbCurrentAmount = 0;
 }
+
 
 void publishHeartbeat() {
 	// Gather and publish task information
