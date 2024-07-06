@@ -166,7 +166,7 @@ namespace YARG.DAL
                         ws.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
                         ws.PotID = p.ID;
                         ws.EFStartTime = morningsplashdt.AddMinutes(4 * (p.QueuePosition - 1));
-                        ws.EFDuration = 4;
+                        ws.EFDuration = 1;
                         //ws.EFAmount = p.EFAmount;
                         ws.EFAmount = p.CurrentCapacity;
                         if (ws.EFStartTime.TimeOfDay < currentIrrigationCalcs.Sunrise.TimeOfDay)
@@ -206,7 +206,7 @@ namespace YARG.DAL
                         ws.ID = Global.NewSequentialGuid(SequentialGuidType.SequentialAsString);
                         ws.PotID = p.ID;
                         ws.EFStartTime = eveningsplashdt.AddMinutes(-4 * (p.QueuePosition - 1));
-                        ws.EFDuration = 4;
+                        ws.EFDuration = 1;
                         ws.EFAmount = p.CurrentCapacity;
                         //ws.EFAmount = p.EFAmount;
                         if (ws.EFStartTime.TimeOfDay < currentIrrigationCalcs.Sunrise.TimeOfDay)

@@ -56,6 +56,10 @@ namespace YARG.Models
                         {
                             sb.Append(Constants.MeasurementType_HumidityNight.ToString());
                         }
+                        else if (remoteProbe.MeasurementTypeID == Constants.MeasurementType_Weight)
+                        {
+                            sb.Append(Constants.MeasurementType_Weight.ToString());
+                        }
 
                         try
                         {

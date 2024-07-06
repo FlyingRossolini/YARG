@@ -225,17 +225,66 @@ namespace YARG.Data.Services
             }
             if (topic == "yargbot/FE_ebbPump_RUN")
             {
-                Guid commandID = JsonConvert.DeserializeObject<Guid>(payload);
-                _fertigationEventRecord.CommandID = commandID;
-                _fertigationEventRecord.EbbPump_RunDate = DateTime.Now;
-                await _wateringScheduleDAL.UpdateFertigationEventRecord(_fertigationEventRecord);
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventRecord fertigationEventRecord = new();
+                fertigationEventRecord.CommandID = x.CommandID;
+                fertigationEventRecord.EbbPump_RunDate = DateTime.Now;
+
+                await _wateringScheduleDAL.UpdateFertigationEventRecord(fertigationEventRecord);
             }
             if (topic == "yargbot/FE_ebbPump_DONE")
             {
-                Guid commandID = JsonConvert.DeserializeObject<Guid>(payload);
-                _fertigationEventRecord.CommandID = commandID;
-                _fertigationEventRecord.EbbPump_DoneDate = DateTime.Now;
-                await _wateringScheduleDAL.UpdateFertigationEventRecord(_fertigationEventRecord);
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventRecord fertigationEventRecord = new();
+                fertigationEventRecord.CommandID = x.CommandID;
+                fertigationEventRecord.EbbPump_DoneDate = DateTime.Now;
+
+                await _wateringScheduleDAL.UpdateFertigationEventRecord(fertigationEventRecord);
+            }
+            if (topic == "yargbot/FE_ebbFlowmeter_DONE")
+            {
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventRecord fertigationEventRecord = new();
+                fertigationEventRecord.CommandID = x.CommandID;
+                fertigationEventRecord.EbbFlowmeter_DoneDate = DateTime.Now;
+
+                await _wateringScheduleDAL.UpdateFertigationEventRecord(fertigationEventRecord);
+            }
+            if (topic == "yargbot/FE_flowPump_START")
+            {
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventRecord fertigationEventRecord = new();
+                fertigationEventRecord.CommandID = x.CommandID;
+                fertigationEventRecord.FlowPump_StartDate = DateTime.Now;
+
+                await _wateringScheduleDAL.UpdateFertigationEventRecord(fertigationEventRecord);
+            }
+            if (topic == "yargbot/FE_flowPump_RUN")
+            {
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventRecord fertigationEventRecord = new();
+                fertigationEventRecord.CommandID = x.CommandID;
+                fertigationEventRecord.FlowPump_RunDate = DateTime.Now;
+
+                await _wateringScheduleDAL.UpdateFertigationEventRecord(fertigationEventRecord);
+            }
+            if (topic == "yargbot/FE_flowFlowmeter_DONE")
+            {
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventRecord fertigationEventRecord = new();
+                fertigationEventRecord.CommandID = x.CommandID;
+                fertigationEventRecord.FlowFlowmeter_DoneDate = DateTime.Now;
+
+                await _wateringScheduleDAL.UpdateFertigationEventRecord(fertigationEventRecord);
+            }
+            if (topic == "yargbot/FE_flowPump_DONE")
+            {
+                GenericFE_ACK x = JsonConvert.DeserializeObject<GenericFE_ACK>(payload);
+                FertigationEventRecord fertigationEventRecord = new();
+                fertigationEventRecord.CommandID = x.CommandID;
+                fertigationEventRecord.FlowPump_DoneDate = DateTime.Now;
+
+                await _wateringScheduleDAL.UpdateFertigationEventRecord(fertigationEventRecord);
             }
 
             if (topic == "yargbot/pumpWorklog")
@@ -289,7 +338,9 @@ namespace YARG.Data.Services
                 await _wateringScheduleDAL.UpdateCAFEDateFertigationEventRecord(x);
                 Console.WriteLine($"Fertigation event record; CAFE date updated.");
 
-                await _mqttPublisherService.PublishMessageAsync("fertigationEvent/CAFE", FertigationEventAcknowledged.CommandID.ToString());
+                string mqttMessage = $"{FertigationEventAcknowledged.CommandID}";
+
+                await _mqttPublisherService.PublishMessageAsync("fertigationEvent/CAFE", mqttMessage);
                 Console.WriteLine($"Broadcasting CAFE message.");
 
 
@@ -351,6 +402,8 @@ namespace YARG.Data.Services
             FlgFE_potOverflow_ACK = false;
             FlgFE_ebbSolenoids_ACK = false;
             FlgFE_flowSolenoids_ACK = false;
+
+            
         }
     }
 

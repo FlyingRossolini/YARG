@@ -153,6 +153,36 @@ namespace YARG.Common_Types
               .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
               .Build());
 
+            await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+              .WithTopic("yargbot/FE_ebbFlowmeter_DONE")
+              .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+              .Build());
+
+            await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+              .WithTopic("yargbot/FE_flowPump_START")
+              .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+              .Build());
+
+            await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+              .WithTopic("yargbot/FE_flowPump_RUN")
+              .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+              .Build());
+
+            await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+              .WithTopic("yargbot/FE_flowFlowmeter_DONE")
+              .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+              .Build());
+
+            await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+              .WithTopic("yargbot/FE_flowPump_DONE")
+              .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+              .Build());
+
+            await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
+              .WithTopic("fertigationEvent/CAFE")
+              .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
+              .Build());
+
             //await _mqttClient.SubscribeAsync(new MqttTopicFilterBuilder()
             //    .WithTopic("yargbot/FE_ebbFlowmeter_DN")
             //    .WithQualityOfServiceLevel(MqttQualityOfServiceLevel.AtLeastOnce)
@@ -211,6 +241,7 @@ namespace YARG.Common_Types
         public static readonly Guid MeasurementType_Humidity = new("3a030472-0d80-2519-8007-5a74813c8bba");
         public static readonly Guid MeasurementType_pH = new("3a0307d4-48b7-9a1d-b283-855ddb37b3d3");
         public static readonly Guid MeasurementType_PPM = new("3a0307d4-7913-8e12-b823-4aa5ccc8d100");
+        public static readonly Guid MeasurementType_Weight = new("3a03048c-322c-61df-5c7b-46b8ca3f12f5");
         public static readonly Guid LocationType_Habitat = new("3a030487-3e43-0455-fe56-125537762d27");
         public static readonly Guid LocationType_Reservoir = new("3a030486-4c6e-174a-5cda-f6eb18dbb247");
 

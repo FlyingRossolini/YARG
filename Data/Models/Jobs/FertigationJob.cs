@@ -41,6 +41,7 @@ namespace YARG.Models
                         Console.WriteLine("Found watering event for " + MQTT_Topic_Suffix);
 
                         string mqttMessage = $"{fertigationEventCommand.CommandID}:{fertigationEventCommand.PotID}:" +
+                            $"{fertigationEventCommand.PotNumber}:" +
                             $"{fertigationEventCommand.EbbSpeed}:{fertigationEventCommand.EbbAmount}:" +
                             $"{fertigationEventCommand.EbbAntiShockRamp}:{fertigationEventCommand.EbbExpectedFlowRate}:" +
                             $"{fertigationEventCommand.EbbPumpErrorThreshold}:{fertigationEventCommand.EbbPulsesPerLiter}:" +
